@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>めぐる訪問ケア｜理学療法士による自宅訪問サービス</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green-deep:  #2D5A3D;
+    --green-mid:   #4A7C59;
+    --green-light: #E8F0E9;
+    --cream:       #FAF7F2;
+    --cream-dark:  #F0EBE1;
+    --brown:       #5C3D1E;
+    --brown-light: #8B6340;
+    --text:        #2C2C2A;
+    --text-sub:    #5F5E5A;
+    --white:       #FFFFFF;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 16px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, #E8F0E9 0%, #FAF7F2 60%, #F0EBE1 100%);
+    padding: 80px 24px 72px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: -60px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(74,124,89,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--green-mid);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 600;
+    color: var(--green-deep);
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .hero-title span {
+    display: block;
+    font-size: clamp(16px, 3vw, 22px);
+    font-weight: 400;
+    color: var(--green-mid);
+    margin-top: 8px;
+    font-family: 'Noto Sans JP', sans-serif;
+  }
+
+  .hero-desc {
+    font-size: 15px;
+    color: var(--text-sub);
+    max-width: 520px;
+    margin: 0 auto 32px;
+    line-height: 1.9;
+  }
+
+  .hero-note {
+    font-size: 12px;
+    color: var(--brown-light);
+    margin-bottom: 32px;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    background: var(--green-deep);
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 14px 36px;
+    border-radius: 32px;
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    transition: background 0.2s;
+  }
+
+  .btn-primary:hover { background: var(--green-mid); }
+
+  /* ── SECTION ── */
+  .section {
+    padding: 72px 24px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--green-mid);
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 600;
+    color: var(--green-deep);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .divider {
+    width: 40px;
+    height: 2px;
+    background: var(--green-mid);
+    margin: 0 0 32px;
+    opacity: 0.4;
+  }
+
+  /* ── WORRY ── */
+  .worry-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+
+  .worry-list li {
+    background: var(--white);
+    border: 0.5px solid #C8D8C4;
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 15px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .worry-list li::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green-mid);
+    flex-shrink: 0;
+  }
+
+  /* ── SERVICE CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .card {
+    background: var(--white);
+    border: 0.5px solid #C8D8C4;
+    border-radius: 16px;
+    padding: 24px 22px;
+  }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--green-light);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .card-icon svg { width: 22px; height: 22px; stroke: var(--green-deep); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--green-deep);
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.8;
+  }
+
+  /* ── FLOW ── */
+  .flow-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-item {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 0.5px solid #C8D8C4;
+  }
+
+  .flow-item:last-child { border-bottom: none; }
+
+  .flow-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--green-deep);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .flow-body {}
+  .flow-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .flow-desc { font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+
+  /* ── PRICE ── */
+  .price-box {
+    background: var(--white);
+    border: 0.5px solid #C8D8C4;
+    border-radius: 16px;
+    padding: 32px 28px;
+    margin-bottom: 16px;
+  }
+
+  .price-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .price-label { font-size: 13px; color: var(--text-sub); }
+
+  .price-amount {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--green-deep);
+  }
+
+  .price-unit { font-size: 14px; color: var(--text-sub); }
+
+  .price-notes {
+    list-style: none;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .price-notes li {
+    font-size: 13px;
+    color: var(--text-sub);
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .price-notes li::before {
+    content: '※';
+    position: absolute;
+    left: 0;
+    color: var(--brown-light);
+  }
+
+  /* ── AREA ── */
+  .area-box {
+    background: var(--green-light);
+    border-radius: 16px;
+    padding: 28px 24px;
+    margin-bottom: 16px;
+  }
+
+  .area-title { font-size: 13px; font-weight: 500; color: var(--green-deep); margin-bottom: 10px; }
+  .area-list { font-size: 14px; color: var(--green-deep); line-height: 2; }
+
+  /* ── PROFILE ── */
+  .profile-box {
+    background: var(--white);
+    border: 0.5px solid #C8D8C4;
+    border-radius: 16px;
+    padding: 32px 28px;
+  }
+
+  .profile-name {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--green-deep);
+    margin-bottom: 4px;
+  }
+
+  .profile-role { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; }
+
+  .profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    background: var(--green-light);
+    color: var(--green-deep);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  .profile-hist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .profile-hist li {
+    font-size: 13px;
+    color: var(--text-sub);
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.7;
+  }
+
+  .profile-hist li::before {
+    content: '–';
+    position: absolute;
+    left: 0;
+    color: var(--green-mid);
+  }
+
+  /* ── CONDITIONS ── */
+  .cond-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cond-list li {
+    font-size: 14px;
+    color: var(--text-sub);
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.8;
+  }
+
+  .cond-list li::before {
+    content: '・';
+    position: absolute;
+    left: 0;
+    color: var(--green-mid);
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: var(--green-deep);
+    padding: 72px 24px;
+    text-align: center;
+  }
+
+  .cta-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+
+  .cta-desc {
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 32px;
+    line-height: 1.8;
+  }
+
+  .btn-line {
+    display: inline-block;
+    background: #06C755;
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 500;
+    padding: 14px 40px;
+    border-radius: 32px;
+    text-decoration: none;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--cream-dark);
+    padding: 32px 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+
+  footer p { margin-bottom: 4px; }
+
+  .legal-note {
+    background: var(--cream-dark);
+    border-top: 0.5px solid #C8D8C4;
+    padding: 20px 24px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--brown-light);
+    line-height: 1.8;
+  }
+
+  @media (max-width: 480px) {
+    .hero { padding: 60px 20px 56px; }
+    .section { padding: 56px 20px; }
+    .price-box, .profile-box { padding: 24px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">山梨県 韮崎市・甲斐市・北杜市・甲府市エリア</p>
+  <h1 class="hero-title">
+    めぐる訪問ケア
+    <span>理学療法士がご自宅へ伺います</span>
+  </h1>
+  <p class="hero-desc">
+    農作業の疲れ、手術前後の体づくり、麻痺などで体が動かしづらい方——<br>
+    あなたのペースで、丁寧にケアします。
+  </p>
+  <p class="hero-note">※ 医療行為・治療ではなく、体のお手入れを目的とした自費サービスです</p>
+  <a href="#line" class="btn-primary">LINEで相談する</a>
+</section>
+
+<!-- WORRY -->
+<section class="section">
+  <p class="section-label">こんなお悩みありませんか</p>
+  <h2 class="section-title">一人で抱え込んでいませんか？</h2>
+  <div class="divider"></div>
+  <ul class="worry-list">
+    <li>肩や腰の疲れがなかなか抜けない</li>
+    <li>体がかたくなって動きづらくなってきた</li>
+    <li>麻痺などで体が思うように動かない</li>
+    <li>歩く・立つ・しゃがむなど日常動作がつらい</li>
+    <li>手術の前後に体を整えておきたい</li>
+    <li>病院には行くほどじゃないけど気になる</li>
+  </ul>
+</section>
+
+<!-- SERVICE -->
+<section class="section" style="padding-top: 0;">
+  <p class="section-label">サービス内容</p>
+  <h2 class="section-title">4つのケアメニュー</h2>
+  <div class="divider"></div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      </div>
+      <p class="card-title">農家の方の体のケア</p>
+      <p class="card-desc">農作業特有の腰・肩・膝の疲労を、専門家の視点でやさしくほぐします。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9S3 16.97 3 12 7.03 3 12 3s9 4.03 9 9z"/></svg>
+      </div>
+      <p class="card-title">手術前後のコンディショニング</p>
+      <p class="card-desc">術前の体づくりから術後のリカバリーまで、段階に合わせてサポートします。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24"><path d="M4.5 12.5c0-4.14 3.36-7.5 7.5-7.5s7.5 3.36 7.5 7.5"/><path d="M12 8v4l2.5 2.5"/></svg>
+      </div>
+      <p class="card-title">神経症状のリラクゼーション</p>
+      <p class="card-desc">麻痺やこわばりに対し、やさしい刺激で体の緊張をほぐすアプローチ。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <p class="card-title">日常動作・運動のご提案</p>
+      <p class="card-desc">無理なく続けられる体操や日常動作のコツを、生活に合わせてご提案します。</p>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW -->
+<section class="section" style="padding-top: 0;">
+  <p class="section-label">ご利用の流れ</p>
+  <h2 class="section-title">4ステップで始められます</h2>
+  <div class="divider"></div>
+  <div class="flow-list">
+    <div class="flow-item">
+      <div class="flow-num">1</div>
+      <div class="flow-body">
+        <p class="flow-title">LINEでご相談</p>
+        <p class="flow-desc">まずはLINEから問診票をお送りください。お体の状態を確認のうえ、折り返しご連絡します。</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-num">2</div>
+      <div class="flow-body">
+        <p class="flow-title">日程のご確認</p>
+        <p class="flow-desc">ご希望の日時を調整のうえ、訪問日をご案内します。</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-num">3</div>
+      <div class="flow-body">
+        <p class="flow-title">ご自宅へ訪問</p>
+        <p class="flow-desc">施術台を持参してお伺いします。ベッドをお使いの方はそのままで対応できます。</p>
+      </div>
+    </div>
+    <div class="flow-item">
+      <div class="flow-num">4</div>
+      <div class="flow-body">
+        <p class="flow-title">ケア実施</p>
+        <p class="flow-desc">お体の状態に合わせて、リラクゼーション・ストレッチ・動作指導などを行います。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICE -->
+<section class="section" style="padding-top: 0;">
+  <p class="section-label">料金</p>
+  <h2 class="section-title">シンプルな料金体系</h2>
+  <div class="divider"></div>
+  <div class="price-box">
+    <p class="price-label">初回　からだのチェック＋ケア</p>
+    <div class="price-main">
+      <span class="price-amount">7,000</span>
+      <span class="price-unit">円 / 60分</span>
+    </div>
+    <ul class="price-notes">
+      <li>ご紹介の方・ご紹介いただいた方は 1,000円引きでご利用いただけます</li>
+      <li>訪問エリア圏外（車で30分超）の場合は交通費 2,000円を別途いただく場合があります</li>
+      <li>お支払いは現金にてお願いします</li>
+    </ul>
+  </div>
+</section>
+
+<!-- AREA -->
+<section class="section" style="padding-top: 0;">
+  <p class="section-label">訪問エリア</p>
+  <h2 class="section-title">対応エリア</h2>
+  <div class="divider"></div>
+  <div class="area-box">
+    <p class="area-title">韮崎市を中心に、車で30分圏内に対応しています</p>
+    <p class="area-list">
+      韮崎市・甲斐市・北杜市南部・甲府市北部など<br>
+      上記以外のエリアはお気軽にご相談ください
+    </p>
+  </div>
+  <p style="font-size:13px; color:var(--text-sub);">※ 駐車スペースのご用意をお願いします</p>
+</section>
+
+<!-- PROFILE -->
+<section class="section" style="padding-top: 0;">
+  <p class="section-label">担当者紹介</p>
+  <h2 class="section-title">はじめまして</h2>
+  <div class="divider"></div>
+  <div class="profile-box">
+    <p class="profile-name">めぐる訪問ケア</p>
+    <p class="profile-role">理学療法士 ／ 脳卒中認定療法士</p>
+    <div class="profile-tags">
+      <span class="tag">理学療法士</span>
+      <span class="tag">脳卒中認定療法士</span>
+      <span class="tag">臨床経験13年</span>
+      <span class="tag">訪問ケア経験あり</span>
+    </div>
+    <ul class="profile-hist">
+      <li>リハビリ専門病院に10年勤務（脳卒中・パーキンソン病・脊髄損傷・切断など）</li>
+      <li>整形・神経外来で3年勤務（小児から高齢の方まで幅広く対応）</li>
+      <li>市の依頼による健康講習会を担当</li>
+      <li>介護が必要な方への訪問ケア経験あり</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CONDITIONS -->
+<section class="section" style="padding-top: 0;">
+  <p class="section-label">ご利用条件</p>
+  <h2 class="section-title">ご確認ください</h2>
+  <div class="divider"></div>
+  <ul class="cond-list">
+    <li>基本的に紹介制でご案内しています。紹介者がいない場合もご相談ください。</li>
+    <li>施術台を持参しますので、畳1枚分程度のスペースをご準備ください。ベッドをお使いの方はそのまま対応できます。</li>
+    <li>お車を停めるスペースが必要です。</li>
+    <li>女性の方のみご利用の場合は、ご家族の同席をお願いする場合があります。</li>
+  </ul>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="line">
+  <h2 class="cta-title">まずはお気軽にご相談ください</h2>
+  <p class="cta-desc">
+    LINEからいつでもご連絡いただけます。<br>
+    問診票をお送りいただければ、内容を確認のうえ折り返しご連絡します。
+  </p>
+  <a href="https://line.me/R/ti/p/@180qqdgh" class="btn-line">LINEで相談する</a>
+</section>
+
+<div class="legal-note">
+  本サービスは医療行為や治療ではなく、体のお手入れとコンディショニングを目的とした自費サービスです。
+</div>
+
+<footer>
+  <p>めぐる訪問ケア</p>
+  <p>山梨県 韮崎市・甲斐市・北杜市・甲府市エリア</p>
+</footer>
+
+</body>
+</html>
