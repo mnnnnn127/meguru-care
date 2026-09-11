@@ -556,7 +556,7 @@ function render(){
       e.addEventListener("click",()=>multiMode?toggleMultiDate(k,day):selectDate(k,day));
     }else{
       e.classList.add("disabled");
-      e.innerHTML=`<div class="daynum">${day}</div><span class="mark full">受付終了</span>`;
+      e.innerHTML=`<div class="daynum">${day}</div>`;
     }
 
     cal.appendChild(e);
