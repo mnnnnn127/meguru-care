@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>次回予約｜めぐる訪問ケア</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f8f5ed;color:#333;font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif}
+.wrap{max-width:720px;margin:auto;padding:12px 10px 34px}.head,.card{background:#fff;border:1px solid #ddd;border-radius:18px;box-shadow:0 3px 12px #0000000d}
+.head{background:#fffdf7;border-color:#dfe4c9;text-align:center;padding:20px 14px}.brand{font-size:12px;letter-spacing:.16em;color:#7d8755}.head h1{margin:7px 0 3px;color:#59682f;font-size:27px;font-weight:600}.sub{font-size:12px;color:#777}
+.card{margin-top:14px;padding:17px 12px}.notice{background:#f8f7ed;border-left:4px solid #879b54;padding:11px 12px;border-radius:8px;font-size:13px;line-height:1.8;margin-bottom:16px}
+.month{display:flex;align-items:center;justify-content:space-between}.month button{width:42px;height:42px;border-radius:50%;border:1px solid #d9ddc4;background:#fff;color:#697b38;font-size:22px}.mt{font-size:20px;font-weight:600;color:#59682f}
+.week,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.week{margin-top:8px}.week div{text-align:center;font-size:11px;color:#777;padding:4px 0}.day{min-height:65px;border:1px solid #e7e7e7;border-radius:10px;background:#fff;text-align:center;padding:6px 2px}.empty{border-color:transparent;background:transparent}.day.open{background:#fcfdf6;border-color:#cbd5a7;cursor:pointer}.day.sel{border:2px solid #697b38;background:#edf2d9}.num{font-weight:600;font-size:14px}.status{display:block;font-size:10px;margin-top:7px}.open .status{color:#6d8335}.few .status{color:#c48b3d}.full .status{color:#999}.detail{margin-top:17px;padding-top:17px;border-top:1px dashed #ddd}.detail h2{font-size:17px;color:#59682f;margin:0 0 11px}.slots{display:grid;gap:8px}.slot{width:100%;padding:13px;border:1px solid #d9ddc4;background:#fff;border-radius:11px;text-align:left;font-size:15px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between}.slot:hover,.slot.selected{background:#edf2d9;border-color:#697b38}.badge{font-size:11px;color:#697b38;font-weight:500}.form{display:none;margin-top:14px}.form label{display:block;font-size:13px;margin:10px 0 5px}.form input{width:100%;padding:12px;border:1px solid #ccc;border-radius:9px;font-size:15px}.confirm{width:100%;border:0;border-radius:13px;background:#697b38;color:#fff;padding:14px;margin-top:14px;font-size:16px;font-weight:600}.result{display:none;text-align:center;background:#f8f7ed;border-radius:12px;padding:18px;line-height:1.9}.ok{font-size:20px;color:#59682f;font-weight:600}.small{font-size:12px;color:#777;line-height:1.7}.footer{text-align:center;color:#888;font-size:11px;margin-top:16px}
+@media(max-width:430px){.day{min-height:60px}.head h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="head"><div class="brand">こころと身体を、やさしくめぐる時間を。</div><h1>めぐる訪問ケア</h1><div class="sub">次回予約</div></header>
+<main class="card">
+<div class="notice"><b>次回の予約はこちらから</b><br>空いている日時を選んで、簡単に予約できます。予約確定後はこのページに完了画面が表示されます。</div>
+<div class="month"><button id="prev">‹</button><div class="mt" id="title"></div><button id="next">›</button></div>
+<div class="week"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>
+<div class="grid" id="grid"></div>
+<div class="detail" id="detail"><h2>希望日を選択してください</h2><div class="small">カレンダーの日付をタップすると空き時間が表示されます。</div></div>
+<div class="form" id="form">
+<label for="name">お名前</label><input id="name" autocomplete="name" placeholder="例：山田 太郎">
+<button class="confirm" id="confirm">この内容で予約する</button>
+<div class="small" style="margin-top:8px">※予約確定後に表示される内容を必ずご確認ください。</div>
+</div>
+<div class="result" id="result"></div>
+</main>
+<div class="footer">※表示される空き状況は予約システム上の最新情報です。変更・キャンセルはご案内の方法でご連絡ください。</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://wsstzrflaaotawzojxzw.supabase.co";
+const SUPABASE_KEY = "sb_publishable_BEH2SD2OZgtVpqPtbx-QFg_bIS3g5XJ";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* 本番データはSupabaseから取得します。デモ用の初期値は下記。 */
+
+let slots={};
+async function loadAvailability(){
+  const from = new Date(d.getFullYear(),d.getMonth(),1);
+  const to = new Date(d.getFullYear(),d.getMonth()+1,0);
+  const {data,error}=await sb.rpc("get_public_availability",{
+    p_from: from.toISOString().slice(0,10),
+    p_to: to.toISOString().slice(0,10)
+  });
+  if(error){ console.error(error); slots={}; }
+  else {
+    slots={};
+    (data||[]).forEach(x=>{
+      const k=x.available_date;
+      const t=String(x.start_time).slice(0,5);
+      (slots[k] ||= []).push(t+"〜"+minutesToEnd(t,x.duration_minutes));
+    });
+  }
+}
+function minutesToEnd(t,min){
+  const [h,m]=t.split(":").map(Number), z=h*60+m+Number(min||60);
+  return String(Math.floor(z/60)%24).padStart(2,"0")+":"+String(z%60).padStart(2,"0");
+}
+let d=new Date(2026,8,1),chosenDate="",chosenTime="";
+const days=["日","月","火","水","木","金","土"];
+const key=(y,m,n)=>`${y}-${String(m+1).padStart(2,"0")}-${String(n).padStart(2,"0")}`;
+async function render(){
+ await loadAvailability();
+ const y=d.getFullYear(),m=d.getMonth(); title.textContent=`${y}年${m+1}月`;grid.innerHTML="";
+ for(let i=0;i<new Date(y,m,1).getDay();i++)grid.innerHTML+=`<div class="day empty"></div>`;
+ for(let n=1;n<=new Date(y,m+1,0).getDate();n++){
+  const k=key(y,m,n),a=slots[k],e=document.createElement("div");e.className="day";
+  if(a){e.classList.add(a.length?"open":"full");if(a.length===1)e.classList.add("few");e.innerHTML=`<div class="num">${n}</div><span class="status">${a.length>1?"空きあり":a.length?"残りわずか":"受付終了"}</span>`;if(a.length)e.onclick=()=>select(k,n)}
+  else e.innerHTML=`<div class="num">${n}</div>`;
+  if(k===chosenDate)e.classList.add("sel");grid.appendChild(e);
+ }}
+function select(k,n){
+ chosenDate=k;chosenTime="";render();const x=new Date(k+"T00:00:00"),a=slots[k];
+ detail.innerHTML=`<h2>${x.getMonth()+1}月${n}日（${days[x.getDay()]}）の空き状況</h2><div class="slots">${a.map(t=>`<button class="slot" onclick="pick('${t}',this)"><span>${t}</span><span class="badge">選択 ›</span></button>`).join("")}</div>`;
+ form.style.display="none";result.style.display="none";
+}
+function pick(t,el){
+ chosenTime=t;document.querySelectorAll(".slot").forEach(x=>x.classList.remove("selected"));el.classList.add("selected");form.style.display="block";form.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+confirm.onclick=async()=>{
+ const name=document.getElementById("name").value.trim();
+ if(!name||!chosenTime){alert("お名前を入力し、時間を選択してください。");return}
+ const date=chosenDate;
+ const time=chosenTime.slice(0,5);
+ confirm.disabled=true; confirm.textContent="予約中…";
+ const {data,error}=await sb.rpc("book_existing_customer",{
+   p_customer_name:name,p_reservation_date:date,p_start_time:time
+ });
+ confirm.disabled=false; confirm.textContent="この内容で予約する";
+ if(error){alert("予約処理に失敗しました。時間を置いてもう一度お試しください。");return}
+ const r=data && data[0];
+ if(!r || !r.ok){alert(r?.message || "この時間は予約できません。");await render();return}
+ result.style.display="block";
+ result.innerHTML=`<div class="ok">予約を受け付けました🌿</div>
+ <p><b>${name} 様</b><br>${date.replaceAll("-","/")} ${chosenTime}</p>
+ <div class="small">予約が確定しました。次回の訪問をお待ちしております。</div>`;
+ form.style.display="none"; await render();
+};
+prev.onclick=()=>{d.setMonth(d.getMonth()-1);chosenDate="";render();detail.innerHTML='<h2>希望日を選択してください</h2><div class="small">カレンダーの日付をタップすると空き時間が表示されます。</div>'};
+next.onclick=()=>{d.setMonth(d.getMonth()+1);chosenDate="";render();detail.innerHTML='<h2>希望日を選択してください</h2><div class="small">カレンダーの日付をタップすると空き時間が表示されます。</div>'};
+render();
+</script>
+</body></html>
