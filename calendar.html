@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>空き状況｜めぐる訪問ケア</title>
+<title>空き状況｜めぐる訪問ケア V32</title>
 <style>
 :root{
   --green:#148A6A;
@@ -141,14 +141,51 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
 .new-customer-top-title{display:block;font-size:17px;font-weight:700}
 .new-customer-top-note{display:block;margin-top:4px;font-size:12px;color:#4F6D61}
 @media(max-width:480px){
-  .top-customer-actions{grid-template-columns:1fr 1fr;gap:8px}
-  .new-customer-top-btn{padding:13px 7px}
-  .new-customer-top-title{font-size:14px;white-space:nowrap;letter-spacing:-.035em}
-  .new-customer-top-note{font-size:10px;line-height:1.35}
-  .calendar-toggle{padding:15px 38px 15px 12px}
-  .calendar-toggle-title{font-size:16px;letter-spacing:-.045em}
-  .calendar-toggle-note{font-size:11px}
-  .calendar-toggle-arrow{right:12px;font-size:20px}
+  .intro-line{
+    display:block;
+    white-space:nowrap;
+    font-size:clamp(12px,3.55vw,16px);
+    line-height:1.45;
+    letter-spacing:-.04em;
+  }
+
+  /* スマートフォンでは文字が折り返して縦に伸びすぎないよう、上部ボタンをコンパクトに調整 */
+  .top-customer-actions{grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+  .new-customer-top-btn{
+    padding:11px 4px;
+    min-height:74px;
+    border-radius:13px;
+  }
+  .new-customer-top-title{
+    font-size:13px;
+    line-height:1.25;
+    white-space:nowrap;
+    letter-spacing:-.055em;
+  }
+  .new-customer-top-note{
+    margin-top:3px;
+    font-size:9px;
+    line-height:1.2;
+    white-space:nowrap;
+    letter-spacing:-.055em;
+  }
+  .calendar-toggle{padding:13px 36px 13px 10px;margin-top:9px}
+  .calendar-toggle-title{font-size:14px;line-height:1.3;letter-spacing:-.055em}
+  .calendar-toggle-note{margin-top:3px;font-size:10px;line-height:1.25}
+  .calendar-toggle-arrow{right:10px;font-size:19px}
+  .price-link-card{
+    display:block;
+    text-decoration:none;
+    color:inherit;
+    text-align:center;
+    cursor:pointer;
+    margin-top:9px;
+  }
+  .price-link-card .calendar-toggle-title,
+  .price-link-card .calendar-toggle-note{
+    text-align:center;
+  }
+
   h1{font-size:clamp(34px,10.2vw,52px);letter-spacing:-.055em}
   .brand-small{font-size:14px;letter-spacing:.1em}
   .sub{font-size:15px}
@@ -276,13 +313,23 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
     <h1>めぐる訪問ケア</h1>
     <div class="sub">理学療法士による訪問ケア</div>
     <div class="header-description">
-      農作業の疲れ、手術前後の体づくり、麻痺などで体が動かしづらい方——<br>
+      <span class="intro-line">仕事や日々の疲れ、農作業の疲れ、手術前後の体づくり、</span>
+<span class="intro-line">麻痺などで体が動かしづらい方など</span><br>
       あなたのペースで、丁寧にケアします。<br>
       <span>※ 医療行為・治療ではなく、体のお手入れを目的とした自費サービスです</span>
     </div>
   </div>
 
-  <div class="top-customer-actions">
+  <a class="calendar-toggle price-link-card"
+     href="https://mnnnnn127.github.io/meguru-care/"
+     target="_blank"
+     rel="noopener noreferrer"
+     aria-label="料金はこちら（ホームページよりご確認ください）">
+  <div class="calendar-toggle-title">料金はこちら</div>
+  <div class="calendar-toggle-note">ホームページよりご確認ください</div>
+</a>
+
+<div class="top-customer-actions">
     <button type="button" class="new-customer-top-btn" id="newCustomerTopBtn">
       <span class="new-customer-top-title">新規のお客様はこちら</span>
       <span class="new-customer-top-note">初めてご利用の方はこちらから登録できます</span>
@@ -334,8 +381,10 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
     <div class="error-box" id="errorBox"></div>
   </div>
 
-  <div class="footer">
-    ※空き状況は予約システム上の最新情報です。
+  <div id="homepageLinkWrap" style="display:none;margin:0 0 14px;text-align:center"><a id="homepageLink" href="#" target="_blank" rel="noopener noreferrer" class="admin-link">ホームページを見る</a></div>
+
+    <div class="footer">
+    ※空き状況は予約システム上の最新情報です.
     <br><a href="#admin" class="admin-link" id="adminLink">管理者</a>
   </div>
 
@@ -357,11 +406,25 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
         <button type="button" class="admin-nav-item" data-section="customers">お客様情報</button>
         <button type="button" class="admin-nav-item" data-section="slots">予約枠設定</button>
         <button type="button" class="admin-nav-item" data-section="settings">各種設定</button>
+        <button type="button" class="admin-nav-item" data-section="messages">メッセージ</button>
+        <button type="button" class="admin-nav-item" data-section="proxy">代理予約</button>
       </div>
       <div class="admin-box">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <h2>管理者画面</h2><button class="admin-btn sub" id="adminLogoutBtn">ログアウト</button>
         </div>
+      </div>
+
+      <div class="admin-box" id="todayScheduleBox" style="margin-top:14px;background:#F4FBF8">
+        <h2 style="margin-bottom:4px">本日の予定</h2>
+        <div class="admin-muted" id="todayScheduleDate"></div>
+        <div class="admin-list" id="todayScheduleList" style="margin-top:10px"></div>
+      </div>
+
+      <div class="admin-box" id="newReservationRequestsBox" style="margin-top:14px;background:#FFF9F4">
+        <h2 style="margin-bottom:4px">新規予約依頼一覧</h2>
+        <div class="admin-muted">お客様から届いた仮予約です。内容を確認して「予約確定」または「キャンセル」を選択してください。</div>
+        <div class="admin-list" id="newReservationRequestsList" style="margin-top:10px"></div>
       </div>
 
       <div class="admin-box admin-section" id="adminSectionReservations" style="margin-top:14px">
@@ -377,16 +440,79 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
         <div class="admin-list" id="adminBookingDetail"></div>
       </div>
 
+      <div class="admin-box admin-section" id="adminSectionMessages" style="margin-top:14px">
+        <h2>メッセージ</h2>
+        <div class="admin-muted" style="margin-top:6px">登録済みのお客様を名前・ひらがなで検索して、担当者からのメッセージを送信できます。</div>
+        <div class="admin-box" style="background:#EFFAF6;box-shadow:none;margin-top:12px">
+          <label class="admin-label">お客様検索（名前・ひらがな）</label>
+          <div style="display:flex;gap:7px">
+            <input class="admin-input" id="messageCustomerSearch" type="text" placeholder="例：山田 / やまだ">
+            <button class="admin-btn" id="messageCustomerSearchBtn" type="button">検索</button>
+          </div>
+          <div class="proxy-results" id="messageCustomerResults"></div>
+          <div id="messageComposer" style="display:none;margin-top:14px">
+            <div class="admin-muted" id="messageSelectedCustomer"></div>
+            <label class="admin-label">メッセージ</label>
+            <textarea class="admin-input" id="messageContent" rows="5" placeholder="お客様へのメッセージを入力してください。"></textarea>
+            <button class="admin-btn" id="messageSendBtn" type="button" style="width:100%;margin-top:10px">送信</button>
+            <div class="admin-msg" id="messageSendMsg"></div>
+          </div>
+        </div>
+        <div class="admin-box" style="background:#fff;box-shadow:none;margin-top:12px">
+          <h3 style="margin:0 0 8px;color:#0F5C4A;font-size:16px">選択したお客様のメッセージ</h3>
+          <div class="admin-list" id="messageHistoryList"></div>
+        </div>
+      </div>
+
+      <div class="admin-box admin-section" id="adminSectionProxy" style="margin-top:14px">
+        <h2>代理予約</h2>
+        <div class="admin-muted" style="margin-top:6px">お客様を選択し、月を選んで予約可能な日時を確認します。チェックした日時を一括で代理予約できます。</div>
+
+        <div class="admin-box" style="background:#EFFAF6;box-shadow:none;margin-top:12px">
+          <label class="admin-label">お客様選択（名前・ひらがな）</label>
+          <div style="display:flex;gap:7px">
+            <input class="admin-input" id="bulkProxyCustomerSearch" type="text" placeholder="例：山田 / やまだ">
+            <button class="admin-btn" id="bulkProxyCustomerSearchBtn" type="button">検索</button>
+          </div>
+          <div class="proxy-results" id="bulkProxyCustomerResults"></div>
+          <div class="admin-muted" id="bulkProxySelectedCustomer" style="margin-top:8px"></div>
+        </div>
+
+        <div class="admin-box" style="background:#fff;box-shadow:none;margin-top:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <h3 style="margin:0;color:#0F5C4A;font-size:16px">予約一覧</h3>
+            <div style="display:flex;align-items:center;gap:7px">
+              <button class="admin-btn sub" id="bulkProxyPrevMonthBtn" type="button">前月（●月）</button>
+              <span id="bulkProxyMonthLabel" style="min-width:90px;text-align:center;font-weight:700;color:#0F5C4A"></span>
+              <button class="admin-btn sub" id="bulkProxyNextMonthBtn" type="button">翌月（●月）</button>
+            </div>
+          </div>
+          <div class="admin-actions" style="margin-top:10px">
+            <button class="admin-btn sub" id="bulkProxySelectAllBtn" type="button">すべて選択</button>
+            <button class="admin-btn sub" id="bulkProxyClearAllBtn" type="button">選択解除</button>
+          </div>
+          <div class="admin-list" id="bulkProxySlotList" style="margin-top:8px"></div>
+          <div class="admin-actions" style="margin-top:12px">
+            <button class="admin-btn" id="bulkProxyBookBtn" type="button" style="width:100%">☑ 選択した日時を一括予約</button>
+          </div>
+          <div class="admin-msg" id="bulkProxyMsg"></div>
+        </div>
+      </div>
+
       <div class="admin-box admin-section" id="adminSectionCustomers" style="margin-top:14px">
         <h2>お客様の個人情報</h2>
         <button class="admin-btn" id="newCustomerBtn" style="margin-top:12px">＋ 新規登録</button>
         <div class="admin-box" id="customerForm" style="display:none;background:#EFFAF6;box-shadow:none;margin-top:12px">
+          <div id="customerMessagesBox" style="display:none;margin-bottom:14px;padding:12px;border:1px solid #B9E0D2;border-radius:12px;background:#fff">
+            <h3 style="margin:0 0 9px;color:#0F5C4A;font-size:16px">担当者からのメッセージ</h3>
+            <div class="admin-list" id="customerMessagesList"></div>
+          </div>
           <input type="hidden" id="customerId">
           <label class="admin-label">氏名</label><input class="admin-input" id="customerNameAdmin" type="text">
           <label class="admin-label">年齢</label><input class="admin-input" id="customerAge" type="number" min="0" max="120">
           <label class="admin-label">住所</label><textarea class="admin-input" id="customerAddress" rows="3"></textarea>
-          <label class="admin-label">電話番号</label><input class="admin-input" id="customerPhone" type="tel" inputmode="tel" placeholder="例：090-1234-5678">
-          <label class="admin-label">患者個人パスワード（新規登録・変更時のみ）</label><input class="admin-input" id="customerPasswordAdmin" type="password">
+          <label class="admin-label">電話番号</label><input class="admin-input" id="customerPhoneAdmin" type="tel" inputmode="tel" placeholder="例：090-1234-5678">
+          <label class="admin-label">お客様パスワード（変更時のみ）</label><input class="admin-input" id="customerPasswordAdmin" type="password">
           <div class="admin-actions"><button class="admin-btn" id="saveCustomerBtn">保存</button><button class="admin-btn sub" id="cancelCustomerBtn">キャンセル</button></div>
           <div class="admin-msg" id="customerMsg"></div>
         </div>
@@ -407,7 +533,19 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
       <div class="admin-box admin-section" id="adminSectionSettings" style="margin-top:14px">
         <h2>設定</h2>
         <div class="admin-box admin-setting-page" id="adminSettingSlots" style="background:#EFFAF6;box-shadow:none;margin-top:12px">
-          <h3 style="margin:0 0 8px;color:#0F5C4A;font-size:16px">予約時間枠の設定</h3>
+          <h3 style="margin:0 0 8px;color:#0F5C4A;font-size:16px">予約受付期間の設定</h3>
+          <div class="admin-muted">ここで設定した期間のみ、お客様側のカレンダーで「空きあり」として表示され、予約できるようになります。期間外に登録済みの空き枠は削除されません。</div>
+          <div class="admin-row" style="margin-top:10px">
+            <div><label class="admin-label">受付開始日</label><input class="admin-input" id="reservationStartDate" type="date"></div>
+            <div><label class="admin-label">受付終了日</label><input class="admin-input" id="reservationEndDate" type="date"></div>
+          </div>
+          <div class="admin-actions" style="margin-top:10px">
+            <button class="admin-btn" id="saveReservationPeriodBtn" type="button">予約受付期間を保存</button>
+            <button class="admin-btn sub" id="clearReservationPeriodBtn" type="button">期間設定を解除</button>
+          </div>
+          <div class="admin-msg" id="reservationPeriodMsg"></div>
+
+          <h3 style="margin:22px 0 8px;color:#0F5C4A;font-size:16px">予約時間枠の設定</h3>
           <div class="admin-muted">トップページの空き枠カレンダーと同期します。</div>
           <label class="admin-label">個別の空き時間追加</label>
           <div class="admin-row"><input class="admin-input" id="adminDate" type="date"><input class="admin-input" id="adminTime" type="time" step="900"></div>
@@ -424,7 +562,20 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
             <div class="admin-msg" id="recMsg"></div>
           </div>
 
-          <h3 style="margin:18px 0 8px;color:#0F5C4A;font-size:16px">完了された予約枠一覧</h3>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 8px">
+            <h3 style="margin:0;color:#0F5C4A;font-size:16px">完了された予約枠一覧</h3>
+            <button class="admin-btn danger" id="bulkDeleteSlotsBtn" type="button">選択式で一括削除</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin:8px 0 12px">
+            <button class="admin-btn sub" id="prevSlotMonthBtn" type="button">前月（●月）</button>
+            <span id="slotMonthLabel" style="min-width:100px;text-align:center;font-weight:700;color:#0F5C4A"></span>
+            <button class="admin-btn sub" id="nextSlotMonthBtn" type="button">翌月（●月）</button>
+          </div>
+          <div class="admin-actions" style="margin-bottom:8px">
+            <button class="admin-btn sub" id="selectAllSlotsBtn" type="button">すべて選択</button>
+            <button class="admin-btn sub" id="clearAllSlotsBtn" type="button">選択解除</button>
+          </div>
+          <div class="admin-msg" id="bulkDeleteSlotsMsg"></div>
           <div class="admin-list" id="adminAvailability"></div>
         </div>
 
@@ -569,12 +720,18 @@ async function registerNewCustomer(){
   const ageValue=document.getElementById("newCustomerAge").value.trim();
   const phone=document.getElementById("newCustomerPhone").value.trim();
   const address=document.getElementById("newCustomerAddress").value.trim();
+  const password=document.getElementById("newCustomerPassword").value;
+  const bedSpace=document.querySelector('input[name="bedSpaceAvailable"]:checked')?.value || "";
+  const parking=document.querySelector('input[name="parkingAvailable"]:checked')?.value || "";
   const msg=document.getElementById("newCustomerMsg");
   const btn=document.getElementById("newCustomerRegisterBtn");
   const age=ageValue===""?null:Number(ageValue);
   msg.textContent="";
   if(!name){msg.textContent="お名前を入力してください。";return;}
   if(!phone){msg.textContent="電話番号を入力してください。";return;}
+  if(!password || password.length<6){msg.textContent="お客様パスワードは6文字以上で入力してください。";return;}
+  if(!bedSpace){msg.textContent="ベッド一台分のスペースについて「はい」または「いいえ」を選択してください。";return;}
+  if(!parking){msg.textContent="車を止めるスペースについて「はい」または「いいえ」を選択してください。";return;}
   if(age!==null && (!Number.isInteger(age)||age<0||age>120)){msg.textContent="年齢は0〜120歳で入力してください。";return;}
   btn.disabled=true; btn.textContent="登録しています…";
   try{
@@ -584,6 +741,9 @@ async function registerNewCustomer(){
       p_age:age,
       p_phone:phone,
       p_address:address||null,
+      p_customer_password:password,
+      p_bed_space_available:bedSpace==="yes",
+      p_parking_available:parking==="yes"
       });
     if(!result||!result.ok){
       msg.textContent=(result&&result.message)||"登録できませんでした。";
@@ -614,6 +774,45 @@ function showNewCustomerRegistration(){
   detail.innerHTML=`
     <h2>新規のお客様はこちら</h2>
     <div class="note">初めてご利用になる方は、こちらの予約アプリ内で登録できます。登録した情報は管理者画面の「お客様情報」に自動的に反映されます。</div>
+
+    <div class="booking-form" style="margin-bottom:14px;background:#fffdf7;border:1px solid #e4d9b8;">
+      <div style="font-size:20px;font-weight:700;margin-bottom:12px;color:#4f4a3d;">注意書き</div>
+
+      <div style="font-weight:700;line-height:1.7;">
+        ・当日は、施術用のベッドをお持ちします。ベッド一台分のスペースはありますか？
+        <span style="color:#a34b42">※必須</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;" role="radiogroup" aria-label="ベッド一台分のスペース">
+        <label style="flex:1;min-width:120px;margin:0;cursor:pointer;">
+          <input type="radio" name="bedSpaceAvailable" value="yes" style="margin-right:7px;">はい
+        </label>
+        <label style="flex:1;min-width:120px;margin:0;cursor:pointer;">
+          <input type="radio" name="bedSpaceAvailable" value="no" style="margin-right:7px;">いいえ
+        </label>
+      </div>
+
+      <div style="font-weight:700;line-height:1.7;margin-top:18px;">
+        ・車を止めるスペースはありますか？
+        <span style="color:#a34b42">※必須</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;" role="radiogroup" aria-label="車を止めるスペース">
+        <label style="flex:1;min-width:120px;margin:0;cursor:pointer;">
+          <input type="radio" name="parkingAvailable" value="yes" style="margin-right:7px;">はい
+        </label>
+        <label style="flex:1;min-width:120px;margin:0;cursor:pointer;">
+          <input type="radio" name="parkingAvailable" value="no" style="margin-right:7px;">いいえ
+        </label>
+      </div>
+
+      <div style="margin-top:16px;line-height:1.8;font-size:14px;">
+        ＊有料駐車場を利用の場合は、追加で料金を頂きます。ケア60分の場合、ご自宅までの移動時間＋20分（準備等の時間分）となります。
+      </div>
+
+      <div style="margin-top:12px;line-height:1.8;font-size:14px;">
+        ・当日は、メッセージにて連絡させていただきますが、急な連絡が必要となる場合は直接電話させていただくことがあります。
+      </div>
+    </div>
+
     <div class="booking-form" id="newCustomerRegisterForm">
       <label for="newCustomerName">お名前 <span style="color:#a34b42">※必須</span></label>
       <input id="newCustomerName" type="text" autocomplete="name" placeholder="山田 太郎">
@@ -625,6 +824,8 @@ function showNewCustomerRegistration(){
       <input id="newCustomerPhone" type="tel" autocomplete="tel" placeholder="090-0000-0000">
       <label for="newCustomerAddress" style="margin-top:10px">住所</label>
       <input id="newCustomerAddress" type="text" autocomplete="street-address" placeholder="山梨県…">
+      <label for="newCustomerPassword" style="margin-top:10px">お客様パスワード <span style="color:#a34b42">※必須</span></label>
+      <input id="newCustomerPassword" type="password" autocomplete="new-password" placeholder="6文字以上">
       <button type="button" class="cta" id="newCustomerRegisterBtn" style="color:#fff;background:#148A6A" onclick="registerNewCustomer()">この内容で登録する</button>
       <div class="admin-msg" id="newCustomerMsg" style="display:block;color:#a34b42"></div>
     </div>
@@ -669,36 +870,95 @@ async function showExistingCustomerReservations(){
   const detail=document.getElementById("detail");
   detail.innerHTML=`
     <h2>登録済みのお客様の予約情報</h2>
-    <div class="note">お名前と携帯電話番号を入力して、「予約情報を確認する」を押してください。</div>
+    <div class="note">お名前とお客様パスワードを入力して、「予約情報を確認する」を押してください。</div>
     <div class="booking-form">
       <label for="reservationLookupName">お名前</label>
       <input id="reservationLookupName" type="text" autocomplete="name" placeholder="例：山田 太郎">
-      <label for="reservationLookupPhone" style="margin-top:10px">携帯電話番号</label>
-      <input id="reservationLookupPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="例：090-1234-5678">
+      <label for="reservationLookupPassword" style="margin-top:10px">お客様パスワード</label>
+      <input id="reservationLookupPassword" type="password" autocomplete="current-password" placeholder="登録時に設定したパスワード">
       <button type="button" id="reservationLookupBtn">予約情報を確認する</button>
+      <button type="button" id="forgotCustomerPasswordBtn" class="cta" style="margin-top:9px;background:#fff;color:#148A6A;border:1px solid #B9E0D2">パスワードを忘れてしまった方へ</button>
       <div class="admin-msg" id="reservationLookupMsg" style="display:block;color:#a34b42"></div>
     </div>
     <button type="button" class="cta" id="reservationLookupBackBtn" style="background:#fff;color:#148A6A;border:1px solid #B9E0D2">トップ画面に戻る</button>`;
-
   document.getElementById("reservationLookupBackBtn").addEventListener("click",returnToTopScreen);
   document.getElementById("reservationLookupBtn").addEventListener("click",loadCustomerReservations);
+  document.getElementById("forgotCustomerPasswordBtn").addEventListener("click",showForgotCustomerPassword);
   window.scrollTo({top:detail.getBoundingClientRect().top+window.scrollY-20,behavior:"smooth"});
   document.getElementById("reservationLookupName").focus();
 }
 
+async function showForgotCustomerPassword(){
+  const detail=document.getElementById("detail");
+  detail.innerHTML=`
+    <h2>パスワードを忘れてしまった方へ</h2>
+    <div class="note">登録時のお客様情報と一致した場合、新しいパスワードを設定できます。</div>
+    <div class="booking-form" id="forgotPasswordForm">
+      <label>お名前</label>
+      <input id="forgotName" type="text" autocomplete="name" placeholder="例：山田 太郎">
+      <label style="margin-top:10px">電話番号</label>
+      <input id="forgotPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="例：090-1234-5678">
+      <label style="margin-top:10px">住所</label>
+      <input id="forgotAddress" type="text" autocomplete="street-address" placeholder="登録時の住所">
+      <button type="button" id="forgotVerifyBtn">本人確認</button>
+      <div class="admin-msg" id="forgotMsg" style="display:block;color:#a34b42"></div>
+    </div>
+    <button type="button" class="cta" id="forgotBackBtn" style="background:#fff;color:#148A6A;border:1px solid #B9E0D2">予約情報のログイン画面に戻る</button>`;
+  document.getElementById("forgotBackBtn").addEventListener("click",showExistingCustomerReservations);
+  document.getElementById("forgotVerifyBtn").addEventListener("click",async()=>{
+    const name=document.getElementById("forgotName").value.trim(), phone=document.getElementById("forgotPhone").value.trim(), address=document.getElementById("forgotAddress").value.trim(), msg=document.getElementById("forgotMsg");
+    msg.textContent="";
+    if(!name||!phone||!address){msg.textContent="お名前・電話番号・住所をすべて入力してください。";return;}
+    const btn=document.getElementById("forgotVerifyBtn");btn.disabled=true;btn.textContent="確認しています…";
+    try{
+      const r=await rpc("customer_password_reset_request",{p_name:name,p_phone:phone,p_address:address});
+      if(!r||!r.ok){msg.textContent=(r&&r.message)||"登録情報と一致しません。";return;}
+      detail.innerHTML=`
+        <h2>パスワードの再登録</h2>
+        <div class="note">本人確認ができました。新しいパスワードを登録してください。</div>
+        <div class="booking-form">
+          <label>新しいパスワード</label>
+          <input id="resetNewPassword" type="password" autocomplete="new-password" placeholder="6文字以上">
+          <label style="margin-top:10px">新しいパスワード（確認）</label>
+          <input id="resetNewPasswordConfirm" type="password" autocomplete="new-password" placeholder="もう一度入力">
+          <button type="button" id="resetPasswordBtn">パスワードを再登録する</button>
+          <div class="admin-msg" id="resetPasswordMsg" style="display:block;color:#a34b42"></div>
+        </div>`;
+      document.getElementById("resetPasswordBtn").addEventListener("click",async()=>{
+        const np=document.getElementById("resetNewPassword").value, cp=document.getElementById("resetNewPasswordConfirm").value, rm=document.getElementById("resetPasswordMsg");
+        rm.textContent="";
+        if(np.length<6){rm.textContent="パスワードは6文字以上で入力してください。";return;}
+        if(np!==cp){rm.textContent="パスワードが一致しません。";return;}
+        const rb=document.getElementById("resetPasswordBtn");rb.disabled=true;rb.textContent="再登録しています…";
+        try{
+          const rr=await rpc("customer_password_reset",{p_name:name,p_phone:phone,p_address:address,p_new_password:np});
+          if(!rr||!rr.ok){rm.textContent=(rr&&rr.message)||"再登録できませんでした。";return;}
+          rm.style.color="#148A6A";rm.textContent="パスワードを再登録しました。ログイン画面からご確認ください。";
+          setTimeout(showExistingCustomerReservations,900);
+        }catch(e){console.error(e);rm.textContent="再登録中にエラーが発生しました。";}
+        finally{rb.disabled=false;rb.textContent="パスワードを再登録する";}
+      });
+      document.getElementById("resetNewPassword").focus();
+    }catch(e){console.error(e);msg.textContent="本人確認中にエラーが発生しました。";}
+    finally{btn.disabled=false;btn.textContent="本人確認";}
+  });
+  document.getElementById("forgotName").focus();
+}
+
+
 async function loadCustomerReservations(){
   const name=document.getElementById("reservationLookupName").value.trim();
-  const phone=document.getElementById("reservationLookupPhone").value.trim();
+  const password=document.getElementById("reservationLookupPassword").value;
   const msg=document.getElementById("reservationLookupMsg");
   const btn=document.getElementById("reservationLookupBtn");
   msg.textContent="";
   if(!name){msg.textContent="お名前を入力してください。";return;}
-  if(!phone){msg.textContent="携帯電話番号を入力してください。";return;}
+  if(!password){msg.textContent="お客様パスワードを入力してください。";return;}
   btn.disabled=true;btn.textContent="確認しています…";
   try{
     const result=await rpc("get_customer_reservations_public",{
       p_customer_name:name,
-      p_customer_phone:phone
+      p_customer_password:password
     });
     if(!result||!result.ok){
       msg.textContent=(result&&result.message)||"予約情報を確認できませんでした。";
@@ -709,21 +969,84 @@ async function loadCustomerReservations(){
     const detail=document.getElementById("detail");
     const jp=["日","月","火","水","木","金","土"];
     const esc=v=>escapeHtml(String(v??""));
-    const list=rows.map(r=>{
+    const pendingRows=rows.filter(r=>r.status==='pending');
+    const confirmedRows=rows.filter(r=>r.status==='reserved');
+    const formatReservation=r=>{
       const d=new Date(String(r.reservation_date).slice(0,10)+"T00:00:00");
       const dateText=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${jp[d.getDay()]}）`;
       const start=String(r.start_time).slice(0,5);
       const duration=Number(r.duration_minutes||60);
       const end=calcEndTime(start,duration);
       return `<div class="admin-item"><b>${dateText}</b><br><span class="admin-muted">${esc(start)}〜${esc(end)}（${duration}分）</span></div>`;
-    }).join("");
+    };
+    const pendingList=pendingRows.map(formatReservation).join("");
+    const confirmedList=confirmedRows.map(formatReservation).join("");
+    const list=`
+      ${pendingRows.length?`<div style="margin-bottom:14px">
+        <div style="font-weight:700;color:#0F5C4A;margin-bottom:7px">担当者より予約確定通知があるまでお待ちください。</div>
+        <div class="admin-muted" style="margin-bottom:7px">仮予約</div>
+        <div class="admin-list">${pendingList}</div>
+      </div>`:''}
+      ${confirmedRows.length?`<div>
+        <div style="font-weight:700;color:#0F5C4A;margin-bottom:7px">ご予約ありがとうございます。以下の日時でうかがわせていただきます。</div>
+        <div class="admin-muted" style="margin-bottom:7px">予約確定</div>
+        <div class="admin-list">${confirmedList}</div>
+      </div>`:''}
+      ${!pendingRows.length&&!confirmedRows.length?`<div class="note" style="margin-top:14px">現在、予約されている日時はありません。</div>`:''}`;
+
+    const messages=Array.isArray(result.messages)?result.messages:[];
+    const messageHtml=messages.length?`<div style="margin-bottom:14px;padding:14px;border:1px solid #B9E0D2;border-radius:12px;background:#F4FBF8">
+      <h3 style="margin:0 0 9px;color:#0F5C4A;font-size:16px">メッセージ</h3>
+      <div class="admin-list">${messages.map(m=>{
+        const isStaff=m.sender_type!=='customer';
+        return `<div class="admin-item" data-message-id="${m.id}">
+          <div style="font-weight:700;color:#0F5C4A;margin-bottom:5px">${isStaff?'担当者からのメッセージ':'お客様からの返信'}</div>
+          <div style="white-space:pre-wrap;line-height:1.7">${esc(m.content)}</div>
+          <div class="admin-muted" style="margin-top:7px">${m.sent_at?new Date(m.sent_at).toLocaleString('ja-JP',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):''}</div>
+          ${isStaff?`<button type="button" class="cta message-reply-btn" data-message-id="${m.id}" style="margin-top:9px;background:#fff;color:#148A6A;border:1px solid #B9E0D2;padding:9px 16px">返信</button>
+          <button type="button" class="cta message-delete-btn" data-message-id="${m.id}" style="margin-top:9px;margin-left:6px;background:#fff;color:#a34b42;border:1px solid #e0b9b9;padding:9px 16px">削除</button>
+          <div class="message-reply-form" id="messageReplyForm-${m.id}" style="display:none;margin-top:10px">
+            <textarea class="booking-form message-reply-text" rows="4" placeholder="返信内容を入力してください。"></textarea>
+            <button type="button" class="cta message-reply-send" data-message-id="${m.id}" style="margin-top:8px">返信を送信</button>
+            <div class="admin-msg message-reply-msg" style="display:block;color:#a34b42"></div>
+          </div>`:''}
+        </div>`;
+      }).join('')}</div>
+    </div>`:'';
 
     detail.innerHTML=`
       <h2>現在の予約情報</h2>
       <div class="note">${esc(name)} 様の現在予約されている日時です。</div>
+      ${messageHtml}
       ${rows.length?`<div class="admin-list">${list}</div>`:`<div class="note" style="margin-top:14px">現在、予約されている日時はありません。</div>`}
       <button type="button" class="cta" id="reservationResultTopBtn">トップ画面に戻る</button>`;
 
+    document.querySelectorAll(".message-delete-btn").forEach(btn=>btn.addEventListener("click",async()=>{
+      if(!confirm("この担当者からのメッセージを削除しますか？"))return;
+      btn.disabled=true;btn.textContent="削除中…";
+      try{
+        const rr=await rpc("customer_delete_message",{p_customer_name:name,p_customer_password:password,p_message_id:Number(btn.dataset.messageId)});
+        if(!rr||!rr.ok){alert((rr&&rr.message)||"メッセージを削除できませんでした。");btn.disabled=false;btn.textContent="削除";return;}
+        await loadCustomerReservations();
+      }catch(e){console.error(e);alert("メッセージ削除中にエラーが発生しました。");btn.disabled=false;btn.textContent="削除";}
+    }));
+    document.querySelectorAll(".message-reply-btn").forEach(btn=>btn.addEventListener("click",()=>{
+      const form=document.getElementById(`messageReplyForm-${btn.dataset.messageId}`);
+      if(form)form.style.display=form.style.display==="none"?"block":"none";
+    }));
+    document.querySelectorAll(".message-reply-send").forEach(btn=>btn.addEventListener("click",async()=>{
+      const form=document.getElementById(`messageReplyForm-${btn.dataset.messageId}`);
+      const textarea=form?.querySelector(".message-reply-text"), msg=form?.querySelector(".message-reply-msg");
+      const content=(textarea?.value||"").trim();
+      if(!content){if(msg)msg.textContent="返信内容を入力してください。";return;}
+      btn.disabled=true;btn.textContent="送信中…";
+      try{
+        const rr=await rpc("customer_reply_message",{p_customer_name:name,p_customer_password:password,p_content:content});
+        if(!rr||!rr.ok){if(msg)msg.textContent=(rr&&rr.message)||"返信を送信できませんでした。";return;}
+        await loadCustomerReservations();
+      }catch(e){console.error(e);if(msg)msg.textContent="返信中にエラーが発生しました。";}
+      finally{btn.disabled=false;btn.textContent="返信を送信";}
+    }));
     document.getElementById("reservationResultTopBtn").addEventListener("click",returnToTopScreen);
   }catch(err){
     console.error(err);
@@ -860,7 +1183,7 @@ function renderMultiSchedule(){
       const result=await rpc('book_existing_customer_multi',{p_customer_name:name,p_customer_phone:phone,p_bookings:bookings});
       const row=Array.isArray(result)?result[0]:result;
       if(!row||!row.ok){alert((row&&row.message)||'予約できませんでした。');btn.disabled=false;btn.textContent='選択した日程をまとめて予約する';return;}
-      detail.innerHTML=`<div class="success"><strong>予約を受け付けました</strong><br><div style="margin-top:10px">${escapeHtml(name)} 様</div><div style="margin-top:8px">${bookings.map(b=>`${b.reservation_date.replaceAll('-','/')} ${b.start_time}〜${calcEndTime(b.start_time,b.duration)}（${b.duration}分）`).join('<br>')}</div><div class="note">選択したすべての日程の予約が確定しました。</div></div>`;
+      detail.innerHTML=`<div class="success"><strong>仮予約を受け付けました</strong><br><div style="margin-top:10px">${escapeHtml(name)} 様</div><div style="margin-top:8px">${bookings.map(b=>`${b.reservation_date.replaceAll('-','/')} ${b.start_time}〜${calcEndTime(b.start_time,b.duration)}（${b.duration}分）`).join('<br>')}</div><div class="note">担当者が確認後、予約確定となります。登録済みのお客様の「予約情報」から確定状況をご確認いただけます。</div></div>`;
       multiMode=false;multiSelectedDates=[];selected=null;
       await loadAvailability();render();
     }catch(err){console.error(err);alert('予約処理に失敗しました。もう一度お試しください。');btn.disabled=false;btn.textContent='選択した日程をまとめて予約する';}
@@ -991,12 +1314,12 @@ function showBookingForm(time,dt,d,day){
       const detail=document.getElementById("detail");
       detail.innerHTML=`
         <div class="success">
-          <strong>予約を受け付けました</strong><br>
+          <strong>仮予約を受け付けました</strong><br>
           <div style="margin-top:10px">${escapeHtml(name)} 様</div>
           <div>${dt.getFullYear()}年${dt.getMonth()+1}月${d}日（${day}）</div>
           <div>${time}〜${calcEndTime(time,duration)}</div>
           <div>${duration}分</div>
-          <div class="note">予約が確定しました。次回の訪問をお待ちしております。</div>
+          <div class="note">担当者が確認後、予約確定となります。登録済みのお客様の「予約情報」から確定状況をご確認いただけます。</div>
         </div>`;
       selected=null;
       await loadAvailability();
@@ -1055,11 +1378,13 @@ function showPublic(){document.body.classList.remove('admin-page-mode');$a('admi
 function showAdminSection(section){
   const sections={
     reservations:$a('adminSectionReservations'),
+    messages:$a('adminSectionMessages'),
+    proxy:$a('adminSectionProxy'),
     customers:$a('adminSectionCustomers'),
     slots:$a('adminSectionSettings'),
     settings:$a('adminSectionSettings')
   };
-  [$a('adminSectionReservations'),$a('adminSectionCustomers'),$a('adminSectionSettings')].forEach(el=>el.classList.remove('active-section'));
+  [$a('adminSectionReservations'),$a('adminSectionMessages'),$a('adminSectionProxy'),$a('adminSectionCustomers'),$a('adminSectionSettings')].forEach(el=>el.classList.remove('active-section'));
   if(section==='slots'||section==='settings') $a('adminSectionSettings').classList.add('active-section');
   else sections[section]?.classList.add('active-section');
 
@@ -1085,10 +1410,81 @@ $a('adminLogoutBtn').addEventListener('click',()=>{adminPassword='';$a('adminApp
 
 document.querySelectorAll('.admin-nav-item').forEach(btn=>btn.addEventListener('click',()=>showAdminSection(btn.dataset.section)));
 function initAdminDate(){if(!$a('adminDate').value){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());$a('adminDate').value=d.toISOString().slice(0,10)}}
-async function loadAllAdmin(){await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability(),loadCustomers(),loadAdminAvailability(),loadHomepageUrl()]);renderAdminBookingCalendar()}
+async function loadAllAdmin(){await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability(),loadCustomers(),loadAdminAvailability(),loadHomepageUrl(),loadReservationPeriod(),loadTodaySchedule(),loadNewReservationRequests()]);renderAdminBookingCalendar()}
 
 $a('adminPrevMonth').addEventListener('click',async()=>{adminMonth.setMonth(adminMonth.getMonth()-1);await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability()]);renderAdminBookingCalendar()});
 $a('adminNextMonth').addEventListener('click',async()=>{adminMonth.setMonth(adminMonth.getMonth()+1);await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability()]);renderAdminBookingCalendar()});
+
+
+async function loadNewReservationRequests(){
+  const list=$a('newReservationRequestsList');
+  list.innerHTML='読み込み中…';
+  try{
+    const rows=await adminRpc('admin_get_pending_reservations_password',{p_password:adminPassword});
+    const data=Array.isArray(rows)?rows:[];
+    if(!data.length){list.innerHTML='<div class="admin-muted">新規の予約依頼はありません。</div>';return;}
+    list.innerHTML=data.map(r=>{
+      const date=afmtDate(r.reservation_date),time=afmtTime(r.start_time),dur=Number(r.duration_minutes||60);
+      return `<div class="admin-item" id="pendingRequest-${r.id}">
+        <div style="font-size:17px;font-weight:700;color:#0F5C4A">${date} ${time}〜（${dur}分）</div>
+        <div style="margin-top:7px;line-height:1.8">
+          <strong>${escapeHtml(r.patient_name||'名前未登録')}</strong><br>
+          電話番号：${escapeHtml(r.patient_phone||'未登録')}<br>
+          住所：${escapeHtml(r.patient_address||'未登録')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button type="button" class="admin-btn" data-pending-confirm="${r.id}" style="flex:1">予約確定</button>
+          <button type="button" class="admin-btn danger" data-pending-cancel="${r.id}" style="flex:1">キャンセル</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-pending-confirm]').forEach(btn=>btn.onclick=async()=>{
+      if(!confirm('この仮予約を予約確定しますか？'))return;
+      btn.disabled=true;
+      const r=await adminRpc('admin_confirm_reservation_password',{p_password:adminPassword,p_id:Number(btn.dataset.pendingConfirm)});
+      if(!r||!r.ok){alert((r&&r.message)||'予約確定できませんでした。');btn.disabled=false;return;}
+      await Promise.all([loadNewReservationRequests(),loadAdminBookings(),loadAdminCalendarAvailability(),loadTodaySchedule(),loadAvailability()]);
+      renderAdminBookingCalendar();render();
+    });
+    list.querySelectorAll('[data-pending-cancel]').forEach(btn=>btn.onclick=async()=>{
+      if(!confirm('この予約依頼をキャンセルしますか？'))return;
+      btn.disabled=true;
+      const r=await adminRpc('admin_reject_pending_reservation_password',{p_password:adminPassword,p_id:Number(btn.dataset.pendingCancel)});
+      if(!r||!r.ok){alert((r&&r.message)||'キャンセルできませんでした。');btn.disabled=false;return;}
+      await Promise.all([loadNewReservationRequests(),loadAdminBookings(),loadAdminCalendarAvailability(),loadTodaySchedule(),loadAvailability()]);
+      renderAdminBookingCalendar();render();
+    });
+  }catch(e){console.error(e);list.innerHTML='<div class="admin-muted">新規予約依頼を読み込めませんでした。</div>';}
+}
+
+async function loadTodaySchedule(){
+  const list=$a('todayScheduleList'), dateBox=$a('todayScheduleDate');
+  const now=new Date();
+  const yyyy=now.getFullYear(), mm=String(now.getMonth()+1).padStart(2,'0'), dd=String(now.getDate()).padStart(2,'0');
+  const today=`${yyyy}-${mm}-${dd}`;
+  dateBox.textContent=`${yyyy}年${now.getMonth()+1}月${now.getDate()}日`;
+  list.innerHTML='読み込み中…';
+  try{
+    const data=await adminRpc('admin_get_reservation_calendar_password',{p_password:adminPassword,p_from:today,p_to:today});
+    const rows=(Array.isArray(data)?data:[]).filter(r=>String(r.reservation_date).slice(0,10)===today && String(r.status||'reserved')==='reserved');
+    rows.sort((a,b)=>String(a.start_time).localeCompare(String(b.start_time)));
+    if(!rows.length){
+      list.innerHTML='<div class="admin-muted">本日の予定はありません。</div>';
+      return;
+    }
+    list.innerHTML=rows.map(r=>`<div class="admin-item">
+      <div style="font-size:17px;font-weight:700;color:#0F5C4A">${afmtDate(r.reservation_date)} ${afmtTime(r.start_time)}〜</div>
+      <div style="margin-top:7px;line-height:1.8">
+        <strong>${escapeHtml(r.patient_name||'名前未登録')}</strong><br>
+        電話番号：${escapeHtml(r.patient_phone||'未登録')}<br>
+        住所：${escapeHtml(r.patient_address||'未登録')}
+      </div>
+    </div>`).join('');
+  }catch(e){
+    console.error(e);
+    list.innerHTML='<div class="admin-muted">本日の予定を読み込めませんでした。</div>';
+  }
+}
 async function loadAdminBookings(){const y=adminMonth.getFullYear(),m=adminMonth.getMonth();const from=key(y,m,1),to=key(y,m+1,new Date(y,m+1,0).getDate());$a('adminMonthTitle').textContent=`${y}年${m+1}月`;try{const data=await adminRpc('admin_get_reservation_calendar_password',{p_password:adminPassword,p_from:from,p_to:to});adminBookings=Array.isArray(data)?data:[]}catch(e){console.error(e);adminBookings=[]}}
 async function loadAdminCalendarAvailability(){const y=adminMonth.getFullYear(),m=adminMonth.getMonth();const from=key(y,m,1),to=key(y,m+1,new Date(y,m+1,0).getDate());try{const data=await rpc('get_public_availability',{p_from:from,p_to:to});adminFreeAvailability=Array.isArray(data)?data:[]}catch(e){console.error(e);adminFreeAvailability=[]}}
 function openCustomerFromBooking(patientId){
@@ -1186,7 +1582,7 @@ function showAdminProxyBooking(date){
     res.querySelectorAll('.proxy-customer').forEach(btn=>btn.onclick=()=>{selectedPatient=rows.find(r=>Number(r.id)===Number(btn.dataset.id));res.querySelectorAll('.proxy-customer').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected')});
   }
   $a('proxySearchBtn').onclick=searchCustomers;$a('proxyCustomerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchCustomers()});searchCustomers();
-  $a('proxyConfirmBtn').onclick=async()=>{const time=$a('proxyTimeSelect').value,duration=Number($a('proxyDurationSelect').value);if(!selectedPatient){amsg('proxyMsg','お客様を選択してください。');return}if(!time){amsg('proxyMsg','予約時間を選択してください。');return}const r=await adminRpc('admin_book_customer_password',{p_password:adminPassword,p_patient_id:Number(selectedPatient.id),p_reservation_date:date,p_start_time:time,p_duration:duration});if(!r||!r.ok){amsg('proxyMsg',(r&&r.message)||'予約できませんでした。');return}await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability(),loadCustomers()]);renderAdminBookingCalendar();amsg('proxyMsg','代理予約が完了しました。');setTimeout(()=>showAdminReservationDetail(adminBookings.find(x=>Number(x.id)===Number(r.id))),200)};
+  $a('proxyConfirmBtn').onclick=async()=>{const time=$a('proxyTimeSelect').value,duration=Number($a('proxyDurationSelect').value);if(!selectedPatient){amsg('proxyMsg','お客様を選択してください。');return}if(!time){amsg('proxyMsg','予約時間を選択してください。');return}const r=await adminRpc('admin_book_customer_password',{p_password:adminPassword,p_patient_id:Number(selectedPatient.id),p_reservation_date:date,p_start_time:time,p_duration:duration});if(!r||!r.ok){amsg('proxyMsg',(r&&r.message)||'予約できませんでした。');return}await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability(),loadCustomers(),loadTodaySchedule(),loadNewReservationRequests()]);renderAdminBookingCalendar();amsg('proxyMsg','代理予約が完了しました。');setTimeout(()=>showAdminReservationDetail(adminBookings.find(x=>Number(x.id)===Number(r.id))),200)};
   window.scrollTo({top:box.getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});
 }
 
@@ -1204,7 +1600,7 @@ window.cancelReservation=async function(id){
       return;
     }
     alert('予約をキャンセルしました。');
-    await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability(),loadCustomers()]);
+    await Promise.all([loadAdminBookings(),loadAdminCalendarAvailability(),loadCustomers(),loadTodaySchedule(),loadNewReservationRequests()]);
     renderAdminBookingCalendar();
     showAdminBookingDate(String(row.reservation_date).slice(0,10));
   }catch(e){
@@ -1215,15 +1611,174 @@ window.cancelReservation=async function(id){
   }
 }
 
+
+
+let bulkProxyPatient=null;
+let bulkProxyMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+
+function updateBulkProxyMonthButtons(){
+  const y=bulkProxyMonth.getFullYear(),m=bulkProxyMonth.getMonth();
+  const prev=new Date(y,m-1,1), next=new Date(y,m+1,1);
+  $a('bulkProxyMonthLabel').textContent=`${y}年${m+1}月`;
+  $a('bulkProxyPrevMonthBtn').textContent=`前月（${prev.getMonth()+1}月）`;
+  $a('bulkProxyNextMonthBtn').textContent=`翌月（${next.getMonth()+1}月）`;
+}
+async function loadBulkProxySlots(){
+  const box=$a('bulkProxySlotList'); updateBulkProxyMonthButtons();
+  box.innerHTML='読み込み中…';
+  const y=bulkProxyMonth.getFullYear(),m=bulkProxyMonth.getMonth();
+  let rows=[];
+  for(let d=1;d<=new Date(y,m+1,0).getDate();d++){
+    const date=key(y,m,d);
+    const data=await adminRpc('admin_get_availability_password',{p_password:adminPassword,p_date:date});
+    (Array.isArray(data)?data:[]).filter(x=>x.is_available).forEach(x=>rows.push(x));
+  }
+  rows.sort((a,b)=>String(a.available_date).localeCompare(String(b.available_date))||String(a.start_time).localeCompare(String(b.start_time)));
+  if(!rows.length){box.innerHTML='<div class="admin-muted">この月に予約可能な日時はありません。</div>';return;}
+  box.innerHTML=rows.map(x=>`<label class="admin-item" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+    <input type="checkbox" class="bulk-proxy-slot" data-date="${x.available_date}" data-time="${afmtTime(x.start_time)}" data-duration="${x.duration_minutes||60}" style="width:18px;height:18px">
+    <span><b>${afmtDate(x.available_date)}</b> ${afmtTime(x.start_time)}〜 <span class="admin-muted">${x.duration_minutes||60}分 / 受付中</span></span>
+  </label>`).join('');
+}
+async function searchBulkProxyCustomers(){
+  const q=$a('bulkProxyCustomerSearch').value.trim(),res=$a('bulkProxyCustomerResults');
+  const data=await adminRpc('admin_search_customers_password',{p_password:adminPassword,p_query:q});
+  const rows=Array.isArray(data)?data:[];
+  res.innerHTML=rows.length?rows.map(r=>`<button type="button" class="proxy-customer bulk-proxy-customer" data-id="${r.id}">
+    <b>${escapeHtml(r.name||'')}</b>${r.name_kana?`<br><span class="admin-muted">${escapeHtml(r.name_kana)}</span>`:''}
+    <br><span class="admin-muted">年齢：${r.age??'未登録'} / ${escapeHtml(r.address||'住所未登録')}</span>
+  </button>`).join(''):'<div class="admin-muted">該当するお客様がいません。</div>';
+  res.querySelectorAll('.bulk-proxy-customer').forEach(btn=>btn.onclick=()=>{
+    bulkProxyPatient=rows.find(r=>Number(r.id)===Number(btn.dataset.id));
+    res.querySelectorAll('.bulk-proxy-customer').forEach(x=>x.classList.remove('selected'));
+    btn.classList.add('selected');
+    $a('bulkProxySelectedCustomer').textContent=`選択中のお客様：${bulkProxyPatient.name||''}${bulkProxyPatient.name_kana?'（'+bulkProxyPatient.name_kana+'）':''}`;
+  });
+}
+$a('bulkProxyCustomerSearchBtn').addEventListener('click',searchBulkProxyCustomers);
+$a('bulkProxyCustomerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchBulkProxyCustomers()});
+$a('bulkProxyPrevMonthBtn').addEventListener('click',()=>{bulkProxyMonth=new Date(bulkProxyMonth.getFullYear(),bulkProxyMonth.getMonth()-1,1);loadBulkProxySlots()});
+$a('bulkProxyNextMonthBtn').addEventListener('click',()=>{bulkProxyMonth=new Date(bulkProxyMonth.getFullYear(),bulkProxyMonth.getMonth()+1,1);loadBulkProxySlots()});
+$a('bulkProxySelectAllBtn').addEventListener('click',()=>{$a('bulkProxySlotList').querySelectorAll('.bulk-proxy-slot').forEach(c=>c.checked=true)});
+$a('bulkProxyClearAllBtn').addEventListener('click',()=>{$a('bulkProxySlotList').querySelectorAll('.bulk-proxy-slot').forEach(c=>c.checked=false)});
+$a('bulkProxyBookBtn').addEventListener('click',async()=>{
+  hideAmsg('bulkProxyMsg');
+  if(!bulkProxyPatient){amsg('bulkProxyMsg','先にお客様を選択してください。');return;}
+  const checks=Array.from($a('bulkProxySlotList').querySelectorAll('.bulk-proxy-slot:checked'));
+  if(!checks.length){amsg('bulkProxyMsg','予約する日時を選択してください。');return;}
+  const bookings=checks.map(c=>({reservation_date:c.dataset.date,start_time:c.dataset.time,duration:Number(c.dataset.duration)}));
+  if(!confirm(`${bulkProxyPatient.name||''} 様の${bookings.length}件を一括で代理予約しますか？`))return;
+  const btn=$a('bulkProxyBookBtn');btn.disabled=true;btn.textContent='予約中…';
+  try{
+    const r=await adminRpc('admin_book_customer_multi_password',{p_password:adminPassword,p_patient_id:Number(bulkProxyPatient.id),p_bookings:bookings});
+    if(!r||!r.ok){amsg('bulkProxyMsg',(r&&r.message)||'一括予約できませんでした。');return;}
+    amsg('bulkProxyMsg',r.message||'一括予約が完了しました。');
+    await Promise.all([loadBulkProxySlots(),loadAdminBookings(),loadAdminCalendarAvailability(),loadCustomers(),loadAvailability(),loadTodaySchedule(),loadNewReservationRequests()]);
+    renderAdminBookingCalendar();render();
+  }catch(e){console.error(e);amsg('bulkProxyMsg','予約中にエラーが発生しました。')}
+  finally{btn.disabled=false;btn.textContent='☑ 選択した日時を一括予約';}
+});
+
+let selectedMessagePatient=null;
+async function loadCustomerMessagesForAdmin(patientId){
+  const box=$a('customerMessagesBox'), list=$a('customerMessagesList');
+  if(!patientId){box.style.display='none';list.innerHTML='';return;}
+  box.style.display='block'; list.innerHTML='読み込み中…';
+  try{
+    const rows=await adminRpc('admin_get_messages_password',{p_password:adminPassword,p_patient_id:Number(patientId)});
+    const data=Array.isArray(rows)?rows:[];
+    list.innerHTML=data.length?data.map(m=>`<div class="admin-item">
+      <div style="font-weight:700;color:#0F5C4A;margin-bottom:5px">${m.sender_type==='customer'?'お客様からの返信':'担当者からのメッセージ'}</div>
+      <div style="white-space:pre-wrap;line-height:1.7">${escapeHtml(m.content||'')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px">
+        <span class="admin-muted">${escapeHtml(m.staff_name||(m.sender_type==='customer'?'お客様':'担当者'))}${m.sent_at?' / '+new Date(m.sent_at).toLocaleString('ja-JP',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):''}</span>
+        ${m.sender_type!=='customer'?`<button type="button" class="admin-btn danger delete-message-btn" data-id="${m.id}">削除</button>`:''}
+      </div>
+    </div>`).join(''):'<div class="admin-muted">メッセージはありません。</div>';
+    list.querySelectorAll('.delete-message-btn').forEach(btn=>btn.onclick=async()=>{
+      if(!confirm('このメッセージを削除しますか？'))return;
+      btn.disabled=true;
+      const r=await adminRpc('admin_delete_message_password',{p_password:adminPassword,p_id:Number(btn.dataset.id)});
+      if(!r||!r.ok){alert((r&&r.message)||'メッセージを削除できませんでした。');btn.disabled=false;return;}
+      await loadCustomerMessagesForAdmin(patientId);
+      if(selectedMessagePatient && Number(selectedMessagePatient.id)===Number(patientId)) await loadMessageHistory();
+    });
+  }catch(e){
+    console.error(e);list.innerHTML='<div class="admin-muted">メッセージを読み込めませんでした。</div>';
+  }
+}
+async function searchMessageCustomers(){
+  hideAmsg('messageSendMsg');
+  const q=$a('messageCustomerSearch').value.trim();
+  const res=$a('messageCustomerResults');
+  const data=await adminRpc('admin_search_customers_password',{p_password:adminPassword,p_query:q});
+  const rows=Array.isArray(data)?data:[];
+  res.innerHTML=rows.length?rows.map(r=>`<button type="button" class="proxy-customer message-customer" data-id="${r.id}">
+    <b>${escapeHtml(r.name||'')}</b>${r.name_kana?`<br><span class="admin-muted">${escapeHtml(r.name_kana)}</span>`:''}
+    <br><span class="admin-muted">年齢：${r.age??'未登録'} / ${escapeHtml(r.address||'住所未登録')}</span>
+  </button>`).join(''):'<div class="admin-muted">該当するお客様がいません。</div>';
+  res.querySelectorAll('.message-customer').forEach(btn=>btn.onclick=()=>{
+    selectedMessagePatient=rows.find(r=>Number(r.id)===Number(btn.dataset.id));
+    res.querySelectorAll('.message-customer').forEach(x=>x.classList.remove('selected'));
+    btn.classList.add('selected');
+    $a('messageComposer').style.display='block';
+    $a('messageSelectedCustomer').textContent=`送信先：${selectedMessagePatient.name||''}${selectedMessagePatient.name_kana?'（'+selectedMessagePatient.name_kana+'）':''}`;
+    $a('messageContent').focus();
+    loadMessageHistory();
+  });
+}
+async function loadMessageHistory(){
+  const list=$a('messageHistoryList');
+  if(!selectedMessagePatient){list.innerHTML='<div class="admin-muted">お客様を選択してください。</div>';return;}
+  const rows=await adminRpc('admin_get_messages_password',{p_password:adminPassword,p_patient_id:Number(selectedMessagePatient.id)});
+  const data=Array.isArray(rows)?rows:[];
+  list.innerHTML=data.length?data.map(m=>`<div class="admin-item">
+    <div style="font-weight:700;color:#0F5C4A;margin-bottom:5px">${m.sender_type==='customer'?'お客様からの返信':'担当者からのメッセージ'}</div>
+    <div style="white-space:pre-wrap;line-height:1.7">${escapeHtml(m.content||'')}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px">
+      <span class="admin-muted">${escapeHtml(m.staff_name||(m.sender_type==='customer'?'お客様':'担当者'))}${m.sent_at?' / '+new Date(m.sent_at).toLocaleString('ja-JP',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):''}</span>
+      ${m.sender_type!=='customer'?`<button type="button" class="admin-btn danger message-history-delete" data-id="${m.id}">削除</button>`:''}
+    </div>
+  </div>`).join(''):'<div class="admin-muted">メッセージはありません。</div>';
+  list.querySelectorAll('.message-history-delete').forEach(btn=>btn.onclick=async()=>{
+    if(!confirm('このメッセージを削除しますか？'))return;
+    btn.disabled=true;
+    const r=await adminRpc('admin_delete_message_password',{p_password:adminPassword,p_id:Number(btn.dataset.id)});
+    if(!r||!r.ok){alert((r&&r.message)||'メッセージを削除できませんでした。');btn.disabled=false;return;}
+    await loadMessageHistory();
+    if($a('customerId').value && Number($a('customerId').value)===Number(selectedMessagePatient.id)) await loadCustomerMessagesForAdmin(selectedMessagePatient.id);
+  });
+}
+$a('messageCustomerSearchBtn').addEventListener('click',searchMessageCustomers);
+$a('messageCustomerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')searchMessageCustomers()});
+$a('messageSendBtn').addEventListener('click',async()=>{
+  hideAmsg('messageSendMsg');
+  if(!selectedMessagePatient){amsg('messageSendMsg','お客様を選択してください。');return;}
+  const content=$a('messageContent').value.trim();
+  if(!content){amsg('messageSendMsg','メッセージを入力してください。');return;}
+  const btn=$a('messageSendBtn');btn.disabled=true;btn.textContent='送信中…';
+  try{
+    const r=await adminRpc('admin_send_message_password',{p_password:adminPassword,p_patient_id:Number(selectedMessagePatient.id),p_content:content});
+    if(!r||!r.ok){amsg('messageSendMsg',(r&&r.message)||'送信できませんでした。');return;}
+    $a('messageContent').value='';
+    amsg('messageSendMsg','メッセージを送信しました。');
+    await loadMessageHistory();
+    if($a('customerId').value && Number($a('customerId').value)===Number(selectedMessagePatient.id)) await loadCustomerMessagesForAdmin(selectedMessagePatient.id);
+  }catch(e){console.error(e);amsg('messageSendMsg','送信中にエラーが発生しました。');}
+  finally{btn.disabled=false;btn.textContent='送信';}
+});
+
 $a('newCustomerBtn').addEventListener('click',()=>{clearCustomerForm();$a('customerForm').style.display='block'});
 $a('cancelCustomerBtn').addEventListener('click',()=>{$a('customerForm').style.display='none'});
-function clearCustomerForm(){$a('customerId').value='';$a('customerNameAdmin').value='';$a('customerAge').value='';$a('customerAddress').value='';$a('customerPhone').value='';$a('customerPasswordAdmin').value='';hideAmsg('customerMsg')}
-async function loadCustomers(){const box=$a('customerList');box.innerHTML='読み込み中…';try{const data=await adminRpc('admin_get_customers_password',{p_password:adminPassword});const rows=Array.isArray(data)?data:[];if(!rows.length){box.innerHTML='<div class="admin-muted">登録されたお客様はいません。</div>';return;}box.innerHTML=rows.map(r=>`<div class="admin-item"><b>${escapeHtml(r.name||'')}</b><br><span class="admin-muted">年齢：${r.age??'未登録'} / 住所：${escapeHtml(r.address||'未登録')} / 電話：${escapeHtml(r.phone||'未登録')}</span><div class="admin-actions"><button class="admin-btn sub edit-customer" data-id="${r.id}" data-name="${escapeHtml(r.name||'')}" data-age="${r.age??''}" data-address="${escapeHtml(r.address||'')}" data-phone="${escapeHtml(r.phone||'')}">編集</button><button class="admin-btn" data-history="${r.id}" data-name="${escapeHtml(r.name||'')}">サービス履歴</button></div></div>`).join('');box.querySelectorAll('.edit-customer').forEach(b=>b.addEventListener('click',()=>editCustomer(b.dataset)));box.querySelectorAll('[data-history]').forEach(b=>b.addEventListener('click',()=>openHistory(Number(b.dataset.history),b.dataset.name)))}catch(e){console.error(e);box.innerHTML='<div class="admin-muted">お客様情報を読み込めませんでした。</div>'}}
-function editCustomer(d){$a('customerForm').style.display='block';$a('customerId').value=d.id;$a('customerNameAdmin').value=d.name||'';$a('customerAge').value=d.age||'';$a('customerAddress').value=d.address||'';$a('customerPhone').value=d.phone||'';$a('customerPasswordAdmin').value='';window.scrollTo({top:$a('customerForm').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'})}
-$a('saveCustomerBtn').addEventListener('click',async()=>{hideAmsg('customerMsg');const data=await adminRpc('admin_save_customer_password',{p_password:adminPassword,p_id:$a('customerId').value?Number($a('customerId').value):null,p_name:$a('customerNameAdmin').value.trim(),p_age:$a('customerAge').value?Number($a('customerAge').value):null,p_address:$a('customerAddress').value.trim(),p_phone:$a('customerPhone').value.trim(),p_customer_password:$a('customerPasswordAdmin').value});if(!data||!data.ok){amsg('customerMsg',(data&&data.message)||'保存できませんでした。');return;}amsg('customerMsg','保存しました。');await loadCustomers()});
+function clearCustomerForm(){$a('customerId').value='';$a('customerNameAdmin').value='';$a('customerAge').value='';$a('customerAddress').value='';$a('customerPhoneAdmin').value='';$a('customerPasswordAdmin').value='';$a('customerMessagesBox').style.display='none';$a('customerMessagesList').innerHTML='';hideAmsg('customerMsg')}
+async function loadCustomers(){const box=$a('customerList');box.innerHTML='読み込み中…';try{const data=await adminRpc('admin_get_customers_password',{p_password:adminPassword});const rows=Array.isArray(data)?data:[];if(!rows.length){box.innerHTML='<div class="admin-muted">登録されたお客様はいません。</div>';return;}box.innerHTML=rows.map(r=>`<div class="admin-item"><b>${escapeHtml(r.name||'')}</b><br><span class="admin-muted">年齢：${r.age??'未登録'} / 住所：${escapeHtml(r.address||'未登録')} / 電話：${escapeHtml(r.phone||'未登録')} / パスワード：設定済み</span><div class="admin-actions"><button class="admin-btn sub edit-customer" data-id="${r.id}" data-name="${escapeHtml(r.name||'')}" data-age="${r.age??''}" data-address="${escapeHtml(r.address||'')}" data-phone="${escapeHtml(r.phone||'')}">編集</button><button class="admin-btn" data-history="${r.id}" data-name="${escapeHtml(r.name||'')}">サービス履歴</button></div></div>`).join('');box.querySelectorAll('.edit-customer').forEach(b=>b.addEventListener('click',()=>editCustomer(b.dataset)));box.querySelectorAll('[data-history]').forEach(b=>b.addEventListener('click',()=>openHistory(Number(b.dataset.history),b.dataset.name)))}catch(e){console.error(e);box.innerHTML='<div class="admin-muted">お客様情報を読み込めませんでした。</div>'}}
+function editCustomer(d){$a('customerForm').style.display='block';$a('customerId').value=d.id;$a('customerNameAdmin').value=d.name||'';$a('customerAge').value=d.age||'';$a('customerAddress').value=d.address||'';$a('customerPhoneAdmin').value=d.phone||'';$a('customerPasswordAdmin').value='';loadCustomerMessagesForAdmin(d.id);window.scrollTo({top:$a('customerForm').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'})}
+$a('saveCustomerBtn').addEventListener('click',async()=>{hideAmsg('customerMsg');const data=await adminRpc('admin_save_customer_password',{p_password:adminPassword,p_id:$a('customerId').value?Number($a('customerId').value):null,p_name:$a('customerNameAdmin').value.trim(),p_age:$a('customerAge').value?Number($a('customerAge').value):null,p_address:$a('customerAddress').value.trim(),p_phone:$a('customerPhoneAdmin').value.trim(),p_customer_password:$a('customerPasswordAdmin').value});if(!data||!data.ok){amsg('customerMsg',(data&&data.message)||'保存できませんでした。');return;}amsg('customerMsg','保存しました。');await loadCustomers()});
 async function openHistory(id,name){$a('customerHistoryBox').style.display='block';$a('customerHistoryTitle').textContent=`${name} さんのサービス履歴`; $a('historyPatientId').value=id;const data=await adminRpc('admin_get_customer_history_password',{p_password:adminPassword,p_patient_id:id});const rows=Array.isArray(data)?data:[];$a('customerHistoryList').innerHTML=rows.length?rows.map(r=>`<div class="admin-item"><b>${afmtDate(r.service_date)}</b><br>${escapeHtml(r.service_type||'')}<br><span class="admin-muted">${escapeHtml(r.notes||'')}</span></div>`).join(''):'<div class="admin-muted">履歴はありません。</div>';}
 $a('addHistoryBtn').addEventListener('click',async()=>{const id=Number($a('historyPatientId').value);if(!id)return;const data=await adminRpc('admin_add_customer_history_password',{p_password:adminPassword,p_patient_id:id,p_service_date:$a('historyDate').value||new Date().toISOString().slice(0,10),p_service_type:$a('historyType').value.trim(),p_notes:$a('historyNotes').value.trim()});if(!data||!data.ok){alert((data&&data.message)||'履歴を追加できませんでした。');return;}await openHistory(id,$a('customerHistoryTitle').textContent.replace(' さんのサービス履歴',''));$a('historyType').value='';$a('historyNotes').value=''})
 
+$a('prevSlotMonthBtn').addEventListener('click',()=>changeSlotMonth(-1));
+$a('nextSlotMonthBtn').addEventListener('click',()=>changeSlotMonth(1));
 $a('adminDate').addEventListener('change',loadAdminAvailability);
 $a('addSlotBtn').addEventListener('click',()=>manageAdminSlot(true));
 $a('closeSlotBtn').addEventListener('click',()=>manageAdminSlot(false));
@@ -1232,8 +1787,59 @@ $a('refreshAdminBtn').addEventListener('click',loadAdminAvailability);
 async function manageAdminSlot(available){hideAmsg('adminSlotMsg');const date=$a('adminDate').value,time=$a('adminTime').value,duration=Number($a('adminDuration').value);if(!date||!time){amsg('adminSlotMsg','日付と開始時刻を入力してください。');return;}const data=await adminRpc('admin_manage_availability_password',{p_password:adminPassword,p_date:date,p_start:time,p_duration:duration,p_available:available});if(!data||!data.ok){amsg('adminSlotMsg',(data&&data.message)||'変更できませんでした。');return;}amsg('adminSlotMsg',available?'空き枠を追加しました。':'受付停止しました。');await loadAdminAvailability();await loadAvailability();render()}
 function initRecurringMonth(){const sel=$a('recMonth');if(sel.options.length)return;const now=new Date();for(let i=0;i<12;i++){const dt=new Date(now.getFullYear(),now.getMonth()+i,1);const v=`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;const o=document.createElement('option');o.value=v;o.textContent=`${dt.getFullYear()}年${dt.getMonth()+1}月`;sel.appendChild(o)}}
 async function addWeeklySlots(){hideAmsg('recMsg');const month=$a('recMonth').value,weekday=Number($a('recWeekday').value),time=$a('recTime').value,duration=Number($a('recDuration').value);if(!month||!time){amsg('recMsg','月・曜日・時間を入力してください。');return;}const [y,m]=month.split('-').map(Number);let added=0;for(let d=1;d<=new Date(y,m,0).getDate();d++){const dt=new Date(y,m-1,d);if(dt.getDay()!==weekday)continue;const date=key(y,m-1,d);const r=await adminRpc('admin_manage_availability_password',{p_password:adminPassword,p_date:date,p_start:time,p_duration:duration,p_available:true});if(r&&r.ok)added++;}amsg('recMsg',`${added}件の空き枠を追加しました。`);await loadAdminAvailability();await loadAvailability();render()}
-async function loadAdminAvailability(){const box=$a('adminAvailability');const base=$a('adminDate').value;if(!base)return;const dt=new Date(base+'T00:00:00');const y=dt.getFullYear(),m=dt.getMonth();box.innerHTML='読み込み中…';let rows=[];for(let d=1;d<=new Date(y,m+1,0).getDate();d++){const date=key(y,m,d);const a=await adminRpc('admin_get_availability_password',{p_password:adminPassword,p_date:date});(Array.isArray(a)?a:[]).forEach(x=>rows.push(x))}rows.sort((a,b)=>String(a.available_date).localeCompare(String(b.available_date))||String(a.start_time).localeCompare(String(b.start_time)));box.innerHTML=rows.length?rows.map(x=>`<div class="admin-item"><b>${afmtDate(x.available_date)}</b> ${afmtTime(x.start_time)}〜 <span class="admin-muted">${x.duration_minutes||60}分 / ${x.is_available?'受付中':'受付停止'}</span><div style="margin-top:8px"><button class="admin-btn danger" onclick="deleteSlot('${x.available_date}','${afmtTime(x.start_time)}')">削除</button></div></div>`).join(''):'<div class="admin-muted">この月の予約枠はありません。</div>'}
-window.deleteSlot=async function(date,time){if(!confirm(`${afmtDate(date)} ${time} の予約枠を削除しますか？`))return;const data=await adminRpc('admin_manage_availability_password',{p_password:adminPassword,p_date:date,p_start:time,p_duration:60,p_available:false});if(!data||!data.ok){alert((data&&data.message)||'削除できませんでした。');return;}await Promise.all([loadAdminAvailability(),loadAvailability()]);render()}
+function updateSlotMonthButtons(){
+  const base=$a('adminDate').value;
+  if(!base)return;
+  const dt=new Date(base+'T00:00:00');
+  const prev=new Date(dt.getFullYear(),dt.getMonth()-1,1);
+  const next=new Date(dt.getFullYear(),dt.getMonth()+1,1);
+  $a('slotMonthLabel').textContent=`${dt.getFullYear()}年${dt.getMonth()+1}月`;
+  $a('prevSlotMonthBtn').textContent=`前月（${prev.getMonth()+1}月）`;
+  $a('nextSlotMonthBtn').textContent=`翌月（${next.getMonth()+1}月）`;
+}
+function changeSlotMonth(offset){
+  const base=$a('adminDate').value;
+  if(!base)return;
+  const dt=new Date(base+'T00:00:00');
+  const target=new Date(dt.getFullYear(),dt.getMonth()+offset,1);
+  $a('adminDate').value=`${target.getFullYear()}-${String(target.getMonth()+1).padStart(2,'0')}-01`;
+  updateSlotMonthButtons();
+  loadAdminAvailability();
+}
+async function loadAdminAvailability(){const box=$a('adminAvailability');const base=$a('adminDate').value;if(!base)return;updateSlotMonthButtons();const dt=new Date(base+'T00:00:00');const y=dt.getFullYear(),m=dt.getMonth();box.innerHTML='読み込み中…';let rows=[];for(let d=1;d<=new Date(y,m+1,0).getDate();d++){const date=key(y,m,d);const a=await adminRpc('admin_get_availability_password',{p_password:adminPassword,p_date:date});(Array.isArray(a)?a:[]).forEach(x=>rows.push(x))}rows.sort((a,b)=>String(a.available_date).localeCompare(String(b.available_date))||String(a.start_time).localeCompare(String(b.start_time)));box.innerHTML=rows.length?rows.map(x=>`<div class="admin-item"><label style="display:flex;align-items:center;gap:10px;cursor:pointer"><input type="checkbox" class="slot-checkbox" value="${x.id}" style="width:18px;height:18px"><span><b>${afmtDate(x.available_date)}</b> ${afmtTime(x.start_time)}〜 <span class="admin-muted">${x.duration_minutes||60}分 / ${x.is_available?'受付中':'受付停止'}</span></span></label></div>`).join(''):'<div class="admin-muted">この月の予約枠はありません。</div>'}
+window.deleteSlot=async function(date,time){if(!confirm(`${afmtDate(date)} ${time} の予約枠を削除しますか？`))return;const data=await adminRpc('admin_delete_availability_password',{p_password:adminPassword,p_date:date,p_start:time});if(!data||!data.ok){alert((data&&data.message)||'削除できませんでした。');return;}await Promise.all([loadAdminAvailability(),loadAvailability()]);render()}
+$a('selectAllSlotsBtn').addEventListener('click',()=>{$a('adminAvailability').querySelectorAll('.slot-checkbox').forEach(c=>c.checked=true)});
+$a('clearAllSlotsBtn').addEventListener('click',()=>{$a('adminAvailability').querySelectorAll('.slot-checkbox').forEach(c=>c.checked=false)});
+$a('bulkDeleteSlotsBtn').addEventListener('click',async()=>{hideAmsg('bulkDeleteSlotsMsg');const ids=Array.from($a('adminAvailability').querySelectorAll('.slot-checkbox:checked')).map(c=>Number(c.value)).filter(Number.isFinite);if(!ids.length){amsg('bulkDeleteSlotsMsg','削除する予約枠を選択してください。');return;}if(!confirm(`選択した${ids.length}件の予約枠を削除しますか？\nこの操作は元に戻せません。`))return;const data=await adminRpc('admin_delete_availability_bulk_password',{p_password:adminPassword,p_ids:ids});if(!data||!data.ok){amsg('bulkDeleteSlotsMsg',(data&&data.message)||'一括削除できませんでした。');return;}amsg('bulkDeleteSlotsMsg',`${data.deleted_count||ids.length}件の予約枠を削除しました。`);await Promise.all([loadAdminAvailability(),loadAvailability()]);render()})
+
+
+async function loadReservationPeriod(){
+  try{
+    const data=await adminRpc('admin_get_reservation_period_password',{p_password:adminPassword});
+    if(!data||!data.ok)return;
+    $a('reservationStartDate').value=data.start_date||'';
+    $a('reservationEndDate').value=data.end_date||'';
+  }catch(e){console.error(e)}
+}
+$a('saveReservationPeriodBtn').addEventListener('click',async()=>{
+  hideAmsg('reservationPeriodMsg');
+  const start=$a('reservationStartDate').value||null;
+  const end=$a('reservationEndDate').value||null;
+  if((start&&!end)||(!start&&end)){amsg('reservationPeriodMsg','開始日と終了日の両方を入力してください。');return;}
+  if(start&&end&&start>end){amsg('reservationPeriodMsg','開始日は終了日以前に設定してください。');return;}
+  const btn=$a('saveReservationPeriodBtn');btn.disabled=true;btn.textContent='保存中…';
+  try{
+    const r=await adminRpc('admin_save_reservation_period_password',{p_password:adminPassword,p_start_date:start,p_end_date:end});
+    if(!r||!r.ok){amsg('reservationPeriodMsg',(r&&r.message)||'保存できませんでした。');return;}
+    amsg('reservationPeriodMsg',start&&end?`${start.replaceAll('-','/')} ～ ${end.replaceAll('-','/')} を予約受付期間に設定しました。`:'予約受付期間の設定を解除しました。');
+    await loadAvailability();render();
+  }catch(e){console.error(e);amsg('reservationPeriodMsg','保存中にエラーが発生しました。')}
+  finally{btn.disabled=false;btn.textContent='予約受付期間を保存';}
+});
+$a('clearReservationPeriodBtn').addEventListener('click',async()=>{
+  $a('reservationStartDate').value='';$a('reservationEndDate').value='';
+  $a('saveReservationPeriodBtn').click();
+});
 
 async function loadHomepageUrl(){try{const url=await adminRpc('admin_get_homepage_url_password',{p_password:adminPassword});$a('homepageUrl').value=url||'';setHomepageLink(url)}catch(e){console.error(e)}}
 function setHomepageLink(url){const wrap=document.getElementById('homepageLinkWrap'),link=document.getElementById('homepageLink');if(url){wrap.style.display='block';link.href=url}else{wrap.style.display='none';link.href='#'}}
