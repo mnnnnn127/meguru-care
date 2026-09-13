@@ -153,6 +153,14 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
   .brand-small{font-size:14px;letter-spacing:.1em}
   .sub{font-size:15px}
 }
+.homepage-toggle-wrap{margin:12px 0 14px;text-align:center}
+.homepage-toggle{
+  display:block;width:100%;box-sizing:border-box;padding:16px 16px;
+  border:none;background:transparent;
+  color:#0F5C4A;text-align:center;text-decoration:none;font-family:inherit;
+  font-size:18px;font-weight:750;line-height:1.35;letter-spacing:-.03em;
+  box-shadow:none;
+}
 .calendar-toggle{
   position:relative;display:block;width:100%;margin-top:12px;padding:16px 48px 16px 16px;
   border:1px solid #8FD0BA;border-radius:16px;background:rgba(255,255,255,.92);
@@ -267,7 +275,25 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
 .admin-titlebar h1{margin:0;color:#0F5C4A;font-size:25px}
 
 .admin-calendar-name{display:block;font-size:10px;font-weight:600;color:#0F5C4A;background:#DDF5EC;border:1px solid #8FD0BA;border-radius:5px;margin-top:4px;padding:3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.admin-calendar-name:hover{background:#C8EBDF}.customer-highlight{outline:3px solid #8CC3AA;box-shadow:0 0 0 6px rgba(184,197,142,.18)!important}.admin-calendar-status{display:block;font-size:9px;margin-top:5px;font-weight:600}.admin-calendar-status.available{cursor:pointer}.admin-calendar-status.available:hover{background:#DDF5EC;border-radius:5px;padding:2px}.proxy-booking{background:#EFFAF6;border:1px solid #C7E8DC;border-radius:12px;padding:13px;margin-top:12px}.proxy-results{display:grid;gap:7px;margin-top:8px}.proxy-customer{border:1px solid #B9E0D2;background:#fff;border-radius:9px;padding:10px;text-align:left;cursor:pointer}.proxy-customer.selected{background:#DDF5EC;border-color:#148A6A}.admin-calendar-status.available{color:#13785C}.admin-calendar-status.reserved{color:#9E644F}.admin-box h2{font-size:18px}.admin-box textarea{resize:vertical;line-height:1.6}
+
+/* V53: 登録済みのお客様の予約情報を独立画面として表示 */
+body.customer-page-mode .header,
+body.customer-page-mode .top-customer-actions,
+body.customer-page-mode #calendarToggleBtn,
+body.customer-page-mode #homepageLinkWrap,
+body.customer-page-mode .footer{display:none!important}
+body.customer-page-mode .wrap{max-width:760px;margin:0 auto;padding-top:18px}
+body.customer-page-mode .calendar-card{display:block!important;box-shadow:none;background:transparent;border:0;padding:0;margin:0}
+body.customer-page-mode .calendar-card > .notice,
+body.customer-page-mode .calendar-card > .monthbar,
+body.customer-page-mode .calendar-card > .week,
+body.customer-page-mode .calendar-card > .calendar,
+body.customer-page-mode .calendar-card > .legend,
+body.customer-page-mode .calendar-card > .error-box{display:none!important}
+body.customer-page-mode #detail{display:block;margin:0;max-width:760px}
+body.customer-page-mode #detail > h2{font-size:25px}
 </style>
+
 </head>
 <body>
 <div class="wrap">
@@ -276,7 +302,7 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
     <h1>めぐる訪問ケア</h1>
     <div class="sub">理学療法士による訪問ケア</div>
     <div class="header-description">
-      農作業の疲れ、手術前後の体づくり、麻痺などで体が動かしづらい方——<br>
+      農作業やお仕事、家事などの疲れ、手術前後の体づくり、麻痺などで体が動かしにくい方——<br>
       あなたのペースで、丁寧にケアします。<br>
       <span>※ 医療行為・治療ではなく、体のお手入れを目的とした自費サービスです</span>
     </div>
@@ -334,7 +360,9 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
     <div class="error-box" id="errorBox"></div>
   </div>
 
-  <div id="homepageLinkWrap" style="display:block;margin:0 0 14px;text-align:center"><a id="homepageLink" href="https://mnnnnn127.github.io/meguru-care/" target="_blank" rel="noopener noreferrer" class="admin-link">ホームページを見る</a></div>
+  <div id="homepageLinkWrap" class="homepage-toggle-wrap">
+  <a id="homepageLink" href="https://mnnnnn127.github.io/meguru-care/" target="_blank" rel="noopener noreferrer" class="homepage-toggle">ホームページを見る</a>
+</div>
 
     <div class="footer">
     ※空き状況は予約システム上の最新情報です.
@@ -1000,18 +1028,26 @@ async function loadCustomerReservations(){
     detail.innerHTML=`
       <h2>現在の予約情報</h2>
       <div class="note">${esc(name)} 様の現在予約されている日時です。</div>
+      <button type="button" class="cta" id="customerReservationRefreshBtn" style="margin:10px 0;background:#fff;color:#148A6A;border:1px solid #B9E0D2">↻ 更新</button>
       ${messageHtml}
       ${rows.length?`<div class="admin-list">${list}</div>`:`<div class="note" style="margin-top:14px">現在、予約されている日時はありません。</div>`}
       <button type="button" class="cta" id="reservationResultTopBtn">トップ画面に戻る</button>`;
+
+    document.getElementById("customerReservationRefreshBtn")?.addEventListener("click",async()=>{
+      const b=document.getElementById("customerReservationRefreshBtn");
+      if(!b)return;
+      b.disabled=true;b.textContent="更新中…";
+      try{await loadCustomerReservations();}finally{b.disabled=false;b.textContent="↻ 更新";}
+    });
 
     document.querySelectorAll(".customer-cancel-btn").forEach(btn=>btn.addEventListener("click",async()=>{
       if(!confirm("この予約をキャンセルしますか？"))return;
       btn.disabled=true;btn.textContent="キャンセル中…";
       try{
         const rr=await rpc("customer_cancel_reservation",{p_customer_name:name,p_customer_password:password,p_reservation_id:Number(btn.dataset.reservationId)});
-        if(!rr||!rr.ok){alert((rr&&rr.message)||"予約をキャンセルできませんでした。");btn.disabled=false;btn.textContent="この予約をキャンセルする";return;}
+        if(!rr||!rr.ok){alert("一度ページを更新してください。表示が消えなければキャンセルエラーのためお手数ですが担当者へメッセージをお願いします。");btn.disabled=false;btn.textContent="この予約をキャンセルする";return;}
         await loadCustomerReservations();
-      }catch(e){console.error(e);alert("予約キャンセル中にエラーが発生しました。");btn.disabled=false;btn.textContent="この予約をキャンセルする";}
+      }catch(e){console.error(e);alert("一度ページを更新してください。表示が消えなければキャンセルエラーのためお手数ですが担当者へメッセージをお願いします。");btn.disabled=false;btn.textContent="この予約をキャンセルする";}
     }));
 
     document.querySelectorAll(".message-delete-btn").forEach(btn=>btn.addEventListener("click",async()=>{
@@ -1035,7 +1071,12 @@ async function loadCustomerReservations(){
       btn.disabled=true;btn.textContent="送信中…";
       try{
         const rr=await rpc("customer_reply_message",{p_customer_name:name,p_customer_password:password,p_content:content});
-        if(!rr||!rr.ok){if(msg)msg.textContent=(rr&&rr.message)||"返信を送信できませんでした。";return;}
+        if(!rr||!rr.ok){
+          if(msg)msg.textContent=(rr&&rr.message)||"返信を送信できませんでした。";
+          return;
+        }
+        if(textarea)textarea.value="";
+        if(msg)msg.textContent="返信を送信しました。";
         await loadCustomerReservations();
       }catch(e){console.error(e);if(msg)msg.textContent="返信中にエラーが発生しました。";}
       finally{btn.disabled=false;btn.textContent="返信を送信";}
@@ -1050,13 +1091,19 @@ async function loadCustomerReservations(){
 }
 
 function returnToTopScreen(){
+  document.body.classList.remove("customer-page-mode");
   const detail=document.getElementById("detail");
   detail.innerHTML=initialDetailHtml();
   bindMultiBookLink();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-document.getElementById("existingCustomerTopBtn").addEventListener("click",()=>{openCalendarCard(false);showExistingCustomerReservations();});
+document.getElementById("existingCustomerTopBtn").addEventListener("click",()=>{
+  document.body.classList.add("customer-page-mode");
+  openCalendarCard(false);
+  showExistingCustomerReservations();
+  window.scrollTo({top:0,behavior:"smooth"});
+});
 
 function initialDetailHtml(){
   return `<h2>日付を選択してください</h2>
@@ -1853,5 +1900,16 @@ $a('changePasswordBtn').addEventListener('click',async()=>{hideAmsg('passwordMsg
 
 
 </script>
+
+<script id="customer-cancel-fallback">
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('[data-customer-cancel-id]');
+  if (!btn) return;
+  e.preventDefault();
+  const id = btn.getAttribute('data-customer-cancel-id');
+  if (window.cancelCustomerReservation) window.cancelCustomerReservation(id);
+});
+</script>
+
 </body>
 </html>
