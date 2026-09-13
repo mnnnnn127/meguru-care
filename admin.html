@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>めぐる訪問ケア｜管理画面</title>
+<style>
+:root{--bg:#f8f5ed;--card:#fffdf8;--text:#35413b;--muted:#718078;--line:#dfe6df;--main:#6d9a88;--danger:#b65b5b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif}
+.wrap{max-width:1100px;margin:auto;padding:18px 14px 60px}h1{font-size:24px;margin:0 0 16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}h2{font-size:17px;margin:0 0 12px}.row{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.field{flex:1;min-width:150px}label{display:block;font-size:12px;margin:7px 0 4px}input,select,textarea{width:100%;border:1px solid #ccd8d0;border-radius:9px;padding:10px;background:#fff;font:inherit}textarea{min-height:75px}button{border:0;border-radius:9px;padding:10px 13px;background:var(--main);color:#fff;font:inherit;font-weight:700;cursor:pointer}button.secondary{background:#eef3ef;color:var(--text)}button.danger{background:var(--danger)}button:disabled{opacity:.45}.msg{margin-top:8px;font-size:13px;color:#3f6b57}.msg.error{color:#a34444}.monthbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.monthbar button{width:40px}.title{font-weight:700}.week,.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.week div{text-align:center;font-size:11px;color:var(--muted)}.day{min-height:90px;border:1px solid var(--line);border-radius:9px;padding:5px;background:#fff}.day.stop{background:#f2f2ee}.daynum{font-size:12px;font-weight:700}.slot{display:flex;justify-content:space-between;gap:4px;align-items:center;font-size:11px;margin-top:4px;padding:4px 5px;border-radius:6px;background:#e7f2eb}.slot.stop{background:#ececea;color:#777}.slot.res{background:#f4e9e9;color:#965656}.list{display:grid;gap:8px;max-height:430px;overflow:auto}.item{border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;font-size:13px}.item .actions{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.hidden{display:none}@media(max-width:760px){.grid{grid-template-columns:1fr}.day{min-height:75px}}
+</style>
+</head>
+<body><div class="wrap">
+<h1>めぐる訪問ケア｜管理画面</h1>
+<div class="tabs"><button onclick="tab('slots')">予約枠</button><button class="secondary" onclick="tab('reservations')">予約一覧</button><button class="secondary" onclick="tab('messages')">メッセージ</button><a href="calendar.html" style="align-self:center;color:var(--text);padding:10px">公開画面</a></div>
+
+<section id="slots">
+<div class="grid">
+<div class="card"><h2>予約枠を追加・受付停止</h2><div class="row">
+<div class="field"><label>日付</label><input id="date" type="date"></div>
+<div class="field"><label>開始時刻</label><input id="time" type="time"></div>
+<div class="field"><label>時間</label><select id="dur"><option>60</option><option>90</option></select></div>
+</div><div class="row" style="margin-top:9px"><button onclick="manage(true)">空き枠を追加・受付再開</button><button class="danger" onclick="manage(false)">受付停止</button></div><div id="slotmsg" class="msg"></div></div>
+<div class="card"><h2>受付期間</h2><div class="row"><div class="field"><label>受付開始日</label><input id="start" type="date"></div><div class="field"><label>受付終了日</label><input id="end" type="date"></div><button onclick="savePeriod()">保存</button></div><div id="periodmsg" class="msg"></div><p style="font-size:12px;color:var(--muted)">※ この管理画面はパスワードなしの簡易管理版です。公開運用では管理者認証を追加してください。</p></div>
+</div>
+<div class="card" style="margin-top:14px"><div class="monthbar"><button onclick="prevMonth()">‹</button><div id="mt" class="title"></div><button onclick="nextMonth()">›</button></div><div class="week"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div><div id="cal" class="cal"></div></div>
+<div class="card" style="margin-top:14px"><h2>選択した日付の一括操作</h2><div class="row"><div class="field"><label>日付</label><input id="bulkdate" type="date"></div><button onclick="setDateStatus(true)">受付再開</button><button class="danger" onclick="setDateStatus(false)">受付停止</button><button class="secondary" onclick="bulkDelete()">予約枠を一括削除</button></div><div id="bulkmsg" class="msg"></div></div>
+</section>
+
+<section id="reservations" class="hidden"><div class="card"><h2>予約一覧</h2><div class="row"><div class="field"><label>開始</label><input id="rf" type="date"></div><div class="field"><label>終了</label><input id="rt" type="date"></div><button onclick="loadReservations()">更新</button></div><div id="rlist" class="list" style="margin-top:12px"></div></div></section>
+<section id="messages" class="hidden"><div class="card"><h2>メッセージ</h2><button onclick="loadMessages()">更新</button><div id="mlist" class="list" style="margin-top:12px"></div></div></section>
+</div>
+<script>
+const URL='https://wsstzrflaaotawzojxzw.supabase.co',KEY='sb_publishable_BEH2SD2OZgtVpqPtbx-QFg_bIS3g5XJ',H={apikey:KEY,'Content-Type':'application/json'};
+const rpc=async(n,b={})=>{const r=await fetch(URL+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b)});const t=await r.text();if(!r.ok)throw Error(t);return t?JSON.parse(t):null};
+const $=id=>document.getElementById(id);let month=new Date();month.setDate(1);let rows=[],settings={};
+function tab(id){['slots','reservations','messages'].forEach(x=>$(x).classList.toggle('hidden',x!==id));if(id==='reservations')loadReservations();if(id==='messages')loadMessages()}
+function msg(id,t,e=false){$(id).textContent=t;$(id).className='msg'+(e?' error':'')}
+function key(d){return d.toISOString().slice(0,10)}
+async function init(){settings=(await rpc('get_public_settings'))[0]||{};$('start').value=settings.reservation_start_date||'';$('end').value=settings.reservation_end_date||'';$('date').value=key(new Date());$('bulkdate').value=$('date').value;await loadRows();render()}
+async function loadRows(){const y=month.getFullYear(),m=month.getMonth();rows=await rpc('admin_get_availability_month',{p_from:y+'-'+String(m+1).padStart(2,'0')+'-01',p_to:key(new Date(y,m+1,0))})||[]}
+function render(){const y=month.getFullYear(),m=month.getMonth();$('mt').textContent=y+'年'+(m+1)+'月';const first=new Date(y,m,1),last=new Date(y,m+1,0),cells=[];for(let i=0;i<first.getDay();i++)cells.push('<div></div>');for(let d=1;d<=last.getDate();d++){const k=key(new Date(y,m,d)),rs=rows.filter(r=>r.available_date===k),html='<div class="day '+(rs.length&&!rs.some(r=>r.is_available)?'stop':'')+'"><div class="daynum">'+d+'</div>'+rs.map(r=>'<div class="slot '+(!r.is_available?'stop':'')+'"><span>'+r.start_time.slice(0,5)+' '+r.duration_minutes+'分 '+(r.is_available?'受付中':'受付停止')+'</span><button class="danger" style="padding:3px 6px;font-size:10px" onclick="delSlot(\\''+k+'\\',\\''+r.start_time.slice(0,5)+'\\')">削除</button></div>').join('')+'</div>';cells.push(html)}$('cal').innerHTML=cells.join('')}
+async function manage(v){try{const d=await rpc('admin_manage_availability',{p_date:$('date').value,p_start:$('time').value+':00',p_duration:Number($('dur').value),p_available:v});msg('slotmsg',d.message,!d.ok);await loadRows();render()}catch(e){msg('slotmsg','変更できませんでした。',true)}}
+async function delSlot(date,time){if(!confirm(date+' '+time+' の予約枠を削除しますか？'))return;try{const d=await rpc('admin_delete_availability',{p_date:date,p_start:time+':00'});msg('bulkmsg',d.message,!d.ok);await loadRows();render()}catch(e){msg('bulkmsg','削除できませんでした。',true)}}
+async function setDateStatus(v){const d=$('bulkdate').value;if(!d)return msg('bulkmsg','日付を選択してください。',true);if(!confirm(d+' の受付を'+(v?'再開':'停止')+'しますか？'))return;try{const x=await rpc('admin_set_availability_status_by_date',{p_date:d,p_available:v});msg('bulkmsg',x.message+'（変更 '+x.changed_count+'件、予約中 '+x.blocked_count+'件）',!x.ok);await loadRows();render()}catch(e){msg('bulkmsg','変更できませんでした。',true)}}
+async function bulkDelete(){const d=$('bulkdate').value;if(!d)return msg('bulkmsg','日付を選択してください。',true);if(!confirm(d+' の予約枠を一括削除しますか？'))return;try{const x=await rpc('admin_delete_availability_bulk',{p_date:d});msg('bulkmsg',x.message+'（削除 '+x.deleted_count+'件、予約中 '+x.blocked_count+'件）',!x.ok);await loadRows();render()}catch(e){msg('bulkmsg','削除できませんでした。',true)}}
+async function savePeriod(){try{await rpc('get_public_settings');const s=$('start').value,e=$('end').value;const r=await fetch(URL+'/rest/v1/app_settings?id=eq.1',{method:'PATCH',headers:{...H,Prefer:'return=minimal'},body:JSON.stringify({reservation_start_date:s||null,reservation_end_date:e||null,updated_at:new Date().toISOString()})});if(!r.ok)throw Error();msg('periodmsg','受付期間を保存しました。')}catch(e){msg('periodmsg','保存できませんでした。',true)}}
+async function loadReservations(){const f=$('rf').value||key(new Date()),t=$('rt').value||key(new Date(Date.now()+30*86400000));try{const x=await rpc('admin_get_reservations',{p_from:f,p_to:t});$('rlist').innerHTML=x.map(r=>'<div class="item"><strong>'+r.reservation_date+' '+r.start_time.slice(0,5)+' / '+r.customer_name+'</strong>'+r.duration_minutes+'分 / '+r.status+'<br>電話：'+(r.phone||'')+'<br>住所：'+(r.address||'')+(r.status!=='cancelled'?'<div class="actions"><button class="danger" onclick="cancelR('+r.id+')">予約をキャンセル</button></div>':'')+'</div>').join('')||'<p>予約はありません。</p>'}catch(e){$('rlist').innerHTML='<p>読み込みエラー</p>'}}
+async function cancelR(id){if(!confirm('この予約をキャンセルしますか？'))return;const x=await rpc('admin_cancel_reservation',{p_id:id});alert(x.message);loadReservations();loadRows().then(render)}
+async function loadMessages(){try{const x=await rpc('admin_get_messages');$('mlist').innerHTML=x.map(m=>'<div class="item"><strong>'+m.customer_name+' / '+(m.sender_type==='staff'?'担当者':'お客様')+'</strong>'+m.content+'<div style="margin-top:8px"><textarea id="reply'+m.patient_id+'" placeholder="返信"></textarea><div class="actions"><button onclick="reply('+m.patient_id+')">返信</button><button class="danger" onclick="delMsg('+m.id+')">削除</button></div></div></div>').join('')||'<p>メッセージはありません。</p>'}catch(e){$('mlist').innerHTML='<p>読み込みエラー</p>'}}
+async function reply(pid){const t=$('reply'+pid).value;if(!t.trim())return;const x=await rpc('admin_reply_message',{p_patient_id:pid,p_content:t,p_staff_name:'めぐる訪問ケア'});alert(x.message);loadMessages()}
+async function delMsg(id){if(!confirm('このメッセージを削除しますか？'))return;const x=await rpc('admin_delete_message',{p_id:id});alert(x.message);loadMessages()}
+async function prevMonth(){month.setMonth(month.getMonth()-1);await loadRows();render()}
+async function nextMonth(){month.setMonth(month.getMonth()+1);await loadRows();render()}
+init().catch(()=>msg('slotmsg','初期化できませんでした。',true))
+</script></body></html>
