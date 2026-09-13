@@ -304,7 +304,7 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
     <div class="notice">
       <strong>空き状況をご確認いただけます</strong><br>
       ご希望の日付をタップすると、現在の空き時間をご確認いただけます。<br>
-      空いている時間を選択し、お名前を入力すると予約を確定できます。
+      空いている時間を選択し、お名前とお客様パスワードを入力すると予約を確定できます。
     </div>
 
     <div class="monthbar">
@@ -334,7 +334,7 @@ h1{margin:0;color:#0D624E;font-size:clamp(36px,10.5vw,72px);line-height:1.05;fon
     <div class="error-box" id="errorBox"></div>
   </div>
 
-  <div id="homepageLinkWrap" style="display:none;margin:0 0 14px;text-align:center"><a id="homepageLink" href="#" target="_blank" rel="noopener noreferrer" class="admin-link">ホームページを見る</a></div>
+  <div id="homepageLinkWrap" style="display:block;margin:0 0 14px;text-align:center"><a id="homepageLink" href="https://mnnnnn127.github.io/meguru-care/" target="_blank" rel="noopener noreferrer" class="admin-link">ホームページを見る</a></div>
 
     <div class="footer">
     ※空き状況は予約システム上の最新情報です.
@@ -929,7 +929,7 @@ async function loadCustomerReservations(){
       const start=String(r.start_time).slice(0,5);
       const duration=Number(r.duration_minutes||60);
       const end=calcEndTime(start,duration);
-      return `<div class="admin-item"><b>${dateText}</b><br><span class="admin-muted">${esc(start)}〜${esc(end)}（${duration}分）</span></div>`;
+      return `<div class="admin-item"><b>${dateText}</b><br><span class="admin-muted">${esc(start)}〜${esc(end)}（${duration}分）</span><br><button type="button" class="cta customer-cancel-btn" data-reservation-id="${Number(r.id)}" style="margin-top:10px;background:#fff;color:#a34b42;border:1px solid #e0b9b9;padding:9px 16px">この予約をキャンセルする</button></div>`;
     };
     const pendingList=pendingRows.map(formatReservation).join("");
     const confirmedList=confirmedRows.map(formatReservation).join("");
@@ -972,6 +972,16 @@ async function loadCustomerReservations(){
       ${messageHtml}
       ${rows.length?`<div class="admin-list">${list}</div>`:`<div class="note" style="margin-top:14px">現在、予約されている日時はありません。</div>`}
       <button type="button" class="cta" id="reservationResultTopBtn">トップ画面に戻る</button>`;
+
+    document.querySelectorAll(".customer-cancel-btn").forEach(btn=>btn.addEventListener("click",async()=>{
+      if(!confirm("この予約をキャンセルしますか？"))return;
+      btn.disabled=true;btn.textContent="キャンセル中…";
+      try{
+        const rr=await rpc("customer_cancel_reservation",{p_customer_name:name,p_customer_password:password,p_reservation_id:Number(btn.dataset.reservationId)});
+        if(!rr||!rr.ok){alert((rr&&rr.message)||"予約をキャンセルできませんでした。");btn.disabled=false;btn.textContent="この予約をキャンセルする";return;}
+        await loadCustomerReservations();
+      }catch(e){console.error(e);alert("予約キャンセル中にエラーが発生しました。");btn.disabled=false;btn.textContent="この予約をキャンセルする";}
+    }));
 
     document.querySelectorAll(".message-delete-btn").forEach(btn=>btn.addEventListener("click",async()=>{
       if(!confirm("この担当者からのメッセージを削除しますか？"))return;
@@ -1097,9 +1107,9 @@ function renderMultiSchedule(){
     <div class="booking-form" style="margin-top:14px">
       <label for="multiCustomerName">お名前</label>
       <input id="multiCustomerName" type="text" autocomplete="name" placeholder="例：山田 太郎">
-      <label for="multiCustomerPhone">電話番号</label>
-      <input id="multiCustomerPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="例：090-1234-5678">
-      <div class="small-note">※登録済みのお客様のみ予約できます。登録時の氏名と電話番号が両方一致した場合に予約できます。</div>
+      <label for="multiCustomerPassword" style="margin-top:10px">お客様パスワード</label>
+      <input id="multiCustomerPassword" type="password" autocomplete="current-password" placeholder="登録時に設定したパスワード">
+      <div class="small-note">※登録済みのお客様のみ予約できます。登録時のお名前とパスワードでご本人確認を行います。</div>
       <button type="button" id="multiBookButton">選択した日程をまとめて予約する</button>
     </div>
     <button type="button" class="cta" id="multiBackBtn" style="background:#fff;color:#148A6A;border:1px solid #B9E0D2">日付選択に戻る</button>`;
@@ -1121,9 +1131,9 @@ function renderMultiSchedule(){
   document.getElementById('multiBackBtn').addEventListener('click',renderMultiSelectionPanel);
   document.getElementById('multiBookButton').addEventListener('click',async()=>{
     const name=document.getElementById('multiCustomerName').value.trim();
-    const phone=document.getElementById('multiCustomerPhone').value.trim();
+    const password=document.getElementById('multiCustomerPassword').value;
     if(!name){alert('お名前を入力してください。');return;}
-    if(!phone){alert('電話番号を入力してください。');return;}
+    if(!password){alert('お客様パスワードを入力してください。');return;}
     const bookings=[...detail.querySelectorAll('.multi-schedule-item')].map(item=>({
       reservation_date:item.dataset.date,
       start_time:item.querySelector('.multi-time').value,
@@ -1132,7 +1142,7 @@ function renderMultiSchedule(){
     const btn=document.getElementById('multiBookButton');
     btn.disabled=true;btn.textContent='予約しています…';
     try{
-      const result=await rpc('book_existing_customer_multi',{p_customer_name:name,p_customer_phone:phone,p_bookings:bookings});
+      const result=await rpc('book_existing_customer_multi',{p_customer_name:name,p_customer_password:password,p_bookings:bookings});
       const row=Array.isArray(result)?result[0]:result;
       if(!row||!row.ok){alert((row&&row.message)||'予約できませんでした。');btn.disabled=false;btn.textContent='選択した日程をまとめて予約する';return;}
       detail.innerHTML=`<div class="success"><strong>仮予約を受け付けました</strong><br><div style="margin-top:10px">${escapeHtml(name)} 様</div><div style="margin-top:8px">${bookings.map(b=>`${b.reservation_date.replaceAll('-','/')} ${b.start_time}〜${calcEndTime(b.start_time,b.duration)}（${b.duration}分）`).join('<br>')}</div><div class="note">担当者が確認後、予約確定となります。登録済みのお客様の「予約情報」から確定状況をご確認いただけます。</div></div>`;
@@ -1209,9 +1219,9 @@ function showBookingForm(time,dt,d,day){
       <div id="selectedEnd" class="duration-end"></div>
       <label for="customerName">お名前</label>
       <input id="customerName" type="text" autocomplete="name" placeholder="例：山田 太郎">
-      <label for="customerPhone">電話番号</label>
-      <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="例：090-1234-5678">
-      <div class="small-note">※登録済みのお客様のみ予約できます。登録時の氏名と電話番号が両方一致した場合に予約できます。</div>
+      <label for="customerPassword" style="margin-top:10px">お客様パスワード</label>
+      <input id="customerPassword" type="password" autocomplete="current-password" placeholder="登録時に設定したパスワード">
+      <div class="small-note">※登録済みのお客様のみ予約できます。登録時のお名前とパスワードでご本人確認を行います。</div>
       <button type="button" id="bookButton">この内容で予約する</button>
     </div>`;
 
@@ -1224,10 +1234,10 @@ function showBookingForm(time,dt,d,day){
 
   document.getElementById("bookButton").addEventListener("click",async()=>{
     const input=document.getElementById("customerName");
-    const phoneInput=document.getElementById("customerPhone");
+    const passwordInput=document.getElementById("customerPassword");
     const button=document.getElementById("bookButton");
     const name=input.value.trim();
-    const phone=phoneInput.value.trim();
+    const password=passwordInput.value;
     const duration=Number(document.querySelector('input[name="customerDuration"]:checked').value);
 
     if(!name){
@@ -1235,9 +1245,9 @@ function showBookingForm(time,dt,d,day){
       input.focus();
       return;
     }
-    if(!phone){
-      alert("電話番号を入力してください。");
-      phoneInput.focus();
+    if(!password){
+      alert("お客様パスワードを入力してください。");
+      passwordInput.focus();
       return;
     }
 
@@ -1247,7 +1257,7 @@ function showBookingForm(time,dt,d,day){
     try{
       const result=await rpc("book_existing_customer",{
         p_customer_name:name,
-        p_customer_phone:phone,
+        p_customer_password:password,
         p_reservation_date:key(dt.getFullYear(),dt.getMonth(),d),
         p_start_time:time,
         p_duration:duration
@@ -1794,7 +1804,7 @@ $a('clearReservationPeriodBtn').addEventListener('click',async()=>{
 });
 
 async function loadHomepageUrl(){try{const url=await adminRpc('admin_get_homepage_url_password',{p_password:adminPassword});$a('homepageUrl').value=url||'';setHomepageLink(url)}catch(e){console.error(e)}}
-function setHomepageLink(url){const wrap=document.getElementById('homepageLinkWrap'),link=document.getElementById('homepageLink');if(url){wrap.style.display='block';link.href=url}else{wrap.style.display='none';link.href='#'}}
+function setHomepageLink(url){const wrap=document.getElementById('homepageLinkWrap'),link=document.getElementById('homepageLink');const target=url||'https://mnnnnn127.github.io/meguru-care/';wrap.style.display='block';link.href=target;}
 $a('saveHomepageBtn').addEventListener('click',async()=>{hideAmsg('homepageMsg');let url=$a('homepageUrl').value.trim();if(url&&!/^https?:\/\//i.test(url))url='https://'+url;const data=await adminRpc('admin_save_homepage_url_password',{p_password:adminPassword,p_url:url});if(!data||!data.ok){amsg('homepageMsg',(data&&data.message)||'保存できませんでした。');return;}setHomepageLink(url);amsg('homepageMsg','保存しました。')});
 
 $a('changePasswordBtn').addEventListener('click',async()=>{hideAmsg('passwordMsg');const cur=$a('currentPassword').value,next=$a('newPassword').value,next2=$a('newPassword2').value;if(!cur||!next||!next2){amsg('passwordMsg','すべて入力してください。');return}if(next!==next2){amsg('passwordMsg','新しいパスワードが一致していません。');return}const data=await adminRpc('admin_password_change',{p_current_password:cur,p_new_password:next});if(!data||!data.ok){amsg('passwordMsg',(data&&data.message)||'変更できませんでした。');return}adminPassword=next;$a('currentPassword').value='';$a('newPassword').value='';$a('newPassword2').value='';amsg('passwordMsg','管理者パスワードを変更しました。')});
