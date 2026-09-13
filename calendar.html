@@ -710,7 +710,6 @@ button,input,select,textarea{
   </section>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL="https://wsstzrflaaotawzojxzw.supabase.co";
 const SUPABASE_KEY="sb_publishable_BEH2SD2OZgtVpqPtbx-QFg_bIS3g5XJ";
@@ -1956,9 +1955,6 @@ function setHomepageLink(url){const wrap=document.getElementById('homepageLinkWr
 $a('saveHomepageBtn').addEventListener('click',async()=>{hideAmsg('homepageMsg');let url=$a('homepageUrl').value.trim();if(url&&!/^https?:\/\//i.test(url))url='https://'+url;const data=await adminRpc('admin_save_homepage_url_password',{p_password:adminPassword,p_url:url});if(!data||!data.ok){amsg('homepageMsg',(data&&data.message)||'保存できませんでした。');return;}setHomepageLink(url);amsg('homepageMsg','保存しました。')});
 
 $a('changePasswordBtn').addEventListener('click',async()=>{hideAmsg('passwordMsg');const cur=$a('currentPassword').value,next=$a('newPassword').value,next2=$a('newPassword2').value;if(!cur||!next||!next2){amsg('passwordMsg','すべて入力してください。');return}if(next!==next2){amsg('passwordMsg','新しいパスワードが一致していません。');return}const data=await adminRpc('admin_password_change',{p_current_password:cur,p_new_password:next});if(!data||!data.ok){amsg('passwordMsg',(data&&data.message)||'変更できませんでした。');return}adminPassword=next;$a('currentPassword').value='';$a('newPassword').value='';$a('newPassword2').value='';amsg('passwordMsg','管理者パスワードを変更しました。')});
-
-// 公開ページにも設定したホームページURLを表示
-(async()=>{try{const {data,error}=await sb.rpc('get_public_homepage_url');if(!error)setHomepageLink(data||'')}catch(e){console.error(e)}})();
 
 </script>
 </body>
