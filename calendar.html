@@ -1541,7 +1541,7 @@ async function loadTodaySchedule(){
   }
 }
 async function loadAdminBookings(){const y=adminMonth.getFullYear(),m=adminMonth.getMonth();const from=key(y,m,1),to=key(y,m,new Date(y,m+1,0).getDate());$a('adminMonthTitle').textContent=`${y}年${m+1}月`;try{const data=await adminRpc('admin_get_reservation_calendar_password',{p_password:adminPassword,p_from:from,p_to:to});adminBookings=Array.isArray(data)?data:[]}catch(e){console.error(e);adminBookings=[]}}
-async function loadAdminCalendarAvailability(){const y=adminMonth.getFullYear(),m=adminMonth.getMonth();const from=key(y,m,1),to=key(y,m,new Date(y,m+1,0).getDate());try{const data=await rpc('get_public_availability',{p_from:from,p_to:to});adminFreeAvailability=Array.isArray(data)?data:[]}catch(e){console.error(e);adminFreeAvailability=[]}}
+async function loadAdminCalendarAvailability(){const y=adminMonth.getFullYear(),m=adminMonth.getMonth();const from=key(y,m,1),to=key(y,m,new Date(y,m+1,0).getDate());try{const rows=[];for(let d=1;d<=new Date(y,m+1,0).getDate();d++){const date=key(y,m,d);const data=await adminRpc('admin_get_availability_password',{p_password:adminPassword,p_date:date});(Array.isArray(data)?data:[]).forEach(x=>rows.push(x))}adminFreeAvailability=rows}catch(e){console.error(e);adminFreeAvailability=[]}}
 function openCustomerFromBooking(patientId){
   const row=adminBookings.find(r=>Number(r.patient_id)===Number(patientId));
   if(!row)return;
@@ -1564,8 +1564,10 @@ function renderAdminBookingCalendar(){
       html+=`<span class="admin-calendar-status reserved">予約あり</span>`;
       html+=rows.map(r=>`<button type="button" class="admin-calendar-name" data-res-id="${r.id}" title="${escapeHtml(r.patient_name||'名前未登録')}">${escapeHtml(r.patient_name||'名前未登録')}</button>`).join('');
     }
+    const stopped=adminFreeAvailability.filter(r=>String(r.available_date).slice(0,10)===date && !r.is_available);
     if(free.length) html+=`<span class="admin-calendar-status available" data-open-booking="${date}">空きあり</span>`;
-    if(!rows.length&&!free.length) html+=`<span class="admin-calendar-status full">受付終了</span>`;
+    if(stopped.length) html+=`<span class="admin-calendar-status full">受付停止</span>`;
+    if(!rows.length&&!free.length&&!stopped.length) html+=`<span class="admin-calendar-status full">受付終了</span>`;
     e.innerHTML=html;
     e.addEventListener('click',()=>{ if(rows.length) showAdminBookingDate(date); else if(free.length) showAdminProxyBooking(date); });
     e.querySelectorAll('.admin-calendar-name').forEach(nameEl=>nameEl.addEventListener('click',ev=>{
