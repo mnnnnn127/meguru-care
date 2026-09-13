@@ -16,17 +16,42 @@ button{border:0;border-radius:8px;padding:8px 11px;font:inherit;font-weight:700;
 .badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;background:#e7f2eb}.badge.warn{background:#f3eadb}.badge.danger{background:#f4e2e2}.badge.done{background:#e8ece9}
 .stat{font-size:28px;font-weight:800}.statlabel{font-size:12px;color:var(--muted)}
 label{display:block;font-size:12px;margin:8px 0 4px}input,select,textarea{width:100%;border:1px solid #ccd8d0;border-radius:8px;padding:9px;background:white;font:inherit}textarea{min-height:100px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.full{grid-column:1/-1}.customer-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.customer-row{cursor:pointer}.customer-row.selected{box-shadow:inset 4px 0 0 #6b9f8c;background:#f4faf7}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.full{grid-column:1/-1}.customer-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
 .notice{padding:10px;border-radius:9px;background:#f1f5f1;font-size:12px;color:var(--muted);margin-bottom:10px}.timeline{border-left:2px solid var(--line);padding-left:14px}.timeline .item{margin-bottom:8px}
 @media(max-width:760px){.grid2,.grid3,.two{grid-template-columns:1fr}.customer-row{grid-template-columns:1fr}}
 .amount-row{display:flex;align-items:center;gap:8px}.amount-row input{max-width:180px}.amount-row span{font-weight:700}.actions{flex-wrap:wrap}
+
+.settings-list-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.settings-list-row .danger{flex:0 0 auto}
+.customer-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}
+.customer-card-head h3{margin:0;color:var(--green-dark);font-size:18px}
+.customer-delete-btn{flex:0 0 auto;border:1px solid #d8aaa4;background:#fff;color:var(--red);border-radius:9px;padding:6px 13px;font:inherit;font-weight:700;cursor:pointer}
+.customer-delete-btn:hover{background:#fff7f5}
+.customer-card{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px 16px;margin-top:12px}
+.customer-two-rows{display:flex;flex-direction:column}
+.customer-line{display:grid;grid-template-columns:1.05fr 1.05fr 2fr .65fr;gap:0}
+.customer-line + .customer-line{border-top:1px solid #edf2f0}
+.customer-field{min-width:0;padding:8px 12px;border-right:1px solid #edf2f0}
+.customer-field:first-child{padding-left:0}
+.customer-field:last-child{border-right:0;padding-right:0}
+.customer-field.wide{grid-column:span 1}
+.customer-field span{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
+.customer-field strong{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){
+  .customer-line{grid-template-columns:1fr 1fr}
+  .customer-field{border-right:0}
+  .customer-field:nth-child(odd){padding-left:0}
+  .customer-field:nth-child(even){padding-right:0}
+  .customer-line + .customer-line{padding-top:2px}
+}
+
 </style>
 <style id="blue-nav-v14">.nav{overflow-x:auto;white-space:nowrap}.nav button{flex:0 0 auto}</style>
 </head>
 <body>
 <div class="wrap">
 <h1>めぐる訪問ケア｜管理画面</h1>
-<div class="sub">新管理画面プレビュー v8　※この画面は確認用で、本番データは変更しません</div>
+<div class="sub">新管理画面プレビュー v41（デモデータなし）　※この画面は確認用で、本番データは変更しません</div>
 
 <div class="nav">
 <button class="active" onclick="show('home',this)">ホーム</button>
@@ -40,42 +65,32 @@ label{display:block;font-size:12px;margin:8px 0 4px}input,select,textarea{width:
 
 <section id="home" class="page active">
 <div class="grid3">
-<div class="card"><div class="stat">1</div><div class="statlabel">本日の予定</div></div>
-<div class="card"><div class="stat">2</div><div class="statlabel">予約申請</div></div>
-<div class="card"><div class="stat">1</div><div class="statlabel">未読メッセージ</div></div>
+<div class="card"><div class="stat" id="todayCount">0</div><div class="statlabel">本日の予定</div></div>
+<div class="card"><div class="stat" id="requestCount">0</div><div class="statlabel">予約申請</div></div>
+<div class="card"><div class="stat" id="unreadMessageCount">0</div><div class="statlabel">未読メッセージ</div></div>
 </div>
 <div class="grid2">
-<div class="card"><h2>◆ 本日の予定</h2>
-<div class="item"><strong>△△様</strong><div class="meta">9月13日　14:00～　60分</div><span class="badge done">予約確定</span></div>
-<div class="item"><strong>●●様</strong><div class="meta">9月13日　17:00～　90分</div><span class="badge done">予約確定</span></div>
-</div>
+<div class="card"><h2>◆ 本日の予定</h2><div id="homeTodayList"></div></div>
 <div class="card"><h2>◆ お客様より予約申請</h2>
-<div class="item"><strong>●●様</strong><div class="meta">9月15日　10:00～　60分　申請日時：9月13日 12:30</div><div class="actions"><button class="primary" onclick="confirmReq('●●様')">予約確定</button><button class="danger" onclick="rejectReq('●●様')">キャンセル</button></div></div>
-<div class="item"><strong>△△様</strong><div class="meta">9月16日　15:00～　60分　申請日時：9月13日 13:10</div><div class="actions"><button class="primary" onclick="confirmReq('△△様')">予約確定</button><button class="danger" onclick="rejectReq('△△様')">キャンセル</button></div></div>
+<div id="homeReservationRequests"></div>
 </div>
 </div>
-<div class="card"><h2>◆ お客様よりメッセージ</h2>
-<div class="item customer-row" id="inbox-1"><div><strong>●●様</strong><div class="meta">訪問日のことで相談があります。～～～～～～</div></div><div class="actions"><button class="primary" onclick="showById('messages')">返信</button><button class="danger" onclick="deleteInboxMessage('inbox-1')">削除</button></div></div>
-<div class="item customer-row" id="inbox-2"><div><strong>△△様</strong><div class="meta">駐車場所について確認したいです。</div></div><div class="actions"><button class="primary" onclick="showById('messages')">返信</button><button class="danger" onclick="deleteInboxMessage('inbox-2')">削除</button></div></div>
-</div>
+<div class="card"><h2>◆ お客様よりメッセージ</h2><div id="inboxList"></div></div>
 </section>
 
 <section id="customers" class="page">
-<div class="grid2">
-<div class="card"><h2>お客様一覧</h2><input placeholder="氏名・電話番号で検索" oninput="filterCustomers(this.value)"><div id="customerList"></div></div>
-<div class="card"><h2>お客様詳細</h2><div id="customerDetail"><div class="notice">左の一覧からお客様を選択してください。</div></div></div>
-</div>
+  <h2>お客様情報</h2>
+  <div class="notice">新規のお客様登録と同じ項目だけを表示しています。</div>
+  <div id="customerList"></div>
 </section>
 
 <section id="reservations" class="page">
 <div class="card"><h2>予約希望一覧</h2>
 <div class="notice">お客様が空き枠に対して予約希望を入れた日時を表示します。確定すると下の「予約確定一覧」へ移動します。</div>
-<div class="item"><strong>●●様　9月15日 10:00～ 60分</strong><div class="meta">予約申請日時：9月13日 12:30</div><div class="actions"><button class="primary" onclick="confirmReq('●●様')">予約確定</button><button class="danger" onclick="rejectReq('●●様')">キャンセル</button></div></div>
+<div id="reservationRequestsList"></div>
 </div>
 <div class="card"><h2>予約確定一覧</h2>
-<div class="item" id="confirmed-1"><strong>△△様　9月16日 15:00～ 60分</strong><div class="meta"><span class="badge done">予約確定</span></div>
-<label style="margin-top:10px">金額入力</label><div class="amount-row"><input id="amount-1" type="number" min="0" step="100" placeholder="例：8000"><span>円</span></div>
-<div class="actions"><button class="primary" onclick="completeVisit(1,'△△様','9月16日 15:00～','60分')">実施済</button><button class="danger" onclick="cancelConfirmed()">キャンセル</button></div></div>
+<div id="confirmedReservationsList"></div>
 </div>
 
 </section>
@@ -83,8 +98,7 @@ label{display:block;font-size:12px;margin:8px 0 4px}input,select,textarea{width:
 <section id="results" class="page">
 <div class="card"><h2>実績一覧（収入）</h2>
 <div class="notice">「金額入力＋実施済」で登録された実績を収入として集計します。</div>
-<div class="item customer-row"><div><strong>●●様</strong><div class="meta">実施回数：12回　金額：96,000円</div></div><button class="secondary" onclick="showHistory('●●様','12')">履歴</button></div>
-<div class="item customer-row"><div><strong>△△様</strong><div class="meta">実施回数：8回　金額：64,000円</div></div><button class="secondary" onclick="showHistory('△△様','8')">履歴</button></div>
+<div id="resultsList"></div>
 <div id="historyPanel" style="display:none;margin-top:12px"></div>
 </div>
 
@@ -110,22 +124,33 @@ label{display:block;font-size:12px;margin:8px 0 4px}input,select,textarea{width:
 <section id="messages" class="page">
 <div class="grid2">
 <div class="card"><h2>担当者より</h2>
-<label>お客様を選択</label><select id="messageCustomer"><option>●●様</option><option>△△様</option></select>
+<label>お客様を選択</label><select id="messageCustomer"><option value="">お客様を選択してください</option></select>
 <label>メッセージ</label><textarea id="messageText" placeholder="お客様へのメッセージを入力"></textarea>
-<div class="actions"><button class="primary" onclick="sendMessage()">送信</button></div>
+<div class="actions"><button type="button" class="primary" id="sendStaffMessageButton" onclick="(function(btn){
+const sel=document.getElementById('messageCustomer'), ta=document.getElementById('messageText');
+const id=sel&&sel.value, text=(ta&&ta.value||'').trim();
+if(!id){alert('お客様を選択してください。');return;}
+if(!text){alert('メッセージを入力してください。');return;}
+const opt=sel.options[sel.selectedIndex];
+const name=(opt.textContent||'').replace(/様$/,'');
+let list=[];try{list=JSON.parse(localStorage.getItem('staffMessages')||'[]');if(!Array.isArray(list))list=[];}catch(e){list=[];}
+list.push({id:'staff-'+Date.now(),customerId:String(id),customerName:name,text:text,sentAt:new Date().toLocaleString('ja-JP')});
+localStorage.setItem('staffMessages',JSON.stringify(list));
+const hs=document.getElementById('messageHistoryCustomer');
+if(hs){hs.value=String(id);}
+if(ta)ta.value='';
+if(typeof renderMessageHistory==='function')renderMessageHistory();
+alert('お客様へ送信しました。');
+})(this)">送信</button></div>
 </div>
 <div class="card"><h2>メッセージ一覧</h2>
-<label>お客様を選択</label><select><option>●●様</option><option>△△様</option></select>
-<div class="timeline">
-<div class="item"><strong>お客様</strong><div>訪問日のことで相談があります。</div><div class="meta">9月13日 12:10</div></div>
-<div class="item"><strong>担当者より</strong><div>承知しました。当日確認いたします。</div><div class="meta">9月13日 12:20</div></div>
+<label>お客様を選択</label><select id="messageHistoryCustomer"><option value="">お客様を選択してください</option></select>
+<div id="messageHistoryList" class="timeline"><div class="notice">お客様を選択すると、メッセージ履歴が表示されます。</div></div>
 </div>
 </div>
 </div>
-<div class="card"><h2>削除済みメッセージ一覧</h2><div class="item"><strong>△△様</strong><div class="meta">削除日時：9月13日 13:00</div><div>過去のメッセージ内容（履歴として保管）</div></div></div>
+</div>
 </section>
-
-
 <section id="blue-return" class="page">
 <div class="card">
 <h2>青色申告用集計</h2>
@@ -187,13 +212,49 @@ label{display:block;font-size:12px;margin:8px 0 4px}input,select,textarea{width:
 <section id="settings" class="page">
 <div class="card"><h2>予約枠の設定</h2>
 <div class="grid2">
-<div><h3>→ 一括予約</h3><div class="two"><div><label>月</label><input type="month" value="2026-09"></div><div><label>曜日</label><select><option>月曜日</option><option>火曜日</option><option>水曜日</option><option>木曜日</option><option>金曜日</option><option>土曜日</option><option>日曜日</option></select></div><div><label>開始時刻</label><input type="time" value="10:00"></div><div><label>時間</label><select><option>60分</option><option>90分</option></select></div></div><div class="actions"><button class="primary">この月の該当曜日を一括登録</button></div></div>
-<div><h3>→ 単日予約</h3><div class="two"><div><label>日付</label><input type="date"></div><div><label>開始時刻</label><input type="time"></div><div><label>時間</label><select><option>60分</option><option>90分</option></select></div></div><div class="actions"><button class="primary">予約枠を登録</button></div></div>
+<div>
+<h3>→ 一括予約</h3>
+<div class="two">
+<div><label>月</label><input type="month" id="bulkMonth"></div>
+<div><label>曜日</label><select id="bulkWeekday">
+<option value="1">月曜日</option><option value="2">火曜日</option><option value="3">水曜日</option>
+<option value="4">木曜日</option><option value="5">金曜日</option><option value="6">土曜日</option><option value="0">日曜日</option>
+</select></div>
+<div><label>開始時刻</label><input type="time" id="bulkTime"></div>
+<div><label>時間</label><select id="bulkDuration"><option value="60">60分</option><option value="90">90分</option></select></div>
+</div>
+<div class="actions"><button type="button" class="primary" onclick="addBulkSlots()">この月の該当曜日を一括登録</button></div>
+</div>
+<div>
+<h3>→ 単日予約</h3>
+<div class="two">
+<div><label>日付</label><input type="date" id="singleDate"></div>
+<div><label>開始時刻</label><input type="time" id="singleTime"></div>
+<div><label>時間</label><select id="singleDuration"><option value="60">60分</option><option value="90">90分</option></select></div>
+</div>
+<div class="actions"><button type="button" class="primary" onclick="addSingleSlot()">予約枠を登録</button></div>
 </div>
 </div>
-<div class="card"><h2>受付期間の設定</h2><div class="two"><div><label>受付開始日</label><input type="date" value="2026-09-13"></div><div><label>受付終了日</label><input type="date" value="2026-10-31"></div></div><div class="actions"><button class="primary">保存</button></div><div class="notice">お客様にはこの期間内の空き枠だけ表示します。管理画面側では期間外も予約枠の登録・管理ができます。</div></div>
-<div class="card"><h2>管理者画面の設定</h2><label>現在の管理者パスワード</label><input type="password" placeholder="現在のパスワード"><label>新しいパスワード</label><input type="password" placeholder="新しいパスワード"><label>新しいパスワード（確認）</label><input type="password" placeholder="もう一度入力"><div class="actions"><button class="primary">管理者パスワードを再設定</button></div></div>
-<div class="card"><h2>予約ページ</h2><label>ホームページURL</label><input value="https://mnnnnn127.github.io/meguru-care/"><div class="actions"><button class="primary">保存</button><button class="secondary">予約ページを開く</button></div></div>
+
+<h3 style="margin-top:22px">予約枠の登録一覧</h3>
+<div class="notice">登録した予約枠を一覧で確認できます。不要な時間枠は「削除」で取り消せます。</div>
+<div id="availabilityRegistrationList"></div>
+</div>
+
+<div class="card"><h2>受付期間の設定</h2>
+<div class="two">
+<div><label>受付開始日</label><input type="date" id="periodStart"></div>
+<div><label>受付終了日</label><input type="date" id="periodEnd"></div>
+</div>
+<div class="actions"><button type="button" class="primary" onclick="addReceptionPeriod()">登録</button></div>
+<div class="notice">お客様にはこの期間内の空き枠だけ表示します。管理画面側では期間外も予約枠の登録・管理ができます。</div>
+<h3 style="margin-top:22px">受付期間の登録一覧</h3>
+<div id="receptionPeriodList"></div>
+</div>
+
+<div class="card"><h2>管理者画面の設定</h2><label>現在の管理者パスワード</label><input type="password" placeholder="現在のパスワード"><label>新しいパスワード</label><input type="password" placeholder="新しいパスワード"><label>新しいパスワード（確認）</label><input type="password" placeholder="もう一度入力"><div class="actions"><button type="button" class="primary">管理者パスワードを再設定</button></div></div>
+
+<div class="card"><h2>予約ページ</h2><label>ホームページURL</label><input value="https://mnnnnn127.github.io/meguru-care/"><div class="actions"><button type="button" class="primary">保存</button><button type="button" class="secondary">予約ページを開く</button></div></div>
 </section>
 </div>
 <script>
@@ -209,90 +270,302 @@ function saveSharedCustomers(list){
   window.dispatchEvent(new CustomEvent('meguru:customers-updated'));
 }
 function getSharedCustomer(id){return getSharedCustomers().find(c=>String(c.id)===String(id));}
-function show(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='customers')renderCustomers()}
+function show(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='customers')renderCustomers();if(id==='settings'){renderAvailabilityRegistrationList();renderReceptionPeriodList();}}
 function showById(id){show(id,[...document.querySelectorAll('.nav button')].find(x=>x.textContent.includes(id==='messages'?'メッセージ':id)))}
 function filterCustomers(q){renderCustomers(q)}
+function selectCustomerFromList(index){
+  return;
+}
+function deleteCustomer(id){
+  const customers=getSharedCustomers();
+  const customer=customers.find(c=>String(c.id)===String(id));
+  if(!customer)return;
+  const name=customer.name||'このお客様';
+  if(!confirm(`${name}さんのお客様情報を削除しますか？\nこの操作は元に戻せません。`)) return;
+  const next=customers.filter(c=>String(c.id)!==String(id));
+  saveSharedCustomers(next);
+  renderCustomers(document.getElementById('customerSearch')?.value||'');
+}
+
 function renderCustomers(q=''){
   const customers=getSharedCustomers();
-  const a=customers.filter(c=>(c.name+c.kana+c.phone).includes(q));
+  const query=String(q||'').trim();
+  const list=customers.filter(c=>{
+    const s=String(c.name||'')+String(c.phone||'')+String(c.address||'');
+    return s.includes(query);
+  });
   const el=document.getElementById('customerList');
-  if(!a.length){el.innerHTML='<div class="notice">まだお客様情報がありません。予約ページの「新規のお客様登録」から登録すると、ここに表示されます。</div>';return;}
-  el.innerHTML=a.map(c=>`<div class="item customer-row"><div><strong>${c.name||'未入力'}</strong><div class="meta">${c.phone||'電話番号未入力'}<br>${c.address||'住所未入力'}</div></div><button class="secondary" onclick="detail('${String(c.id).replace(/'/g,"\\'")}')">詳細</button></div>`).join('')
-}
-function detail(id){
-  const c=getSharedCustomer(id); if(!c){alert('お客様情報が見つかりません。');return;}
-  const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  document.getElementById('customerDetail').innerHTML=`<div class="two">
-<div><label>氏名</label><input id="cust-name" value="${esc(c.name)}"></div><div><label>ふりがな</label><input id="cust-kana" value="${esc(c.kana)}"></div>
-<div><label>電話番号</label><input id="cust-phone" value="${esc(c.phone)}"></div><div><label>年齢</label><input id="cust-age" type="number" value="${esc(c.age)}"></div>
-<div class="full"><label>住所</label><input id="cust-address" value="${esc(c.address)}"></div>
-<div class="full"><label>登録時のご相談内容</label><textarea id="cust-consultation">${esc(c.consultation)}</textarea></div>
-<div><label>ご紹介者様</label><input id="cust-referrer" value="${esc(c.referrer)}"></div>
-<div><label>普通車用の駐車場</label><input value="${esc(c.parking||'未回答')}" readonly></div>
-<div><label>施術台を置くスペース</label><input value="${esc(c.treatmentSpace||'未回答')}" readonly></div>
-<div class="full"><label>自由記載欄</label><textarea id="cust-freeText">${esc(c.freeText)}</textarea></div>
-<div><label>利用開始日（管理者入力）</label><input id="cust-start" type="date" value="${esc(c.start)}"></div><div><label>主訴（管理者入力）</label><input id="cust-chief" value="${esc(c.chief)}"></div>
-<div class="full"><label>注意事項・担当者メモ（管理者入力）</label><textarea id="cust-notes">${esc(c.notes)}</textarea></div></div>
-<div class="actions"><button class="primary" onclick="saveCustomerDetail('${String(c.id).replace(/'/g,"\\'")}')">保存する</button><button class="secondary" onclick="show('reservations')">予約履歴を見る</button></div>
-<div class="notice">予約ページで登録されたお客様情報と管理者側の補足情報を、同じお客様IDで管理するプレビューです。パスワードは管理画面には表示しません。</div>`
-}
-function saveCustomerDetail(id){
-  const list=getSharedCustomers(); const i=list.findIndex(c=>String(c.id)===String(id)); if(i<0)return;
-  const c=list[i];
-  c.name=document.getElementById('cust-name').value.trim();
-  c.kana=document.getElementById('cust-kana').value.trim();
-  c.phone=document.getElementById('cust-phone').value.trim();
-  c.age=document.getElementById('cust-age').value.trim();
-  c.address=document.getElementById('cust-address').value.trim();
-  c.consultation=document.getElementById('cust-consultation').value.trim();
-  c.referrer=document.getElementById('cust-referrer').value.trim();
-  c.freeText=document.getElementById('cust-freeText').value.trim();
-  c.start=document.getElementById('cust-start').value;
-  c.chief=document.getElementById('cust-chief').value.trim();
-  c.notes=document.getElementById('cust-notes').value.trim();
-  saveSharedCustomers(list); alert('お客様情報を保存しました。'); detail(id);
-}
-window.addEventListener('meguru:customers-updated',()=>{if(document.getElementById('customers')?.classList.contains('active'))renderCustomers();});
-function deleteInboxMessage(id){
-  if(!confirm('このメッセージを受信一覧から削除しますか？\nメッセージ履歴は残ります。')) return;
-  const row=document.getElementById(id);
-  if(row) row.remove();
-}
-function confirmReq(n){alert(n+' の予約を確定しました。\\nお客様ページへ「担当者より予約が確定しました。当日はよろしくお願いします」のメッセージを送信する設計です。')}
-function rejectReq(n){alert(n+' の予約をキャンセルしました。\\nお客様ページへ「この度は予約を受け付けられませんでした。大変申し訳ございません。」のメッセージを送信する設計です。')}
-function completeVisit(id,name,time,duration){
-  const amountEl=document.getElementById('amount-'+id);
-  const amount=Number(amountEl?.value||0);
-  if(!amount){alert('実施済にする前に金額を入力してください。');amountEl?.focus();return;}
-  const yen=amount.toLocaleString('ja-JP');
-  const result=document.getElementById('result-'+name);
-  if(result){
-    const meta=result.querySelector('.meta');
-    const current=meta.textContent.match(/実施回数：(\d+)回/);
-    const count=current?Number(current[1])+1:1;
-    meta.textContent=`実施回数：${count}回　金額：${yen}円`;
-    result.dataset.latestAmount=amount;
-    result.dataset.latestTime=time;
+  if(!el)return;
+  if(!list.length){
+    el.innerHTML='<div class="notice">お客様情報はありません。</div>';
+    return;
   }
-  alert(`${name}の金額 ${yen}円 を登録し、実施済にしました。\n実績一覧へ反映しました。`);
-  const row=document.getElementById('confirmed-'+id);
-  if(row){row.querySelector('.badge').textContent='実施済';row.querySelector('.badge').classList.add('done');}
+
+  const field=(label,value,cls='')=>`
+    <div class="customer-field ${cls}">
+      <span>${label}</span>
+      <strong>${escapeHtml(value || '未入力')}</strong>
+    </div>`;
+
+  el.innerHTML=list.map(c=>`
+    <div class="customer-card">
+      <div class="customer-card-head">
+        <h3>${escapeHtml(c.name||'未入力')}</h3>
+        <button type="button" class="customer-delete-btn" onclick="deleteCustomer('${escapeHtml(c.id)}')">削除</button>
+      </div>
+      <div class="customer-two-rows">
+        <div class="customer-line">
+          ${field('お名前',c.name)}
+          ${field('電話番号',c.phone)}
+          ${field('住所',c.address,'address')}
+          ${field('年齢',c.age)}
+        </div>
+        <div class="customer-line">
+          ${field('相談内容',c.consultation,'wide')}
+          ${field('ご紹介者',c.referrer,'wide')}
+          ${field('自由記載',c.freeText,'wide')}
+        </div>
+      </div>
+    </div>`).join('');
 }
-function showHistory(name,count){
-  const panel=document.getElementById('historyPanel');
-  const dates=name==='●●様'
-    ? ['9月3日 14:00～15:00','9月10日 14:00～15:00','9月13日 14:00～15:00','9月20日 14:00～15:00']
-    : ['8月28日 10:00～11:00','9月4日 10:00～11:00','9月11日 10:00～11:00'];
-  panel.style.display='block';
-  const amounts=name==='●●様' ? [8000,8000,8000,8000] : [8000,8000,8000];
-  panel.innerHTML='<div class="item"><strong>'+name+'　実施履歴（'+count+'回）</strong>'+dates.map((d,i)=>'<div class="meta" style="padding:6px 0;border-bottom:1px solid var(--line)">実施済：'+d+'　／　'+(amounts[i]||0).toLocaleString('ja-JP')+'円</div>').join('')+'</div>';
+
+
+
+window.addEventListener('meguru:customers-updated',()=>{if(document.getElementById('customers')?.classList.contains('active'))renderCustomers();});
+function getInbox(){try{const raw=localStorage.getItem('meguruPreviewInbox');const x=raw?JSON.parse(raw):[];return Array.isArray(x)?x:[]}catch(e){return []}}
+function saveInbox(list){localStorage.setItem('meguruPreviewInbox',JSON.stringify(list));}
+function getStaffMessages(){try{const raw=localStorage.getItem('staffMessages');const x=raw?JSON.parse(raw):[];return Array.isArray(x)?x:[]}catch(e){return []}}
+function saveDeletedMessage(m){try{const raw=localStorage.getItem('deletedMessages');const list=raw?JSON.parse(raw):[];list.push({...m,deletedAt:new Date().toLocaleString('ja-JP')});localStorage.setItem('deletedMessages',JSON.stringify(list));}catch(e){}}
+function updateUnreadMessageCount(){const count=getInbox().length;const el=document.getElementById('unreadMessageCount');if(el)el.textContent=count;}
+function renderInbox(){const list=getInbox();const el=document.getElementById('inboxList');if(!el)return;el.innerHTML=list.length?list.map(m=>`<div class="item customer-row" id="inbox-${m.id}"><div><strong>${escapeHtml(m.customerName||'お客様')}様</strong><div class="meta">${escapeHtml(m.text||'')}</div></div><div class="actions"><button class="primary" onclick="replyToCustomer('${String(m.customerName||'').replace(/'/g,"\'")}')">返信</button><button class="danger" onclick="deleteInboxMessage('${m.id}')">削除</button></div></div>`).join(''):'<div class="notice">現在、お客様からの未読メッセージはありません。</div>';updateUnreadMessageCount();}
+function replyToCustomer(name){showById('messages');const sel=document.getElementById('messageCustomer');if(sel){const opt=[...sel.options].find(o=>o.textContent===name+'様');if(opt)sel.value=opt.value;}}
+function renderDeletedMessages(){const el=document.getElementById('deletedMessageList');if(!el)return;try{const raw=localStorage.getItem('deletedMessages');const list=raw?JSON.parse(raw):[];el.innerHTML=list.length?list.map(m=>`<div class="item"><strong>${escapeHtml(m.customerName||'お客様')}様</strong><div class="meta">削除日時：${escapeHtml(m.deletedAt||'')}</div><div>${escapeHtml(m.text||'')}</div></div>`).join(''):'<div class="notice">削除済みメッセージはありません。</div>';}catch(e){el.innerHTML='<div class="notice">削除済みメッセージはありません。</div>';}}
+function deleteInboxMessage(id){if(!confirm('このメッセージを受信一覧から削除しますか？\nメッセージ履歴は残ります。'))return;const list=getInbox();const target=list.find(m=>String(m.id)===String(id));if(target)saveDeletedMessage(target);saveInbox(list.filter(m=>String(m.id)!==String(id)));renderInbox();renderDeletedMessages();}
+const ADMIN_PREVIEW_KEY='meguruAdminReservationPreview';
+function getAdminReservationState(){
+  try{
+    const raw=localStorage.getItem(ADMIN_PREVIEW_KEY);
+    if(raw){const x=JSON.parse(raw);if(x&&Array.isArray(x.requests)&&Array.isArray(x.confirmed))return x;}
+  }catch(e){}
+  return {requests:[],confirmed:[]};
 }
-function cancelConfirmed(){alert('予約をキャンセルしました。お客様ページへキャンセルメッセージを送信する設計です。')}
-function sendMessage(){const t=document.getElementById('messageText').value;if(!t.trim())return alert('メッセージを入力してください。');alert('お客様へ送信しました。送信メッセージ一覧へ保存されます。');document.getElementById('messageText').value=''}
-const expenses=[
-{name:'ガソリン代',date:'2026-09-05',amount:5000},
-{name:'ベッド',date:'2026-09-08',amount:30000}
-];
+function saveAdminReservationState(state){localStorage.setItem(ADMIN_PREVIEW_KEY,JSON.stringify(state));}
+function sendPreviewStaffMessage(name,text){
+  try{const raw=localStorage.getItem('staffMessages');const list=raw?JSON.parse(raw):[];list.push({id:'admin-preview-'+Date.now(),customerName:name.replace(/様$/,''),text,sentAt:new Date().toLocaleString('ja-JP')});localStorage.setItem('staffMessages',JSON.stringify(list));}catch(e){}
+}
+function renderHomeToday(){const list=getAdminReservationState().confirmed.filter(r=>r.date==='9月13日');const el=document.getElementById('homeTodayList');if(!el)return;el.innerHTML=list.length?list.map(r=>`<div class="item"><strong>${escapeHtml(r.name)}</strong><div class="meta">${escapeHtml(r.date)}　${escapeHtml(r.time)}　${escapeHtml(r.duration)}</div><span class="badge done">予約確定</span></div>`).join(''):'<div class="notice">本日の予定はありません。</div>';}
+function renderAdminReservations(){
+ const state=getAdminReservationState();
+ const requestHtml=state.requests.length?state.requests.map(r=>`<div class="item"><strong>${escapeHtml(r.name)}</strong><div class="meta">${escapeHtml(r.date)}　${escapeHtml(r.time)}　${escapeHtml(r.duration)}　申請日時：${escapeHtml(r.appliedAt)}</div><div class="actions"><button class="primary" onclick="confirmReq('${r.id}')">予約確定</button><button class="danger" onclick="rejectReq('${r.id}')">キャンセル</button></div></div>`).join(''):'<div class="notice">現在、予約申請はありません。</div>';
+ const confirmedHtml=state.confirmed.length?state.confirmed.map(r=>`<div class="item" id="confirmed-${r.id}"><strong>${escapeHtml(r.name)}　${escapeHtml(r.date)} ${escapeHtml(r.time)} ${escapeHtml(r.duration)}</strong><div class="meta"><span class="badge done">予約確定</span></div><label style="margin-top:10px">金額入力</label><div class="amount-row"><input id="amount-${r.id}" type="number" min="0" step="100" placeholder="例：8000" value="${r.amount||''}"><span>円</span></div><div class="actions"><button class="primary" onclick="completeVisit('${r.id}','${String(r.name).replace(/'/g,"\'")}','${String(r.date+' '+r.time).replace(/'/g,"\'")}','${String(r.duration).replace(/'/g,"\'")}')">実施済</button><button class="danger" onclick="cancelConfirmed('${r.id}')">キャンセル</button></div></div>`).join(''):'<div class="notice">現在、予約確定済みの予約はありません。</div>';
+ const home=document.getElementById('homeReservationRequests');if(home)home.innerHTML=requestHtml;
+ const req=document.getElementById('reservationRequestsList');if(req)req.innerHTML=requestHtml;
+ const conf=document.getElementById('confirmedReservationsList');if(conf)conf.innerHTML=confirmedHtml;
+ const stats=document.querySelectorAll('#home .stat');if(stats.length>=3){stats[0].textContent=state.confirmed.filter(r=>r.date==='9月13日').length;stats[1].textContent=state.requests.length;stats[2].textContent=getInbox().length;}
+ renderHomeToday();
+}
+
+function confirmReq(id){
+  const state=getAdminReservationState();const i=state.requests.findIndex(r=>r.id===id);if(i<0){alert('この予約申請はすでに処理されています。');renderAdminReservations();return;}
+  const r=state.requests.splice(i,1)[0];state.confirmed.push({id:'conf-'+Date.now(),name:r.name,date:r.date,time:r.time,duration:r.duration,amount:''});saveAdminReservationState(state);
+  sendPreviewStaffMessage(r.name,'担当者より予約が確定しました。当日はよろしくお願いします');renderAdminReservations();
+  alert(`${r.name}の予約を確定しました。
+予約申請一覧から削除し、予約確定一覧へ移動しました。
+お客様への確定メッセージも登録しました。`);
+}
+function rejectReq(id){
+  const state=getAdminReservationState();const i=state.requests.findIndex(r=>r.id===id);if(i<0){alert('この予約申請はすでに処理されています。');renderAdminReservations();return;}
+  const r=state.requests.splice(i,1)[0];saveAdminReservationState(state);sendPreviewStaffMessage(r.name,'この度は予約を受け付けられませんでした。大変申し訳ございません。');renderAdminReservations();
+  alert(`${r.name}の予約申請をキャンセルしました。
+予約申請一覧から削除しました。
+お客様へのキャンセルメッセージも登録しました。`);
+}
+function cancelConfirmed(id){
+  const state=getAdminReservationState();const i=state.confirmed.findIndex(r=>r.id===id);if(i<0)return;const r=state.confirmed.splice(i,1)[0];saveAdminReservationState(state);
+  sendPreviewStaffMessage(r.name,'この度は予約を受け付けられませんでした。大変申し訳ございません。');renderAdminReservations();alert(`${r.name}の予約確定をキャンセルしました。`);
+}
+const PREVIEW_RESULTS_KEY='meguruAdminResultsPreview';
+function getPreviewResults(){try{const raw=localStorage.getItem(PREVIEW_RESULTS_KEY);const x=raw?JSON.parse(raw):[];return Array.isArray(x)?x:[]}catch(e){return []}}
+function savePreviewResults(list){localStorage.setItem(PREVIEW_RESULTS_KEY,JSON.stringify(list));}
+function renderResults(){const list=getPreviewResults();const groups={};list.forEach(r=>{const k=r.name||'未入力';if(!groups[k])groups[k]={count:0,total:0,items:[]};groups[k].count++;groups[k].total+=Number(r.amount||0);groups[k].items.push(r);});const el=document.getElementById('resultsList');if(!el)return;const keys=Object.keys(groups);el.innerHTML=keys.length?keys.map(k=>`<div class="item customer-row"><div><strong>${escapeHtml(k)}</strong><div class="meta">実施回数：${groups[k].count}回　金額：${groups[k].total.toLocaleString('ja-JP')}円</div></div><button class="secondary" onclick="showHistory('${String(k).replace(/'/g,"\'")}','${groups[k].count}')">履歴</button></div>`).join(''):'<div class="notice">まだ実施済みの記録はありません。</div>';renderFinance();renderBlueReturn?.();}
+function completeVisit(id,name,time,duration){const amountEl=document.getElementById('amount-'+id);const amount=Number(amountEl?.value||0);if(!amount){alert('実施済にする前に金額を入力してください。');amountEl?.focus();return;}const state=getAdminReservationState();const i=state.confirmed.findIndex(r=>r.id===id);if(i<0){alert('この予約は見つかりません。');return;}const r=state.confirmed.splice(i,1)[0];const results=getPreviewResults();results.push({id:'result-'+Date.now(),name:r.name||name,date:r.date||'',time:r.time||time,duration:r.duration||duration,amount,completedAt:new Date().toLocaleString('ja-JP')});saveAdminReservationState(state);savePreviewResults(results);renderAdminReservations();renderResults();alert(`${name}の金額 ${amount.toLocaleString('ja-JP')}円を登録し、実施済にしました。`);}
+
+function showHistory(name,count){const panel=document.getElementById('historyPanel');const list=getPreviewResults().filter(r=>(r.name||'')===name);panel.style.display='block';panel.innerHTML='<div class="item"><strong>'+escapeHtml(name)+'　実施履歴（'+count+'回）</strong>'+list.map(r=>'<div class="meta" style="padding:6px 0;border-bottom:1px solid var(--line)">実施済：'+escapeHtml((r.date||'')+' '+(r.time||''))+'　／　'+Number(r.amount||0).toLocaleString('ja-JP')+'円</div>').join('')+'</div>';}
+
+window.sendMessage=function(){
+  const textEl=document.getElementById('messageText');
+  const customerEl=document.getElementById('messageCustomer');
+  const text=(textEl?.value||'').trim();
+  const customerId=customerEl?.value||'';
+
+  if(!customerId){
+    alert('お客様を選択してください。');
+    return;
+  }
+  if(!text){
+    alert('メッセージを入力してください。');
+    return;
+  }
+
+  const customer=getSharedCustomer(customerId);
+  if(!customer){
+    alert('選択したお客様情報が見つかりません。');
+    return;
+  }
+
+  const messages=getStaffMessages();
+  messages.push({
+    id:'staff-'+Date.now(),
+    customerId:String(customer.id),
+    customerName:customer.name||'',
+    text:text,
+    sentAt:new Date().toLocaleString('ja-JP')
+  });
+  localStorage.setItem('staffMessages',JSON.stringify(messages));
+
+  if(textEl) textEl.value='';
+  const historyEl=document.getElementById('messageHistoryCustomer');
+  if(historyEl){
+    historyEl.value=String(customer.id);
+  }
+  renderMessageHistory();
+  alert('お客様へ送信しました。');
+}
+function renderMessageHistory(){const sel=document.getElementById('messageHistoryCustomer');const box=document.getElementById('messageHistoryList');if(!sel||!box)return;const id=sel.value;if(!id){box.innerHTML='<div class="notice">お客様を選択すると、メッセージ履歴が表示されます。</div>';return;}const c=getSharedCustomer(id);const name=c?.name||'';const incoming=getInbox().filter(m=>String(m.customerId)===String(id)||(!m.customerId&&m.customerName===name));const outgoing=getStaffMessages().filter(m=>String(m.customerId)===String(id)||(!m.customerId&&m.customerName===name));const rows=[...incoming.map(m=>({type:'お客様',text:m.text||'',at:m.sentAt||''})),...outgoing.map(m=>({type:'担当者より',text:m.text||'',at:m.sentAt||''}))].sort((a,b)=>String(a.at).localeCompare(String(b.at)));box.innerHTML=rows.length?rows.map(m=>`<div class="item"><strong>${escapeHtml(m.type)}</strong><div>${escapeHtml(m.text)}</div><div class="meta">${escapeHtml(m.at)}</div></div>`).join(''):'<div class="notice">このお客様のメッセージ履歴はありません。</div>';}
+
+const PREVIEW_AVAILABILITY_KEY='meguruPreviewAvailabilitySettings';
+const PREVIEW_AVAILABILITY_RESET_KEY='meguruPreviewAvailabilityResetV36';
+if(!localStorage.getItem(PREVIEW_AVAILABILITY_RESET_KEY)){
+  localStorage.removeItem(PREVIEW_AVAILABILITY_KEY);
+  localStorage.setItem(PREVIEW_AVAILABILITY_RESET_KEY,'1');
+}
+const PREVIEW_PERIOD_KEY='meguruPreviewReceptionPeriods';
+
+function getPreviewAvailabilitySettings(){
+  try{
+    const x=JSON.parse(localStorage.getItem(PREVIEW_AVAILABILITY_KEY)||'[]');
+    return Array.isArray(x)?x:[];
+  }catch(e){return []}
+}
+function savePreviewAvailabilitySettings(list){
+  localStorage.setItem(PREVIEW_AVAILABILITY_KEY,JSON.stringify(list));
+}
+function getPreviewReceptionPeriods(){
+  try{
+    const x=JSON.parse(localStorage.getItem(PREVIEW_PERIOD_KEY)||'[]');
+    return Array.isArray(x)?x:[];
+  }catch(e){return []}
+}
+function savePreviewReceptionPeriods(list){
+  localStorage.setItem(PREVIEW_PERIOD_KEY,JSON.stringify(list));
+}
+function addSingleSlot(){
+  const date=document.getElementById('singleDate').value;
+  const time=document.getElementById('singleTime').value;
+  const duration=Number(document.getElementById('singleDuration').value);
+  if(!date||!time){alert('日付と開始時刻を入力してください。');return;}
+  const list=getPreviewAvailabilitySettings();
+  const exists=list.some(x=>x.date===date&&x.time===time);
+  if(exists){alert('同じ日付・開始時刻の予約枠はすでに登録されています。');return;}
+  list.push({id:'slot-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),date,time,duration});
+  list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  savePreviewAvailabilitySettings(list);
+  renderAvailabilityRegistrationList();
+}
+function addBulkSlots(){
+  const month=document.getElementById('bulkMonth').value;
+  const weekday=Number(document.getElementById('bulkWeekday').value);
+  const time=document.getElementById('bulkTime').value;
+  const duration=Number(document.getElementById('bulkDuration').value);
+  if(!month||!time){alert('月と開始時刻を入力してください。');return;}
+  const [year,mon]=month.split('-').map(Number);
+  const last=new Date(year,mon,0).getDate();
+  const list=getPreviewAvailabilitySettings();
+  let added=0;
+  for(let d=1;d<=last;d++){
+    const dt=new Date(year,mon-1,d);
+    if(dt.getDay()!==weekday)continue;
+    const date=`${year}-${String(mon).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(list.some(x=>x.date===date&&x.time===time))continue;
+    list.push({id:'slot-'+Date.now()+'-'+d+'-'+Math.random().toString(36).slice(2,7),date,time,duration});
+    added++;
+  }
+  list.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  savePreviewAvailabilitySettings(list);
+  renderAvailabilityRegistrationList();
+  alert(added?`${added}件の予約枠を登録しました。`:'該当する予約枠はすでに登録されています。');
+}
+window.deletePreviewAvailabilityByIndex=function(index){
+  const list=getPreviewAvailabilitySettings();
+  const i=parseInt(index,10);
+  if(isNaN(i) || i<0 || i>=list.length)return;
+  list.splice(i,1);
+  savePreviewAvailabilitySettings(list);
+  const el=document.getElementById('availabilityRegistrationList');
+  if(el){
+    const row=el.querySelector(`[data-slot-index="${i}"]`);
+    if(row)row.remove();
+  }
+  renderAvailabilityRegistrationList();
+};
+function renderAvailabilityRegistrationList(){
+  const el=document.getElementById('availabilityRegistrationList');
+  if(!el)return;
+  const list=getPreviewAvailabilitySettings();
+  if(!list.length){
+    el.innerHTML='<div class="notice">予約枠の登録はありません。</div>';
+    return;
+  }
+  el.innerHTML=list.map((x,i)=>`<div class="item settings-list-row" data-slot-index="${i}">
+    <div><strong>${escapeHtml(x.date.replaceAll('-','/'))}</strong><div class="meta">${escapeHtml(x.time)}〜　${Number(x.duration)}分</div></div>
+    <button type="button" class="danger" onclick="window.deletePreviewAvailabilityByIndex(${i});">削除</button>
+  </div>`).join('');
+}
+function addReceptionPeriod(){
+  const start=document.getElementById('periodStart')?.value||'';
+  const end=document.getElementById('periodEnd')?.value||'';
+  if(!start||!end){
+    alert('受付開始日と受付終了日を入力してください。');
+    return;
+  }
+  if(start>end){
+    alert('受付開始日は受付終了日以前の日付にしてください。');
+    return;
+  }
+  const list=getPreviewReceptionPeriods();
+  list.push({
+    id:'period-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),
+    start:start,
+    end:end
+  });
+  list.sort((a,b)=>String(a.start).localeCompare(String(b.start)));
+  savePreviewReceptionPeriods(list);
+  renderReceptionPeriodList();
+  document.getElementById('periodStart').value='';
+  document.getElementById('periodEnd').value='';
+}
+function deleteReceptionPeriod(id){
+  const list=getPreviewReceptionPeriods();
+  const index=list.findIndex(x=>String(x.id)===String(id));
+  if(index<0)return;
+  list.splice(index,1);
+  savePreviewReceptionPeriods(list);
+  renderReceptionPeriodList();
+}
+
+function renderReceptionPeriodList(){
+  const el=document.getElementById('receptionPeriodList');
+  if(!el)return;
+  const list=getPreviewReceptionPeriods();
+  el.innerHTML=list.length?list.map(x=>`<div class="item settings-list-row">
+    <div><strong>${escapeHtml(x.start.replaceAll('-','/'))} ～ ${escapeHtml(x.end.replaceAll('-','/'))}</strong></div>
+    <button type="button" class="danger" onclick="deleteReceptionPeriod('${escapeHtml(x.id)}');">削除</button>
+  </div>`).join(''):'<div class="notice">受付期間の登録はありません。</div>';
+}
+
+let expenses=[];
+try{const raw=localStorage.getItem('meguruAdminExpensesPreview');const x=raw?JSON.parse(raw):[];if(Array.isArray(x))expenses=x;}catch(e){}
+function saveExpenses(){localStorage.setItem('meguruAdminExpensesPreview',JSON.stringify(expenses));}
 
 function escapeHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, function(ch){
@@ -310,125 +583,69 @@ function yen(n){return Number(n||0).toLocaleString('ja-JP')+'円'}
 function addExpense(){
  const name=document.getElementById('expenseName').value.trim(), date=document.getElementById('expenseDate').value, amount=Number(document.getElementById('expenseAmount').value);
  if(!name||!date||!Number.isFinite(amount)||amount<=0){alert('項目・日付・金額を入力してください。');return;}
- expenses.push({name,date,amount}); document.getElementById('expenseName').value=''; document.getElementById('expenseAmount').value=''; renderFinance();
+ expenses.push({name,date,amount}); saveExpenses(); document.getElementById('expenseName').value=''; document.getElementById('expenseAmount').value=''; renderFinance();
 }
 function renderExpenses(){
  const box=document.getElementById('expenseList'); box.innerHTML=expenses.length?expenses.map((e,i)=>`<div class="item"><div><strong>${escapeHtml(e.name)}</strong><div class="meta">${e.date.replaceAll('-','/')}　${yen(e.amount)}</div></div><button class="danger" onclick="removeExpense(${i})">削除</button></div>`).join(''):'<div class="admin-muted">経費はありません。</div>';
 }
-function removeExpense(i){if(!confirm('この経費を削除しますか？'))return;expenses.splice(i,1);renderFinance();}
-function renderFinance(){
- renderExpenses();
- const revenue=[['2026-09',160000]];
- const months=['2026-09'];
- document.getElementById('monthlyProfit').innerHTML=months.map(m=>{const rev=revenue.find(x=>x[0]===m)?.[1]||0;const cost=expenses.filter(e=>e.date.slice(0,7)===m).reduce((a,e)=>a+e.amount,0);return `<tr><td>${Number(m.slice(5))}月</td><td>${yen(rev)}</td><td>${yen(cost)}</td><td class="profit-positive">${yen(rev-cost)}</td></tr>`}).join('');
- const years=['2026']; document.getElementById('yearlyProfit').innerHTML=years.map(y=>{const rev=revenue.filter(x=>x[0].startsWith(y)).reduce((a,x)=>a+x[1],0);const cost=expenses.filter(e=>e.date.startsWith(y)).reduce((a,e)=>a+e.amount,0);return `<tr><td>${y}年度</td><td>${yen(rev)}</td><td>${yen(cost)}</td><td class="profit-positive">${yen(rev-cost)}</td></tr>`}).join('');
-}
+function removeExpense(i){if(!confirm('この経費を削除しますか？'))return;expenses.splice(i,1);saveExpenses();renderFinance();}
+function renderFinance(){renderExpenses();const results=getPreviewResults();const revenue=results.reduce((sum,r)=>sum+Number(r.amount||0),0);const cost=expenses.reduce((sum,e)=>sum+Number(e.amount||0),0);const month='2026-09';document.getElementById('monthlyProfit').innerHTML=`<tr><td>9月</td><td>${yen(results.filter(r=>String(r.date||'').slice(0,7)===month).reduce((s,r)=>s+Number(r.amount||0),0))}</td><td>${yen(expenses.filter(e=>e.date.slice(0,7)===month).reduce((s,e)=>s+e.amount,0))}</td><td class="profit-positive">${yen(results.filter(r=>String(r.date||'').slice(0,7)===month).reduce((s,r)=>s+Number(r.amount||0),0)-expenses.filter(e=>e.date.slice(0,7)===month).reduce((s,e)=>s+e.amount,0))}</td></tr>`;document.getElementById('yearlyProfit').innerHTML=`<tr><td>2026年度</td><td>${yen(revenue)}</td><td>${yen(cost)}</td><td class="profit-positive">${yen(revenue-cost)}</td></tr>`;}
+
 renderCustomers();
 renderFinance();
-renderCustomers();
+renderAdminReservations();
 
 function refreshCustomerSelects(){
- const list=getSharedCustomers();
- ['messageCustomer'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=list.map(c=>`<option value="${c.id}">${c.name||'未入力'}様</option>`).join('')||'<option value="">お客様なし</option>';});
+  const list=getSharedCustomers();
+  ['messageCustomer','messageHistoryCustomer'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const current=el.value;
+    el.innerHTML='<option value="">お客様を選択してください</option>'+
+      list.map(c=>`<option value="${escapeHtml(c.id)}">${escapeHtml(c.name||'未入力')}様</option>`).join('');
+    if(list.some(c=>String(c.id)===String(current))) el.value=current;
+  });
+  renderMessageHistory();
 }
 window.addEventListener('meguru:customers-updated',refreshCustomerSelects);
+document.getElementById('messageHistoryCustomer')?.addEventListener('change',renderMessageHistory);
 refreshCustomerSelects();
+updateUnreadMessageCount();
+
 </script>
 
 <script>
 (function(){
-  const blueIncome = [
-    {date:'2026-09-03', name:'〇〇様', detail:'訪問ケア', amount:8000},
-    {date:'2026-09-10', name:'〇〇様', detail:'訪問ケア', amount:8000},
-    {date:'2026-09-17', name:'△△様', detail:'訪問ケア', amount:8000}
-  ];
-  const blueExpenses = [
-    {date:'2026-09-05', category:'旅費交通費', detail:'ガソリン代', amount:5000},
-    {date:'2026-09-08', category:'消耗品費', detail:'ベッド', amount:30000}
-  ];
-
-  function money(n){ return Number(n||0).toLocaleString('ja-JP')+'円'; }
-  function esc(v){ return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
-
-  window.renderBlueReturn = function(){
-    const y=Number(document.getElementById('blueYear')?.value||2026);
-    const inc=blueIncome.filter(x=>x.date.startsWith(y+'-'));
-    const exp=blueExpenses.filter(x=>x.date.startsWith(y+'-'));
-    const ti=inc.reduce((s,x)=>s+Number(x.amount||0),0);
-    const te=exp.reduce((s,x)=>s+Number(x.amount||0),0);
-
-    document.getElementById('blueIncomeTotal').textContent=money(ti);
-    document.getElementById('blueExpenseTotal').textContent=money(te);
-    document.getElementById('blueProfitTotal').textContent=money(ti-te);
-
-    document.getElementById('blueIncomeList').innerHTML=inc.length
-      ? inc.map(x=>`<div class="item"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.date.replaceAll('-','/'))}　${esc(x.detail)}　${money(x.amount)}</div></div>`).join('')
-      : '<div class="meta">この年度の収入はありません。</div>';
-
-    document.getElementById('blueExpenseList').innerHTML=exp.length
-      ? exp.map((x,i)=>`<div class="item"><strong>${esc(x.category)}　${esc(x.detail)}</strong><div class="meta">${esc(x.date.replaceAll('-','/'))}　${money(x.amount)}</div><div class="actions"><button class="danger" type="button" data-blue-delete="${i}">削除</button></div></div>`).join('')
-      : '<div class="meta">この年度の経費はありません。</div>';
-
-    document.querySelectorAll('[data-blue-delete]').forEach(btn=>btn.onclick=()=>{
-      const i=Number(btn.dataset.blueDelete);
-      if(confirm('この経費を削除しますか？')){ blueExpenses.splice(i,1); window.renderBlueReturn(); }
-    });
-
-    document.getElementById('blueMonthly').innerHTML=Array.from({length:12},(_,i)=>{
-      const m=i+1;
-      const a=inc.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
-      const b=exp.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
-      return `<tr><td style="padding:8px">${m}月</td><td style="padding:8px;text-align:right">${money(a)}</td><td style="padding:8px;text-align:right">${money(b)}</td><td style="padding:8px;text-align:right"><strong>${money(a-b)}</strong></td></tr>`;
-    }).join('');
-
-    document.getElementById('blueAnnual').innerHTML=
-      `<div class="item"><strong>${y}年度</strong><div class="meta">売上（収入） ${money(ti)} － 支出（費用） ${money(te)} ＝ <strong>${money(ti-te)}</strong></div></div>`;
+  function money(n){return Number(n||0).toLocaleString('ja-JP')+'円';}
+  function getIncome(y){return getPreviewResults().filter(r=>String(r.date||'').startsWith(y+'-')).map(r=>({date:r.date,name:r.name||'お客様',detail:'訪問ケア',amount:Number(r.amount||0)}));}
+  window.renderBlueReturn=function(){
+    const y=Number(document.getElementById('blueYear')?.value||2026), inc=getIncome(y), exp=expenses.filter(x=>String(x.date||'').startsWith(y+'-'));
+    const ti=inc.reduce((s,x)=>s+x.amount,0), te=exp.reduce((s,x)=>s+x.amount,0);
+    document.getElementById('blueIncomeTotal').textContent=money(ti); document.getElementById('blueExpenseTotal').textContent=money(te); document.getElementById('blueProfitTotal').textContent=money(ti-te);
+    document.getElementById('blueIncomeList').innerHTML=inc.length?inc.map(x=>'<div class="item"><strong>'+escapeHtml(x.name)+'</strong><div class="meta">'+escapeHtml(x.date.replaceAll('-','/'))+'　'+escapeHtml(x.detail)+'　'+money(x.amount)+'</div></div>').join(''):'<div class="meta">この年度の収入はありません。</div>';
+    document.getElementById('blueExpenseList').innerHTML=exp.length?exp.map(x=>'<div class="item"><strong>'+escapeHtml(x.name||x.detail||'経費')+'</strong><div class="meta">'+escapeHtml(x.date.replaceAll('-','/'))+'　'+money(x.amount)+'</div></div>').join(''):'<div class="meta">この年度の経費はありません。</div>';
+    document.getElementById('blueMonthly').innerHTML=Array.from({length:12},(_,i)=>{const m=String(i+1).padStart(2,'0'),a=inc.filter(x=>String(x.date).slice(5,7)===m).reduce((s,x)=>s+x.amount,0),b=exp.filter(x=>String(x.date).slice(5,7)===m).reduce((s,x)=>s+x.amount,0);return '<tr><td style="padding:8px">'+(i+1)+'月</td><td style="padding:8px;text-align:right">'+money(a)+'</td><td style="padding:8px;text-align:right">'+money(b)+'</td><td style="padding:8px;text-align:right"><strong>'+money(a-b)+'</strong></td></tr>';}).join('');
+    document.getElementById('blueAnnual').innerHTML='<div class="item"><strong>'+y+'年度</strong><div class="meta">売上（収入） '+money(ti)+' － 支出（費用） '+money(te)+' ＝ <strong>'+money(ti-te)+'</strong></div></div>';
   };
-
-  document.addEventListener('DOMContentLoaded',()=>{
+  document.addEventListener('DOMContentLoaded',function(){
     document.getElementById('blueYear')?.addEventListener('change',window.renderBlueReturn);
-    document.getElementById('blueExpAdd')?.addEventListener('click',()=>{
-      const date=document.getElementById('blueExpDate').value;
-      const category=document.getElementById('blueExpCategory').value;
-      const detail=document.getElementById('blueExpDetail').value.trim();
-      const amount=Number(document.getElementById('blueExpAmount').value);
+    document.getElementById('blueExpAdd')?.addEventListener('click',function(){
+      const date=document.getElementById('blueExpDate').value,category=document.getElementById('blueExpCategory').value,detail=document.getElementById('blueExpDetail').value.trim(),amount=Number(document.getElementById('blueExpAmount').value);
       if(!date||!detail||!(amount>0)){alert('日付・内容・金額を入力してください。');return;}
-      blueExpenses.push({date,category,detail,amount});
-      document.getElementById('blueExpDetail').value='';
-      document.getElementById('blueExpAmount').value='';
-      window.renderBlueReturn();
+      expenses.push({name:detail,category,date,amount}); saveExpenses(); document.getElementById('blueExpDetail').value='';document.getElementById('blueExpAmount').value='';renderFinance();window.renderBlueReturn();
     });
-
-    document.getElementById('bluePdf')?.addEventListener('click',()=>{
-      const y=Number(document.getElementById('blueYear').value);
-      const inc=blueIncome.filter(x=>x.date.startsWith(y+'-'));
-      const exp=blueExpenses.filter(x=>x.date.startsWith(y+'-'));
-      const ti=inc.reduce((s,x)=>s+Number(x.amount||0),0);
-      const te=exp.reduce((s,x)=>s+Number(x.amount||0),0);
-      const rows=Array.from({length:12},(_,i)=>{
-        const m=i+1;
-        const a=inc.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
-        const b=exp.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
-        return `<tr><td>${m}月</td><td>${money(a)}</td><td>${money(b)}</td><td>${money(a-b)}</td></tr>`;
-      }).join('');
-      const w=window.open('','_blank');
+    document.getElementById('bluePdf')?.addEventListener('click',function(){
+      const y=Number(document.getElementById('blueYear').value),inc=getIncome(y),exp=expenses.filter(x=>String(x.date||'').startsWith(y+'-')),ti=inc.reduce((s,x)=>s+x.amount,0),te=exp.reduce((s,x)=>s+x.amount,0),w=window.open('','_blank');
       if(!w){alert('ポップアップがブロックされています。');return;}
-      w.document.write(`<html><head><meta charset="utf-8"><title>${y}年度 青色申告用集計</title><style>body{font-family:Arial,sans-serif;padding:30px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aaa;padding:8px}button{padding:9px 14px}@media print{button{display:none}}</style></head><body><h1>青色申告用集計 ${y}年度</h1><p>売上（収入）：${money(ti)}</p><p>経費（支出）：${money(te)}</p><h2>利益：${money(ti-te)}</h2><h2>月別損益</h2><table><tr><th>月</th><th>売上</th><th>支出</th><th>利益</th></tr>${rows}</table><p><button onclick="window.print()">PDFとして保存／印刷</button></p></body></html>`);
-      w.document.close(); w.focus();
+      w.document.write('<html><head><meta charset="utf-8"><title>'+y+'年度 青色申告用集計</title></head><body style="font-family:Arial,sans-serif;padding:30px"><h1>青色申告用集計 '+y+'年度</h1><p>売上（収入）：'+money(ti)+'</p><p>経費（支出）：'+money(te)+'</p><h2>利益：'+money(ti-te)+'</h2><button onclick="window.print()">PDFとして保存／印刷</button></body></html>');
+      w.document.close();w.focus();
     });
-
     window.renderBlueReturn();
   });
 })();
-renderCustomers();
-
-function refreshCustomerSelects(){
- const list=getSharedCustomers();
- ['messageCustomer'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=list.map(c=>`<option value="${c.id}">${c.name||'未入力'}様</option>`).join('')||'<option value="">お客様なし</option>';});
-}
-window.addEventListener('meguru:customers-updated',refreshCustomerSelects);
-refreshCustomerSelects();
 </script>
-
+<script>
+(function(){const KEY='meguruAdminCleanPreview_v22';if(!localStorage.getItem(KEY)){['meguruAdminReservationPreview','meguruPreviewInbox','staffMessages','deletedMessages','meguruAdminResultsPreview','meguruAdminExpensesPreview'].forEach(k=>localStorage.removeItem(k));localStorage.setItem(KEY,'1');}})();
+</script>
 </body>
 </html>
