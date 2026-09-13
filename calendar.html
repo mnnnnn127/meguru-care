@@ -559,7 +559,6 @@ const SUPABASE_KEY="sb_publishable_BEH2SD2OZgtVpqPtbx-QFg_bIS3g5XJ";
 const RPC_BASE=SUPABASE_URL+"/rest/v1/rpc/";
 const RPC_HEADERS={
   "apikey":SUPABASE_KEY,
-  "Authorization":"Bearer "+SUPABASE_KEY,
   "Content-Type":"application/json"
 };
 
@@ -601,19 +600,50 @@ async function rpc(name,body){
   return data;
 }
 
+let reservationPeriod={start_date:null,end_date:null};
+
+async function loadReservationPeriodPublic(){
+  try{
+    const data=await rpc("get_public_reservation_period",{});
+    const row=Array.isArray(data)?data[0]:data;
+    reservationPeriod={start_date:row?.start_date||null,end_date:row?.end_date||null};
+  }catch(err){
+    console.error(err);
+    reservationPeriod={start_date:null,end_date:null};
+  }
+}
+
+function isWithinReservationPeriod(dateKey){
+  if(reservationPeriod.start_date && dateKey<reservationPeriod.start_date)return false;
+  if(reservationPeriod.end_date && dateKey>reservationPeriod.end_date)return false;
+  return true;
+}
+
+function monthKey(y,m){return `${y}-${String(m+1).padStart(2,"0")}`;}
+function updatePublicMonthNav(){
+  const prevBtn=document.getElementById("prev"), nextBtn=document.getElementById("next");
+  const y=view.getFullYear(),m=view.getMonth();
+  const current=monthKey(y,m);
+  const minMonth=reservationPeriod.start_date?reservationPeriod.start_date.slice(0,7):null;
+  const maxMonth=reservationPeriod.end_date?reservationPeriod.end_date.slice(0,7):null;
+  prevBtn.disabled=!!(minMonth && current<=minMonth);
+  nextBtn.disabled=!!(maxMonth && current>=maxMonth);
+  prevBtn.style.visibility=prevBtn.disabled?"hidden":"visible";
+  nextBtn.style.visibility=nextBtn.disabled?"hidden":"visible";
+}
+
 async function loadAvailability(){
   clearError();
   const y=view.getFullYear();
   const m=view.getMonth();
-  const from=key(y,m,1);
-  const to=key(y,m,new Date(y,m+1,0).getDate());
-
+  const monthFirst=key(y,m,1);
+  const monthLast=key(y,m,new Date(y,m+1,0).getDate());
+  const from=reservationPeriod.start_date && reservationPeriod.start_date>monthFirst ? reservationPeriod.start_date : monthFirst;
+  const to=reservationPeriod.end_date && reservationPeriod.end_date<monthLast ? reservationPeriod.end_date : monthLast;
+  if(from>to){availability=[];return;}
   try{
-    const data=await rpc("get_public_availability",{
-      p_from:from,
-      p_to:to
-    });
-    availability=Array.isArray(data)?data:[];
+    const data=await rpc("get_public_availability",{p_from:from,p_to:to});
+    availability=Array.isArray(data)?data.filter(x=>isWithinReservationPeriod(String(x.available_date).slice(0,10))):[];
   }catch(err){
     console.error(err);
     availability=[];
@@ -625,6 +655,7 @@ function render(){
   const y=view.getFullYear();
   const m=view.getMonth();
   document.getElementById("monthTitle").textContent=`${y}年${m+1}月`;
+  updatePublicMonthNav();
 
   const cal=document.getElementById("calendar");
   cal.innerHTML="";
@@ -650,7 +681,7 @@ function render(){
     const times=availability.filter(x=>String(x.available_date).slice(0,10)===k);
     const count=times.length;
 
-    if(count>0 && dt>=today){
+    if(count>0 && dt>=today && isWithinReservationPeriod(k)){
       e.classList.add("available");
       if(selected===k || (multiMode && multiSelectedDates.includes(k)))e.classList.add("selected");
       const status=count>=2?"空きあり":"残りわずか";
@@ -1302,6 +1333,9 @@ function escapeHtml(text){
 }
 
 document.getElementById("prev").addEventListener("click",async()=>{
+  const minMonth=reservationPeriod.start_date?reservationPeriod.start_date.slice(0,7):null;
+  const current=monthKey(view.getFullYear(),view.getMonth());
+  if(minMonth && current<=minMonth)return;
   view.setMonth(view.getMonth()-1);
   selected=null;
   multiMode=false; multiSelectedDates=[]; document.getElementById("detail").innerHTML=initialDetailHtml(); bindMultiBookLink();
@@ -1310,6 +1344,9 @@ document.getElementById("prev").addEventListener("click",async()=>{
 });
 
 document.getElementById("next").addEventListener("click",async()=>{
+  const maxMonth=reservationPeriod.end_date?reservationPeriod.end_date.slice(0,7):null;
+  const current=monthKey(view.getFullYear(),view.getMonth());
+  if(maxMonth && current>=maxMonth)return;
   view.setMonth(view.getMonth()+1);
   selected=null;
   multiMode=false; multiSelectedDates=[]; document.getElementById("detail").innerHTML=initialDetailHtml(); bindMultiBookLink();
@@ -1318,6 +1355,11 @@ document.getElementById("next").addEventListener("click",async()=>{
 });
 
 (async()=>{
+  await loadReservationPeriodPublic();
+  if(reservationPeriod.start_date){
+    const start=new Date(reservationPeriod.start_date+"T00:00:00");
+    if(view<new Date(start.getFullYear(),start.getMonth(),1)) view=new Date(start.getFullYear(),start.getMonth(),1);
+  }
   await loadAvailability();
   render();
   bindMultiBookLink();
