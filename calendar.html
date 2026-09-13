@@ -738,7 +738,7 @@ function register(){
   panel.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function completeRegistration(){
-  alert('登録完了の画面へ進む想定です。\n\n※現在はプレビュー版のため、Supabaseへの実登録は行いません。');
+  alert('登録完了の画面へ進む想定です。\n\n');
 }
 function login(){
   const name=document.getElementById('loginName').value.trim();
@@ -778,7 +778,7 @@ function renderCustomerPage(customer){
           '<span class="reservation-duration">'+r.duration+'分</span>'+
           '<span class="reservation-price">'+Number(r.price).toLocaleString()+'円</span>'+
           '<span class="reservation-status-badge">'+status+'</span>'+
-          '<button type="button" class="cancel-btn" onclick="cancelCustomerReservation('+r.id+')">キャンセル</button>'+
+          '<button type="button" class="cancel-btn" onclick="return cancelCustomerReservation(\''+String(r.id).replace(/'/g, '\\&#39;')+'\')">キャンセル</button>'+
         '</div>'+
       '</div>';
     }).join('');
@@ -898,18 +898,22 @@ function deleteStaffMessageForCustomer(messageId){
   renderStaffMessages(customer);
 }
 function cancelCustomerReservation(reservationId){
-  if(!confirm('この予約をキャンセルしますか？'))return;
+  const id=String(reservationId);
+  if(!window.confirm('この予約をキャンセルしますか？')) return false;
   const reservations=getReservations();
-  const target=reservations.find(r=>r.id===reservationId);
-  if(target){
-    target.status='cancelled';
-    target.cancelledAt=new Date().toLocaleString('ja-JP');
-    saveReservations(reservations);
+  const target=reservations.find(r=>r && String(r.id)===id);
+  if(!target){
+    alert('予約情報が見つかりませんでした。');
+    return false;
   }
+  target.status='cancelled';
+  target.cancelledAt=new Date().toLocaleString('ja-JP');
+  saveReservations(reservations);
   const customer=getCurrentCustomer();
   if(customer) renderCustomerPage(customer);
   render();
   alert('予約をキャンセルしました。');
+  return false;
 }
 
 function openCustomerInfo(){
