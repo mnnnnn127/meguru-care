@@ -556,6 +556,10 @@ body.customer-page-mode #detail > h2{font-size:25px}
             <button class="admin-btn sub" id="selectAllSlotsBtn" type="button">すべて選択</button>
             <button class="admin-btn sub" id="clearAllSlotsBtn" type="button">選択解除</button>
           </div>
+          <div class="admin-actions" style="margin-bottom:8px">
+            <button class="admin-btn danger" id="stopSelectedDateBtn" type="button">選択した日付を受付停止</button>
+            <button class="admin-btn" id="restartSelectedDateBtn" type="button">選択した日付を受付再開</button>
+          </div>
           <div class="admin-msg" id="bulkDeleteSlotsMsg"></div>
           <div class="admin-list" id="adminAvailability"></div>
         </div>
@@ -1861,7 +1865,21 @@ async function loadAdminAvailability(){const box=$a('adminAvailability');const b
 window.deleteSlot=async function(date,time){if(!confirm(`${afmtDate(date)} ${time} の予約枠を削除しますか？`))return;const data=await adminRpc('admin_delete_availability_password',{p_password:adminPassword,p_date:date,p_start:time});if(!data||!data.ok){alert((data&&data.message)||'削除できませんでした。');return;}await Promise.all([loadAdminAvailability(),loadAvailability()]);render()}
 $a('selectAllSlotsBtn').addEventListener('click',()=>{$a('adminAvailability').querySelectorAll('.slot-checkbox').forEach(c=>c.checked=true)});
 $a('clearAllSlotsBtn').addEventListener('click',()=>{$a('adminAvailability').querySelectorAll('.slot-checkbox').forEach(c=>c.checked=false)});
-$a('bulkDeleteSlotsBtn').addEventListener('click',async()=>{hideAmsg('bulkDeleteSlotsMsg');const ids=Array.from($a('adminAvailability').querySelectorAll('.slot-checkbox:checked')).map(c=>Number(c.value)).filter(Number.isFinite);if(!ids.length){amsg('bulkDeleteSlotsMsg','削除する予約枠を選択してください。');return;}if(!confirm(`選択した${ids.length}件の予約枠を削除しますか？\nこの操作は元に戻せません。`))return;const data=await adminRpc('admin_delete_availability_bulk_password',{p_password:adminPassword,p_ids:ids});if(!data||!data.ok){amsg('bulkDeleteSlotsMsg',(data&&data.message)||'一括削除できませんでした。');return;}amsg('bulkDeleteSlotsMsg',`${data.deleted_count||ids.length}件の予約枠を削除しました。`);await Promise.all([loadAdminAvailability(),loadAvailability()]);render()})
+async function setSelectedDateAvailability(available){
+  hideAmsg('bulkDeleteSlotsMsg');
+  const date=$a('adminDate').value;
+  if(!date){amsg('bulkDeleteSlotsMsg','日付を選択してください。');return;}
+  const action=available?'受付を再開':'受付を停止';
+  if(!confirm(`${date} の予約枠の${action}を行いますか？`))return;
+  const data=await adminRpc('admin_set_availability_status_by_date',{p_password:adminPassword,p_date:date,p_available:available});
+  if(!data||!data.ok){amsg('bulkDeleteSlotsMsg',(data&&data.message)||`${action}できませんでした。`);return;}
+  amsg('bulkDeleteSlotsMsg',data.message||`${action}しました。`);
+  await Promise.all([loadAdminAvailability(),loadAvailability()]);
+  render();
+}
+$a('stopSelectedDateBtn').addEventListener('click',()=>setSelectedDateAvailability(false));
+$a('restartSelectedDateBtn').addEventListener('click',()=>setSelectedDateAvailability(true));
+$a('bulkDeleteSlotsBtn').addEventListener('click',async()=>{hideAmsg('bulkDeleteSlotsMsg');const ids=Array.from($a('adminAvailability').querySelectorAll('.slot-checkbox:checked')).map(c=>Number(c.value)).filter(Number.isFinite);if(!ids.length){amsg('bulkDeleteSlotsMsg','削除する予約枠を選択してください。');return;}if(!confirm(`選択した${ids.length}件の予約枠を削除しますか？\n予約済み・処理中の枠は削除できません。`))return;const data=await adminRpc('admin_delete_availability_bulk_password',{p_password:adminPassword,p_ids:ids});if(!data||!data.ok){amsg('bulkDeleteSlotsMsg',(data&&data.message)||'一括削除できませんでした。');return;}amsg('bulkDeleteSlotsMsg',data.message||`${data.deleted_count||0}件の予約枠を削除しました。`);await Promise.all([loadAdminAvailability(),loadAvailability()]);render()})
 
 
 async function loadReservationPeriod(){
