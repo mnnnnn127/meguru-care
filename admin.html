@@ -1,55 +1,434 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>めぐる訪問ケア｜管理画面</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>めぐる訪問ケア｜管理画面プレビュー</title>
 <style>
-:root{--bg:#f8f5ed;--card:#fffdf8;--text:#35413b;--muted:#718078;--line:#dfe6df;--main:#6d9a88;--danger:#b65b5b}
+:root{--bg:#f7f4ec;--card:#fffdf8;--text:#35413b;--muted:#718078;--line:#dfe6df;--main:#6d9a88;--danger:#b65b5b;--warn:#b27b39}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif}
-.wrap{max-width:1100px;margin:auto;padding:18px 14px 60px}h1{font-size:24px;margin:0 0 16px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}h2{font-size:17px;margin:0 0 12px}.row{display:flex;gap:8px;align-items:end;flex-wrap:wrap}.field{flex:1;min-width:150px}label{display:block;font-size:12px;margin:7px 0 4px}input,select,textarea{width:100%;border:1px solid #ccd8d0;border-radius:9px;padding:10px;background:#fff;font:inherit}textarea{min-height:75px}button{border:0;border-radius:9px;padding:10px 13px;background:var(--main);color:#fff;font:inherit;font-weight:700;cursor:pointer}button.secondary{background:#eef3ef;color:var(--text)}button.danger{background:var(--danger)}button:disabled{opacity:.45}.msg{margin-top:8px;font-size:13px;color:#3f6b57}.msg.error{color:#a34444}.monthbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.monthbar button{width:40px}.title{font-weight:700}.week,.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.week div{text-align:center;font-size:11px;color:var(--muted)}.day{min-height:90px;border:1px solid var(--line);border-radius:9px;padding:5px;background:#fff}.day.stop{background:#f2f2ee}.daynum{font-size:12px;font-weight:700}.slot{display:flex;justify-content:space-between;gap:4px;align-items:center;font-size:11px;margin-top:4px;padding:4px 5px;border-radius:6px;background:#e7f2eb}.slot.stop{background:#ececea;color:#777}.slot.res{background:#f4e9e9;color:#965656}.list{display:grid;gap:8px;max-height:430px;overflow:auto}.item{border:1px solid var(--line);border-radius:9px;padding:10px;background:#fff;font-size:13px}.item .actions{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}.hidden{display:none}@media(max-width:760px){.grid{grid-template-columns:1fr}.day{min-height:75px}}
+.wrap{max-width:1180px;margin:auto;padding:18px 14px 60px}h1{font-size:24px;margin:0 0 4px}.sub{color:var(--muted);font-size:12px;margin-bottom:16px}
+.nav{display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;margin-bottom:14px;white-space:nowrap;flex-wrap:nowrap}.nav button{flex:0 0 auto}.nav button{white-space:nowrap;border:0;border-radius:10px;padding:11px 15px;background:#eef2ee;color:var(--text);font:inherit;font-weight:700;cursor:pointer}.nav button.active{background:var(--main);color:white}
+.page{display:none}.page.active{display:block}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}.card h2{font-size:17px;margin:0 0 12px}.card h3{font-size:14px;margin:0 0 9px}
+.item{border:1px solid var(--line);border-radius:10px;background:#fff;padding:11px;margin-top:8px}.item strong{display:block}.meta{font-size:12px;color:var(--muted);margin-top:4px}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+button{border:0;border-radius:8px;padding:8px 11px;font:inherit;font-weight:700;cursor:pointer}.primary{background:var(--main);color:white}.danger{background:var(--danger);color:white}.secondary{background:#eef2ee;color:var(--text)}.warn{background:#f3eadb;color:#79582e}
+.badge{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;background:#e7f2eb}.badge.warn{background:#f3eadb}.badge.danger{background:#f4e2e2}.badge.done{background:#e8ece9}
+.stat{font-size:28px;font-weight:800}.statlabel{font-size:12px;color:var(--muted)}
+label{display:block;font-size:12px;margin:8px 0 4px}input,select,textarea{width:100%;border:1px solid #ccd8d0;border-radius:8px;padding:9px;background:white;font:inherit}textarea{min-height:100px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.full{grid-column:1/-1}.customer-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.notice{padding:10px;border-radius:9px;background:#f1f5f1;font-size:12px;color:var(--muted);margin-bottom:10px}.timeline{border-left:2px solid var(--line);padding-left:14px}.timeline .item{margin-bottom:8px}
+@media(max-width:760px){.grid2,.grid3,.two{grid-template-columns:1fr}.customer-row{grid-template-columns:1fr}}
+.amount-row{display:flex;align-items:center;gap:8px}.amount-row input{max-width:180px}.amount-row span{font-weight:700}.actions{flex-wrap:wrap}
 </style>
+<style id="blue-nav-v14">.nav{overflow-x:auto;white-space:nowrap}.nav button{flex:0 0 auto}</style>
 </head>
-<body><div class="wrap">
+<body>
+<div class="wrap">
 <h1>めぐる訪問ケア｜管理画面</h1>
-<div class="tabs"><button onclick="tab('slots')">予約枠</button><button class="secondary" onclick="tab('reservations')">予約一覧</button><button class="secondary" onclick="tab('messages')">メッセージ</button><a href="calendar.html" style="align-self:center;color:var(--text);padding:10px">公開画面</a></div>
+<div class="sub">新管理画面プレビュー v8　※この画面は確認用で、本番データは変更しません</div>
 
-<section id="slots">
-<div class="grid">
-<div class="card"><h2>予約枠を追加・受付停止</h2><div class="row">
-<div class="field"><label>日付</label><input id="date" type="date"></div>
-<div class="field"><label>開始時刻</label><input id="time" type="time"></div>
-<div class="field"><label>時間</label><select id="dur"><option>60</option><option>90</option></select></div>
-</div><div class="row" style="margin-top:9px"><button onclick="manage(true)">空き枠を追加・受付再開</button><button class="danger" onclick="manage(false)">受付停止</button></div><div id="slotmsg" class="msg"></div></div>
-<div class="card"><h2>受付期間</h2><div class="row"><div class="field"><label>受付開始日</label><input id="start" type="date"></div><div class="field"><label>受付終了日</label><input id="end" type="date"></div><button onclick="savePeriod()">保存</button></div><div id="periodmsg" class="msg"></div><p style="font-size:12px;color:var(--muted)">※ この管理画面はパスワードなしの簡易管理版です。公開運用では管理者認証を追加してください。</p></div>
+<div class="nav">
+<button class="active" onclick="show('home',this)">ホーム</button>
+<button onclick="show('customers',this)">お客様情報</button>
+<button onclick="show('reservations',this)">予約一覧</button>
+<button onclick="show('messages',this)">メッセージ</button>
+<button onclick="show('results',this)">実績一覧</button>
+<button onclick="show('settings',this)">設定</button>
+<button onclick="show('blue-return',this)">青色申告用集計</button>
 </div>
-<div class="card" style="margin-top:14px"><div class="monthbar"><button onclick="prevMonth()">‹</button><div id="mt" class="title"></div><button onclick="nextMonth()">›</button></div><div class="week"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div><div id="cal" class="cal"></div></div>
-<div class="card" style="margin-top:14px"><h2>選択した日付の一括操作</h2><div class="row"><div class="field"><label>日付</label><input id="bulkdate" type="date"></div><button onclick="setDateStatus(true)">受付再開</button><button class="danger" onclick="setDateStatus(false)">受付停止</button><button class="secondary" onclick="bulkDelete()">予約枠を一括削除</button></div><div id="bulkmsg" class="msg"></div></div>
+
+<section id="home" class="page active">
+<div class="grid3">
+<div class="card"><div class="stat">1</div><div class="statlabel">本日の予定</div></div>
+<div class="card"><div class="stat">2</div><div class="statlabel">予約申請</div></div>
+<div class="card"><div class="stat">1</div><div class="statlabel">未読メッセージ</div></div>
+</div>
+<div class="grid2">
+<div class="card"><h2>◆ 本日の予定</h2>
+<div class="item"><strong>△△様</strong><div class="meta">9月13日　14:00～　60分</div><span class="badge done">予約確定</span></div>
+<div class="item"><strong>●●様</strong><div class="meta">9月13日　17:00～　90分</div><span class="badge done">予約確定</span></div>
+</div>
+<div class="card"><h2>◆ お客様より予約申請</h2>
+<div class="item"><strong>●●様</strong><div class="meta">9月15日　10:00～　60分　申請日時：9月13日 12:30</div><div class="actions"><button class="primary" onclick="confirmReq('●●様')">予約確定</button><button class="danger" onclick="rejectReq('●●様')">キャンセル</button></div></div>
+<div class="item"><strong>△△様</strong><div class="meta">9月16日　15:00～　60分　申請日時：9月13日 13:10</div><div class="actions"><button class="primary" onclick="confirmReq('△△様')">予約確定</button><button class="danger" onclick="rejectReq('△△様')">キャンセル</button></div></div>
+</div>
+</div>
+<div class="card"><h2>◆ お客様よりメッセージ</h2>
+<div class="item customer-row" id="inbox-1"><div><strong>●●様</strong><div class="meta">訪問日のことで相談があります。～～～～～～</div></div><div class="actions"><button class="primary" onclick="showById('messages')">返信</button><button class="danger" onclick="deleteInboxMessage('inbox-1')">削除</button></div></div>
+<div class="item customer-row" id="inbox-2"><div><strong>△△様</strong><div class="meta">駐車場所について確認したいです。</div></div><div class="actions"><button class="primary" onclick="showById('messages')">返信</button><button class="danger" onclick="deleteInboxMessage('inbox-2')">削除</button></div></div>
+</div>
 </section>
 
-<section id="reservations" class="hidden"><div class="card"><h2>予約一覧</h2><div class="row"><div class="field"><label>開始</label><input id="rf" type="date"></div><div class="field"><label>終了</label><input id="rt" type="date"></div><button onclick="loadReservations()">更新</button></div><div id="rlist" class="list" style="margin-top:12px"></div></div></section>
-<section id="messages" class="hidden"><div class="card"><h2>メッセージ</h2><button onclick="loadMessages()">更新</button><div id="mlist" class="list" style="margin-top:12px"></div></div></section>
+<section id="customers" class="page">
+<div class="grid2">
+<div class="card"><h2>お客様一覧</h2><input placeholder="氏名・電話番号で検索" oninput="filterCustomers(this.value)"><div id="customerList"></div></div>
+<div class="card"><h2>お客様詳細</h2><div id="customerDetail"><div class="notice">左の一覧からお客様を選択してください。</div></div></div>
+</div>
+</section>
+
+<section id="reservations" class="page">
+<div class="card"><h2>予約希望一覧</h2>
+<div class="notice">お客様が空き枠に対して予約希望を入れた日時を表示します。確定すると下の「予約確定一覧」へ移動します。</div>
+<div class="item"><strong>●●様　9月15日 10:00～ 60分</strong><div class="meta">予約申請日時：9月13日 12:30</div><div class="actions"><button class="primary" onclick="confirmReq('●●様')">予約確定</button><button class="danger" onclick="rejectReq('●●様')">キャンセル</button></div></div>
+</div>
+<div class="card"><h2>予約確定一覧</h2>
+<div class="item" id="confirmed-1"><strong>△△様　9月16日 15:00～ 60分</strong><div class="meta"><span class="badge done">予約確定</span></div>
+<label style="margin-top:10px">金額入力</label><div class="amount-row"><input id="amount-1" type="number" min="0" step="100" placeholder="例：8000"><span>円</span></div>
+<div class="actions"><button class="primary" onclick="completeVisit(1,'△△様','9月16日 15:00～','60分')">実施済</button><button class="danger" onclick="cancelConfirmed()">キャンセル</button></div></div>
+</div>
+
+</section>
+
+<section id="results" class="page">
+<div class="card"><h2>実績一覧（収入）</h2>
+<div class="notice">「金額入力＋実施済」で登録された実績を収入として集計します。</div>
+<div class="item customer-row"><div><strong>●●様</strong><div class="meta">実施回数：12回　金額：96,000円</div></div><button class="secondary" onclick="showHistory('●●様','12')">履歴</button></div>
+<div class="item customer-row"><div><strong>△△様</strong><div class="meta">実施回数：8回　金額：64,000円</div></div><button class="secondary" onclick="showHistory('△△様','8')">履歴</button></div>
+<div id="historyPanel" style="display:none;margin-top:12px"></div>
+</div>
+
+<div class="card"><h2>経費（支出）</h2>
+<div class="notice">ガソリン代、備品・機器などの支出を追加できます。</div>
+<div class="expense-form">
+<div><label>項目</label><input id="expenseName" placeholder="例：ガソリン代、ベッド"></div>
+<div><label>日付</label><input id="expenseDate" type="date" value="2026-09-13"></div>
+<div><label>金額</label><div class="amount-row"><input id="expenseAmount" type="number" min="0" step="1" placeholder="例：5000"><span>円</span></div></div>
+<button class="primary" type="button" onclick="addExpense()">追加</button>
+</div>
+<div id="expenseList" style="margin-top:14px"></div>
+</div>
+
+<div class="card"><h2>損益計算書</h2>
+<h3>月ごと</h3>
+<table class="profit-table"><thead><tr><th>月</th><th>売上（収入）</th><th>支出（費用）</th><th>利益</th></tr></thead><tbody id="monthlyProfit"></tbody></table>
+<h3 style="margin-top:22px">年ごと</h3>
+<table class="profit-table"><thead><tr><th>年度</th><th>売上（収入）</th><th>支出（費用）</th><th>利益</th></tr></thead><tbody id="yearlyProfit"></tbody></table>
+</div>
+</section>
+
+<section id="messages" class="page">
+<div class="grid2">
+<div class="card"><h2>担当者より</h2>
+<label>お客様を選択</label><select id="messageCustomer"><option>●●様</option><option>△△様</option></select>
+<label>メッセージ</label><textarea id="messageText" placeholder="お客様へのメッセージを入力"></textarea>
+<div class="actions"><button class="primary" onclick="sendMessage()">送信</button></div>
+</div>
+<div class="card"><h2>メッセージ一覧</h2>
+<label>お客様を選択</label><select><option>●●様</option><option>△△様</option></select>
+<div class="timeline">
+<div class="item"><strong>お客様</strong><div>訪問日のことで相談があります。</div><div class="meta">9月13日 12:10</div></div>
+<div class="item"><strong>担当者より</strong><div>承知しました。当日確認いたします。</div><div class="meta">9月13日 12:20</div></div>
+</div>
+</div>
+</div>
+<div class="card"><h2>削除済みメッセージ一覧</h2><div class="item"><strong>△△様</strong><div class="meta">削除日時：9月13日 13:00</div><div>過去のメッセージ内容（履歴として保管）</div></div></div>
+</section>
+
+
+<section id="blue-return" class="page">
+<div class="card">
+<h2>青色申告用集計</h2>
+<div class="meta">青色申告に必要な収入・経費を整理するための確認用ページです。</div>
+
+<div class="actions" style="align-items:center">
+<label>年度　
+<select id="blueYear">
+<option value="2026">2026年度</option>
+<option value="2027">2027年度</option>
+<option value="2028">2028年度</option>
+</select>
+</label>
+<button class="primary" type="button" id="bluePdf">PDFで保存</button>
+</div>
+
+<div class="grid3" style="margin-top:14px">
+<div class="item"><strong>年間売上（収入）</strong><div class="meta" id="blueIncomeTotal">0円</div></div>
+<div class="item"><strong>年間経費（支出）</strong><div class="meta" id="blueExpenseTotal">0円</div></div>
+<div class="item"><strong>年間利益</strong><div class="meta" id="blueProfitTotal">0円</div></div>
+</div>
+
+<h3 style="margin-top:22px">① 収入</h3>
+<div id="blueIncomeList"></div>
+
+<h3 style="margin-top:22px">② 経費（支出）</h3>
+<div class="item">
+<div class="grid2">
+<div><label>日付</label><input type="date" id="blueExpDate"></div>
+<div><label>勘定科目</label>
+<select id="blueExpCategory">
+<option>旅費交通費</option><option>消耗品費</option><option>通信費</option>
+<option>広告宣伝費</option><option>車両費</option><option>その他</option>
+</select></div>
+<div><label>内容</label><input type="text" id="blueExpDetail" placeholder="例：ガソリン代"></div>
+<div><label>金額</label><input type="number" id="blueExpAmount" min="0" step="1" placeholder="3000"></div>
+</div>
+<div class="actions"><button class="primary" type="button" id="blueExpAdd">経費を追加</button></div>
+</div>
+<div id="blueExpenseList"></div>
+
+<h3 style="margin-top:22px">③ 月別損益</h3>
+<div class="item" style="overflow:auto">
+<table style="width:100%;border-collapse:collapse">
+<thead><tr><th style="text-align:left;padding:8px">月</th><th style="text-align:right;padding:8px">売上</th><th style="text-align:right;padding:8px">支出</th><th style="text-align:right;padding:8px">利益</th></tr></thead>
+<tbody id="blueMonthly"></tbody>
+</table>
+</div>
+
+<h3 style="margin-top:22px">④ 年間損益</h3>
+<div id="blueAnnual"></div>
+
+<div class="note" style="margin-top:16px">
+※この画面は青色申告用のデータ整理・確認用です。最終的な申告内容は帳簿・領収書等を確認して確定してください。
+</div>
+</div>
+</section>
+
+<section id="settings" class="page">
+<div class="card"><h2>予約枠の設定</h2>
+<div class="grid2">
+<div><h3>→ 一括予約</h3><div class="two"><div><label>月</label><input type="month" value="2026-09"></div><div><label>曜日</label><select><option>月曜日</option><option>火曜日</option><option>水曜日</option><option>木曜日</option><option>金曜日</option><option>土曜日</option><option>日曜日</option></select></div><div><label>開始時刻</label><input type="time" value="10:00"></div><div><label>時間</label><select><option>60分</option><option>90分</option></select></div></div><div class="actions"><button class="primary">この月の該当曜日を一括登録</button></div></div>
+<div><h3>→ 単日予約</h3><div class="two"><div><label>日付</label><input type="date"></div><div><label>開始時刻</label><input type="time"></div><div><label>時間</label><select><option>60分</option><option>90分</option></select></div></div><div class="actions"><button class="primary">予約枠を登録</button></div></div>
+</div>
+</div>
+<div class="card"><h2>受付期間の設定</h2><div class="two"><div><label>受付開始日</label><input type="date" value="2026-09-13"></div><div><label>受付終了日</label><input type="date" value="2026-10-31"></div></div><div class="actions"><button class="primary">保存</button></div><div class="notice">お客様にはこの期間内の空き枠だけ表示します。管理画面側では期間外も予約枠の登録・管理ができます。</div></div>
+<div class="card"><h2>管理者画面の設定</h2><label>現在の管理者パスワード</label><input type="password" placeholder="現在のパスワード"><label>新しいパスワード</label><input type="password" placeholder="新しいパスワード"><label>新しいパスワード（確認）</label><input type="password" placeholder="もう一度入力"><div class="actions"><button class="primary">管理者パスワードを再設定</button></div></div>
+<div class="card"><h2>予約ページ</h2><label>ホームページURL</label><input value="https://mnnnnn127.github.io/meguru-care/"><div class="actions"><button class="primary">保存</button><button class="secondary">予約ページを開く</button></div></div>
+</section>
 </div>
 <script>
-const URL='https://wsstzrflaaotawzojxzw.supabase.co',KEY='sb_publishable_BEH2SD2OZgtVpqPtbx-QFg_bIS3g5XJ',H={apikey:KEY,'Content-Type':'application/json'};
-const rpc=async(n,b={})=>{const r=await fetch(URL+'/rest/v1/rpc/'+n,{method:'POST',headers:H,body:JSON.stringify(b)});const t=await r.text();if(!r.ok)throw Error(t);return t?JSON.parse(t):null};
-const $=id=>document.getElementById(id);let month=new Date();month.setDate(1);let rows=[],settings={};
-function tab(id){['slots','reservations','messages'].forEach(x=>$(x).classList.toggle('hidden',x!==id));if(id==='reservations')loadReservations();if(id==='messages')loadMessages()}
-function msg(id,t,e=false){$(id).textContent=t;$(id).className='msg'+(e?' error':'')}
-function key(d){return d.toISOString().slice(0,10)}
-async function init(){settings=(await rpc('get_public_settings'))[0]||{};$('start').value=settings.reservation_start_date||'';$('end').value=settings.reservation_end_date||'';$('date').value=key(new Date());$('bulkdate').value=$('date').value;await loadRows();render()}
-async function loadRows(){const y=month.getFullYear(),m=month.getMonth();rows=await rpc('admin_get_availability_month',{p_from:y+'-'+String(m+1).padStart(2,'0')+'-01',p_to:key(new Date(y,m+1,0))})||[]}
-function render(){const y=month.getFullYear(),m=month.getMonth();$('mt').textContent=y+'年'+(m+1)+'月';const first=new Date(y,m,1),last=new Date(y,m+1,0),cells=[];for(let i=0;i<first.getDay();i++)cells.push('<div></div>');for(let d=1;d<=last.getDate();d++){const k=key(new Date(y,m,d)),rs=rows.filter(r=>r.available_date===k),html='<div class="day '+(rs.length&&!rs.some(r=>r.is_available)?'stop':'')+'"><div class="daynum">'+d+'</div>'+rs.map(r=>'<div class="slot '+(!r.is_available?'stop':'')+'"><span>'+r.start_time.slice(0,5)+' '+r.duration_minutes+'分 '+(r.is_available?'受付中':'受付停止')+'</span><button class="danger" style="padding:3px 6px;font-size:10px" onclick="delSlot(this.dataset.date,this.dataset.time)" data-date="'+k+'" data-time="'+r.start_time.slice(0,5)+'">削除</button></div>').join('')+'</div>';cells.push(html)}$('cal').innerHTML=cells.join('')}
-async function manage(v){try{const d=await rpc('admin_manage_availability',{p_date:$('date').value,p_start:$('time').value+':00',p_duration:Number($('dur').value),p_available:v});msg('slotmsg',d.message,!d.ok);await loadRows();render()}catch(e){msg('slotmsg','変更できませんでした。',true)}}
-async function delSlot(date,time){if(!confirm(date+' '+time+' の予約枠を削除しますか？'))return;try{const d=await rpc('admin_delete_availability',{p_date:date,p_start:time+':00'});msg('bulkmsg',d.message,!d.ok);await loadRows();render()}catch(e){msg('bulkmsg','削除できませんでした。',true)}}
-async function setDateStatus(v){const d=$('bulkdate').value;if(!d)return msg('bulkmsg','日付を選択してください。',true);if(!confirm(d+' の受付を'+(v?'再開':'停止')+'しますか？'))return;try{const x=await rpc('admin_set_availability_status_by_date',{p_date:d,p_available:v});msg('bulkmsg',x.message+'（変更 '+x.changed_count+'件、予約中 '+x.blocked_count+'件）',!x.ok);await loadRows();render()}catch(e){msg('bulkmsg','変更できませんでした。',true)}}
-async function bulkDelete(){const d=$('bulkdate').value;if(!d)return msg('bulkmsg','日付を選択してください。',true);if(!confirm(d+' の予約枠を一括削除しますか？'))return;try{const x=await rpc('admin_delete_availability_bulk',{p_date:d});msg('bulkmsg',x.message+'（削除 '+x.deleted_count+'件、予約中 '+x.blocked_count+'件）',!x.ok);await loadRows();render()}catch(e){msg('bulkmsg','削除できませんでした。',true)}}
-async function savePeriod(){try{const s=$('start').value,e=$('end').value;if(s&&e&&s>e)return msg('periodmsg','開始日は終了日以前にしてください。',true);const x=await rpc('admin_save_reservation_period',{p_start_date:s||null,p_end_date:e||null});msg('periodmsg',x.message,!x.ok)}catch(e){msg('periodmsg','保存できませんでした。',true)}}
-async function loadReservations(){const f=$('rf').value||key(new Date()),t=$('rt').value||key(new Date(Date.now()+30*86400000));try{const x=await rpc('admin_get_reservations',{p_from:f,p_to:t});$('rlist').innerHTML=x.map(r=>'<div class="item"><strong>'+r.reservation_date+' '+r.start_time.slice(0,5)+' / '+r.customer_name+'</strong>'+r.duration_minutes+'分 / '+r.status+'<br>電話：'+(r.phone||'')+'<br>住所：'+(r.address||'')+(r.status!=='cancelled'?'<div class="actions"><button class="danger" onclick="cancelR('+r.id+')">予約をキャンセル</button></div>':'')+'</div>').join('')||'<p>予約はありません。</p>'}catch(e){$('rlist').innerHTML='<p>読み込みエラー</p>'}}
-async function cancelR(id){if(!confirm('この予約をキャンセルしますか？'))return;const x=await rpc('admin_cancel_reservation',{p_id:id});alert(x.message);loadReservations();loadRows().then(render)}
-async function loadMessages(){try{const x=await rpc('admin_get_messages');$('mlist').innerHTML=x.map(m=>'<div class="item"><strong>'+m.customer_name+' / '+(m.sender_type==='staff'?'担当者':'お客様')+'</strong>'+m.content+'<div style="margin-top:8px"><textarea id="reply'+m.patient_id+'" placeholder="返信"></textarea><div class="actions"><button onclick="reply('+m.patient_id+')">返信</button><button class="danger" onclick="delMsg('+m.id+')">削除</button></div></div></div>').join('')||'<p>メッセージはありません。</p>'}catch(e){$('mlist').innerHTML='<p>読み込みエラー</p>'}}
-async function reply(pid){const t=$('reply'+pid).value;if(!t.trim())return;const x=await rpc('admin_reply_message',{p_patient_id:pid,p_content:t,p_staff_name:'めぐる訪問ケア'});alert(x.message);loadMessages()}
-async function delMsg(id){if(!confirm('このメッセージを削除しますか？'))return;const x=await rpc('admin_delete_message',{p_id:id});alert(x.message);loadMessages()}
-async function prevMonth(){month.setMonth(month.getMonth()-1);await loadRows();render()}
-async function nextMonth(){month.setMonth(month.getMonth()+1);await loadRows();render()}
-init().catch(()=>msg('slotmsg','初期化できませんでした。',true))
-</script></body></html>
+function getSharedCustomers(){
+  try{
+    const raw=localStorage.getItem('meguruCustomers');
+    const list=raw?JSON.parse(raw):[];
+    return Array.isArray(list)?list:[];
+  }catch(e){return []}
+}
+function saveSharedCustomers(list){
+  localStorage.setItem('meguruCustomers',JSON.stringify(list));
+  window.dispatchEvent(new CustomEvent('meguru:customers-updated'));
+}
+function getSharedCustomer(id){return getSharedCustomers().find(c=>String(c.id)===String(id));}
+function show(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='customers')renderCustomers()}
+function showById(id){show(id,[...document.querySelectorAll('.nav button')].find(x=>x.textContent.includes(id==='messages'?'メッセージ':id)))}
+function filterCustomers(q){renderCustomers(q)}
+function renderCustomers(q=''){
+  const customers=getSharedCustomers();
+  const a=customers.filter(c=>(c.name+c.kana+c.phone).includes(q));
+  const el=document.getElementById('customerList');
+  if(!a.length){el.innerHTML='<div class="notice">まだお客様情報がありません。予約ページの「新規のお客様登録」から登録すると、ここに表示されます。</div>';return;}
+  el.innerHTML=a.map(c=>`<div class="item customer-row"><div><strong>${c.name||'未入力'}</strong><div class="meta">${c.phone||'電話番号未入力'}<br>${c.address||'住所未入力'}</div></div><button class="secondary" onclick="detail('${String(c.id).replace(/'/g,"\\'")}')">詳細</button></div>`).join('')
+}
+function detail(id){
+  const c=getSharedCustomer(id); if(!c){alert('お客様情報が見つかりません。');return;}
+  const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  document.getElementById('customerDetail').innerHTML=`<div class="two">
+<div><label>氏名</label><input id="cust-name" value="${esc(c.name)}"></div><div><label>ふりがな</label><input id="cust-kana" value="${esc(c.kana)}"></div>
+<div><label>電話番号</label><input id="cust-phone" value="${esc(c.phone)}"></div><div><label>年齢</label><input id="cust-age" type="number" value="${esc(c.age)}"></div>
+<div class="full"><label>住所</label><input id="cust-address" value="${esc(c.address)}"></div>
+<div class="full"><label>登録時のご相談内容</label><textarea id="cust-consultation">${esc(c.consultation)}</textarea></div>
+<div><label>ご紹介者様</label><input id="cust-referrer" value="${esc(c.referrer)}"></div>
+<div><label>普通車用の駐車場</label><input value="${esc(c.parking||'未回答')}" readonly></div>
+<div><label>施術台を置くスペース</label><input value="${esc(c.treatmentSpace||'未回答')}" readonly></div>
+<div class="full"><label>自由記載欄</label><textarea id="cust-freeText">${esc(c.freeText)}</textarea></div>
+<div><label>利用開始日（管理者入力）</label><input id="cust-start" type="date" value="${esc(c.start)}"></div><div><label>主訴（管理者入力）</label><input id="cust-chief" value="${esc(c.chief)}"></div>
+<div class="full"><label>注意事項・担当者メモ（管理者入力）</label><textarea id="cust-notes">${esc(c.notes)}</textarea></div></div>
+<div class="actions"><button class="primary" onclick="saveCustomerDetail('${String(c.id).replace(/'/g,"\\'")}')">保存する</button><button class="secondary" onclick="show('reservations')">予約履歴を見る</button></div>
+<div class="notice">予約ページで登録されたお客様情報と管理者側の補足情報を、同じお客様IDで管理するプレビューです。パスワードは管理画面には表示しません。</div>`
+}
+function saveCustomerDetail(id){
+  const list=getSharedCustomers(); const i=list.findIndex(c=>String(c.id)===String(id)); if(i<0)return;
+  const c=list[i];
+  c.name=document.getElementById('cust-name').value.trim();
+  c.kana=document.getElementById('cust-kana').value.trim();
+  c.phone=document.getElementById('cust-phone').value.trim();
+  c.age=document.getElementById('cust-age').value.trim();
+  c.address=document.getElementById('cust-address').value.trim();
+  c.consultation=document.getElementById('cust-consultation').value.trim();
+  c.referrer=document.getElementById('cust-referrer').value.trim();
+  c.freeText=document.getElementById('cust-freeText').value.trim();
+  c.start=document.getElementById('cust-start').value;
+  c.chief=document.getElementById('cust-chief').value.trim();
+  c.notes=document.getElementById('cust-notes').value.trim();
+  saveSharedCustomers(list); alert('お客様情報を保存しました。'); detail(id);
+}
+window.addEventListener('meguru:customers-updated',()=>{if(document.getElementById('customers')?.classList.contains('active'))renderCustomers();});
+function deleteInboxMessage(id){
+  if(!confirm('このメッセージを受信一覧から削除しますか？\nメッセージ履歴は残ります。')) return;
+  const row=document.getElementById(id);
+  if(row) row.remove();
+}
+function confirmReq(n){alert(n+' の予約を確定しました。\\nお客様ページへ「担当者より予約が確定しました。当日はよろしくお願いします」のメッセージを送信する設計です。')}
+function rejectReq(n){alert(n+' の予約をキャンセルしました。\\nお客様ページへ「この度は予約を受け付けられませんでした。大変申し訳ございません。」のメッセージを送信する設計です。')}
+function completeVisit(id,name,time,duration){
+  const amountEl=document.getElementById('amount-'+id);
+  const amount=Number(amountEl?.value||0);
+  if(!amount){alert('実施済にする前に金額を入力してください。');amountEl?.focus();return;}
+  const yen=amount.toLocaleString('ja-JP');
+  const result=document.getElementById('result-'+name);
+  if(result){
+    const meta=result.querySelector('.meta');
+    const current=meta.textContent.match(/実施回数：(\d+)回/);
+    const count=current?Number(current[1])+1:1;
+    meta.textContent=`実施回数：${count}回　金額：${yen}円`;
+    result.dataset.latestAmount=amount;
+    result.dataset.latestTime=time;
+  }
+  alert(`${name}の金額 ${yen}円 を登録し、実施済にしました。\n実績一覧へ反映しました。`);
+  const row=document.getElementById('confirmed-'+id);
+  if(row){row.querySelector('.badge').textContent='実施済';row.querySelector('.badge').classList.add('done');}
+}
+function showHistory(name,count){
+  const panel=document.getElementById('historyPanel');
+  const dates=name==='●●様'
+    ? ['9月3日 14:00～15:00','9月10日 14:00～15:00','9月13日 14:00～15:00','9月20日 14:00～15:00']
+    : ['8月28日 10:00～11:00','9月4日 10:00～11:00','9月11日 10:00～11:00'];
+  panel.style.display='block';
+  const amounts=name==='●●様' ? [8000,8000,8000,8000] : [8000,8000,8000];
+  panel.innerHTML='<div class="item"><strong>'+name+'　実施履歴（'+count+'回）</strong>'+dates.map((d,i)=>'<div class="meta" style="padding:6px 0;border-bottom:1px solid var(--line)">実施済：'+d+'　／　'+(amounts[i]||0).toLocaleString('ja-JP')+'円</div>').join('')+'</div>';
+}
+function cancelConfirmed(){alert('予約をキャンセルしました。お客様ページへキャンセルメッセージを送信する設計です。')}
+function sendMessage(){const t=document.getElementById('messageText').value;if(!t.trim())return alert('メッセージを入力してください。');alert('お客様へ送信しました。送信メッセージ一覧へ保存されます。');document.getElementById('messageText').value=''}
+const expenses=[
+{name:'ガソリン代',date:'2026-09-05',amount:5000},
+{name:'ベッド',date:'2026-09-08',amount:30000}
+];
+
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g, function(ch){
+    return ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    })[ch];
+  });
+}
+
+function yen(n){return Number(n||0).toLocaleString('ja-JP')+'円'}
+function addExpense(){
+ const name=document.getElementById('expenseName').value.trim(), date=document.getElementById('expenseDate').value, amount=Number(document.getElementById('expenseAmount').value);
+ if(!name||!date||!Number.isFinite(amount)||amount<=0){alert('項目・日付・金額を入力してください。');return;}
+ expenses.push({name,date,amount}); document.getElementById('expenseName').value=''; document.getElementById('expenseAmount').value=''; renderFinance();
+}
+function renderExpenses(){
+ const box=document.getElementById('expenseList'); box.innerHTML=expenses.length?expenses.map((e,i)=>`<div class="item"><div><strong>${escapeHtml(e.name)}</strong><div class="meta">${e.date.replaceAll('-','/')}　${yen(e.amount)}</div></div><button class="danger" onclick="removeExpense(${i})">削除</button></div>`).join(''):'<div class="admin-muted">経費はありません。</div>';
+}
+function removeExpense(i){if(!confirm('この経費を削除しますか？'))return;expenses.splice(i,1);renderFinance();}
+function renderFinance(){
+ renderExpenses();
+ const revenue=[['2026-09',160000]];
+ const months=['2026-09'];
+ document.getElementById('monthlyProfit').innerHTML=months.map(m=>{const rev=revenue.find(x=>x[0]===m)?.[1]||0;const cost=expenses.filter(e=>e.date.slice(0,7)===m).reduce((a,e)=>a+e.amount,0);return `<tr><td>${Number(m.slice(5))}月</td><td>${yen(rev)}</td><td>${yen(cost)}</td><td class="profit-positive">${yen(rev-cost)}</td></tr>`}).join('');
+ const years=['2026']; document.getElementById('yearlyProfit').innerHTML=years.map(y=>{const rev=revenue.filter(x=>x[0].startsWith(y)).reduce((a,x)=>a+x[1],0);const cost=expenses.filter(e=>e.date.startsWith(y)).reduce((a,e)=>a+e.amount,0);return `<tr><td>${y}年度</td><td>${yen(rev)}</td><td>${yen(cost)}</td><td class="profit-positive">${yen(rev-cost)}</td></tr>`}).join('');
+}
+renderCustomers();
+renderFinance();
+renderCustomers();
+
+function refreshCustomerSelects(){
+ const list=getSharedCustomers();
+ ['messageCustomer'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=list.map(c=>`<option value="${c.id}">${c.name||'未入力'}様</option>`).join('')||'<option value="">お客様なし</option>';});
+}
+window.addEventListener('meguru:customers-updated',refreshCustomerSelects);
+refreshCustomerSelects();
+</script>
+
+<script>
+(function(){
+  const blueIncome = [
+    {date:'2026-09-03', name:'〇〇様', detail:'訪問ケア', amount:8000},
+    {date:'2026-09-10', name:'〇〇様', detail:'訪問ケア', amount:8000},
+    {date:'2026-09-17', name:'△△様', detail:'訪問ケア', amount:8000}
+  ];
+  const blueExpenses = [
+    {date:'2026-09-05', category:'旅費交通費', detail:'ガソリン代', amount:5000},
+    {date:'2026-09-08', category:'消耗品費', detail:'ベッド', amount:30000}
+  ];
+
+  function money(n){ return Number(n||0).toLocaleString('ja-JP')+'円'; }
+  function esc(v){ return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+  window.renderBlueReturn = function(){
+    const y=Number(document.getElementById('blueYear')?.value||2026);
+    const inc=blueIncome.filter(x=>x.date.startsWith(y+'-'));
+    const exp=blueExpenses.filter(x=>x.date.startsWith(y+'-'));
+    const ti=inc.reduce((s,x)=>s+Number(x.amount||0),0);
+    const te=exp.reduce((s,x)=>s+Number(x.amount||0),0);
+
+    document.getElementById('blueIncomeTotal').textContent=money(ti);
+    document.getElementById('blueExpenseTotal').textContent=money(te);
+    document.getElementById('blueProfitTotal').textContent=money(ti-te);
+
+    document.getElementById('blueIncomeList').innerHTML=inc.length
+      ? inc.map(x=>`<div class="item"><strong>${esc(x.name)}</strong><div class="meta">${esc(x.date.replaceAll('-','/'))}　${esc(x.detail)}　${money(x.amount)}</div></div>`).join('')
+      : '<div class="meta">この年度の収入はありません。</div>';
+
+    document.getElementById('blueExpenseList').innerHTML=exp.length
+      ? exp.map((x,i)=>`<div class="item"><strong>${esc(x.category)}　${esc(x.detail)}</strong><div class="meta">${esc(x.date.replaceAll('-','/'))}　${money(x.amount)}</div><div class="actions"><button class="danger" type="button" data-blue-delete="${i}">削除</button></div></div>`).join('')
+      : '<div class="meta">この年度の経費はありません。</div>';
+
+    document.querySelectorAll('[data-blue-delete]').forEach(btn=>btn.onclick=()=>{
+      const i=Number(btn.dataset.blueDelete);
+      if(confirm('この経費を削除しますか？')){ blueExpenses.splice(i,1); window.renderBlueReturn(); }
+    });
+
+    document.getElementById('blueMonthly').innerHTML=Array.from({length:12},(_,i)=>{
+      const m=i+1;
+      const a=inc.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
+      const b=exp.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
+      return `<tr><td style="padding:8px">${m}月</td><td style="padding:8px;text-align:right">${money(a)}</td><td style="padding:8px;text-align:right">${money(b)}</td><td style="padding:8px;text-align:right"><strong>${money(a-b)}</strong></td></tr>`;
+    }).join('');
+
+    document.getElementById('blueAnnual').innerHTML=
+      `<div class="item"><strong>${y}年度</strong><div class="meta">売上（収入） ${money(ti)} － 支出（費用） ${money(te)} ＝ <strong>${money(ti-te)}</strong></div></div>`;
+  };
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('blueYear')?.addEventListener('change',window.renderBlueReturn);
+    document.getElementById('blueExpAdd')?.addEventListener('click',()=>{
+      const date=document.getElementById('blueExpDate').value;
+      const category=document.getElementById('blueExpCategory').value;
+      const detail=document.getElementById('blueExpDetail').value.trim();
+      const amount=Number(document.getElementById('blueExpAmount').value);
+      if(!date||!detail||!(amount>0)){alert('日付・内容・金額を入力してください。');return;}
+      blueExpenses.push({date,category,detail,amount});
+      document.getElementById('blueExpDetail').value='';
+      document.getElementById('blueExpAmount').value='';
+      window.renderBlueReturn();
+    });
+
+    document.getElementById('bluePdf')?.addEventListener('click',()=>{
+      const y=Number(document.getElementById('blueYear').value);
+      const inc=blueIncome.filter(x=>x.date.startsWith(y+'-'));
+      const exp=blueExpenses.filter(x=>x.date.startsWith(y+'-'));
+      const ti=inc.reduce((s,x)=>s+Number(x.amount||0),0);
+      const te=exp.reduce((s,x)=>s+Number(x.amount||0),0);
+      const rows=Array.from({length:12},(_,i)=>{
+        const m=i+1;
+        const a=inc.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
+        const b=exp.filter(x=>new Date(x.date+'T00:00:00').getMonth()+1===m).reduce((s,x)=>s+Number(x.amount||0),0);
+        return `<tr><td>${m}月</td><td>${money(a)}</td><td>${money(b)}</td><td>${money(a-b)}</td></tr>`;
+      }).join('');
+      const w=window.open('','_blank');
+      if(!w){alert('ポップアップがブロックされています。');return;}
+      w.document.write(`<html><head><meta charset="utf-8"><title>${y}年度 青色申告用集計</title><style>body{font-family:Arial,sans-serif;padding:30px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #aaa;padding:8px}button{padding:9px 14px}@media print{button{display:none}}</style></head><body><h1>青色申告用集計 ${y}年度</h1><p>売上（収入）：${money(ti)}</p><p>経費（支出）：${money(te)}</p><h2>利益：${money(ti-te)}</h2><h2>月別損益</h2><table><tr><th>月</th><th>売上</th><th>支出</th><th>利益</th></tr>${rows}</table><p><button onclick="window.print()">PDFとして保存／印刷</button></p></body></html>`);
+      w.document.close(); w.focus();
+    });
+
+    window.renderBlueReturn();
+  });
+})();
+renderCustomers();
+
+function refreshCustomerSelects(){
+ const list=getSharedCustomers();
+ ['messageCustomer'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML=list.map(c=>`<option value="${c.id}">${c.name||'未入力'}様</option>`).join('')||'<option value="">お客様なし</option>';});
+}
+window.addEventListener('meguru:customers-updated',refreshCustomerSelects);
+refreshCustomerSelects();
+</script>
+
+</body>
+</html>
