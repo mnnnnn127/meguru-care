@@ -712,10 +712,11 @@ button,input,select,textarea{
 
 <script>
 const SUPABASE_URL="https://wsstzrflaaotawzojxzw.supabase.co";
-const SUPABASE_KEY="sb_publishable_BEH2SD2OZgtVpqPtbx-QFg_bIS3g5XJ";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indzc3R6cmZsYWFvdGF3em9qeHp3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NDYyMDAsImV4cCI6MjEwNDUyMjIwMH0.9H-eP--iey_3RmOgTmIrFH2gCBQaGP3XqjHsrOU4wmI";
 const RPC_BASE=SUPABASE_URL+"/rest/v1/rpc/";
 const RPC_HEADERS={
   "apikey":SUPABASE_KEY,
+  "Authorization":"Bearer "+SUPABASE_KEY,
   "Content-Type":"application/json"
 };
 
