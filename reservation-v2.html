@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0f6b55">
+<title>ご予約｜めぐる訪問ケア</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--green:#0f6b55;--green2:#148a6a;--pale:#eaf7f2;--ink:#1f302b;--muted:#667a72;--line:#c6dfd6;--white:#fff;--red:#ad4f43;--orange:#b86d26}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#e8f6f1,#f6faf8 42%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",sans-serif;line-height:1.65}
+button,input,textarea,select{font:inherit}.app{max-width:520px;min-height:100svh;margin:auto;padding:14px 12px 56px}.hero,.card{background:#fff;border:1px solid rgba(15,107,85,.09);border-radius:22px;box-shadow:0 8px 30px rgba(15,92,74,.07)}
+.hero{padding:24px 18px;text-align:center}.eyebrow{font-size:12px;letter-spacing:.12em;color:var(--green)}h1{margin:2px 0;font-size:29px;color:var(--green);letter-spacing:-.04em}.hero p{margin:7px 0 0;font-size:13px;color:var(--muted)}
+.card{padding:17px;margin-top:12px}.title{margin:0 0 10px;font-size:19px;color:var(--green)}.note{padding:10px 12px;border-radius:12px;background:#f2faf7;color:var(--muted);font-size:12px}.hidden{display:none!important}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.btn{width:100%;min-height:48px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--green);font-weight:700;padding:11px;cursor:pointer}.btn.primary{border-color:var(--green2);background:var(--green2);color:#fff}.btn.danger{color:var(--red);border-color:#dfb7b1}.btn:disabled{opacity:.5;cursor:wait}.link{border:0;background:none;color:var(--green);text-decoration:underline;cursor:pointer;padding:8px}
+.field{display:block;margin:11px 0;font-size:13px;font-weight:700;color:var(--green)}.field input,.field textarea,.field select{display:block;width:100%;min-height:47px;margin-top:5px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink)}.field textarea{min-height:92px;resize:vertical}.req{color:var(--red)}
+.calendar-head{display:flex;align-items:center;gap:8px;margin:12px 0}.calendar-head strong{flex:1;text-align:center;color:var(--green)}.arrow{width:42px;height:42px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--green);font-size:20px}.week,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.week div{text-align:center;font-size:11px;color:var(--muted)}.day{min-height:52px;padding:5px 2px;border:1px solid #e3eee9;border-radius:10px;background:#fafffd;text-align:center;font-size:12px}.day.open{border-color:#8dceb8;cursor:pointer}.day.open small{display:block;color:var(--green);font-size:8px}.day.closed{color:#aab5b1;background:#f6f8f7}.day.selected{background:#ddf5ec;border:2px solid var(--green2)}.day.empty{border:0;background:transparent}
+.slots{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.slot{min-height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--green);font-weight:700}.slot.selected{border:2px solid var(--green2);background:#ddf5ec}.choice{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.status{margin:10px 0;padding:11px 12px;border-radius:12px;background:#f2faf7;color:var(--green);font-size:13px}.status.error{background:#fff0ee;color:var(--red)}.booking{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:9px}.booking strong{color:var(--green)}.badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#ddf5ec;color:var(--green);font-size:11px}.row{display:flex;gap:8px}.row>*{flex:1}.account-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.footer{text-align:center;margin-top:18px;font-size:11px;color:var(--muted)}
+@media(max-width:380px){.app{padding-left:8px;padding-right:8px}.hero,.card{border-radius:17px}.day{min-height:48px}.slots{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="hero">
+    <div class="eyebrow">こころと身体を、やさしくめぐる時間を。</div>
+    <h1>めぐる訪問ケア</h1>
+    <p>韮崎市・甲斐市・甲府市の中西部を中心に訪問</p>
+    <div class="nav">
+      <button class="btn primary" onclick="showPanel('register')">初めての方<br><small>新規お客様登録</small></button>
+      <button class="btn" onclick="showPanel('login')">登録済みの方<br><small>ログイン</small></button>
+    </div>
+  </header>
+
+  <section class="card" id="availability">
+    <h2 class="title">空き状況</h2>
+    <div class="note">空きがある日を選ぶと、予約可能な時間が表示されます。予約は内容確認後に確定します。</div>
+    <div class="calendar-head"><button class="arrow" onclick="moveMonth(-1)">‹</button><strong id="monthLabel"></strong><button class="arrow" onclick="moveMonth(1)">›</button></div>
+    <div class="week"><div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div></div>
+    <div class="calendar" id="calendar"></div>
+    <div id="slotArea" class="hidden"><h3 id="slotTitle" class="title" style="font-size:16px;margin-top:16px"></h3><div id="slots" class="slots"></div></div>
+  </section>
+
+  <section class="card hidden" id="register">
+    <h2 class="title">新規お客様登録</h2>
+    <div class="note">予約管理と訪問時のご連絡に使用します。第三者には公開されません。</div>
+    <form onsubmit="registerCustomer(event)">
+      <label class="field">お名前 <span class="req">＊</span><input id="regName" required autocomplete="name" maxlength="60"></label>
+      <label class="field">ふりがな <span class="req">＊</span><input id="regKana" required maxlength="60"></label>
+      <label class="field">メールアドレス <span class="req">＊</span><input id="regEmail" type="email" required autocomplete="email"></label>
+      <label class="field">電話番号 <span class="req">＊</span><input id="regPhone" type="tel" required autocomplete="tel"></label>
+      <label class="field">訪問先住所 <span class="req">＊</span><input id="regAddress" required autocomplete="street-address" maxlength="200"></label>
+      <label class="field">年齢<input id="regAge" type="number" min="0" max="120"></label>
+      <label class="field">ご相談内容<textarea id="regConsultation" maxlength="1000" placeholder="お身体の状態やご希望をご記入ください"></textarea></label>
+      <label class="field">ご紹介者様<input id="regReferrer" maxlength="100" placeholder="いない場合は空欄"></label>
+      <div class="row"><label class="field">駐車場<select id="regParking"><option value="">選択</option><option>あり</option><option>なし</option><option>相談したい</option></select></label><label class="field">施術スペース<select id="regSpace"><option value="">選択</option><option>あり</option><option>相談したい</option></select></label></div>
+      <label class="field">パスワード <span class="req">＊</span><input id="regPassword" type="password" minlength="8" required autocomplete="new-password" placeholder="8文字以上"></label>
+      <label class="field">パスワード確認 <span class="req">＊</span><input id="regPassword2" type="password" minlength="8" required autocomplete="new-password"></label>
+      <div id="regStatus"></div><button id="regButton" class="btn primary" type="submit">登録する</button>
+    </form>
+  </section>
+
+  <section class="card hidden" id="login">
+    <h2 class="title">お客様ログイン</h2>
+    <form onsubmit="loginCustomer(event)">
+      <label class="field">メールアドレス<input id="loginEmail" type="email" required autocomplete="email"></label>
+      <label class="field">パスワード<input id="loginPassword" type="password" required autocomplete="current-password"></label>
+      <div id="loginStatus"></div><button id="loginButton" class="btn primary" type="submit">ログイン</button>
+    </form>
+  </section>
+
+  <section class="card hidden" id="bookingForm">
+    <h2 class="title">予約内容の確認</h2>
+    <div id="selectedSlot" class="status"></div>
+    <div class="choice"><button class="slot" id="duration60" onclick="chooseDuration(60,7000)">60分<br>7,000円</button><button class="slot" id="duration90" onclick="chooseDuration(90,10000)">90分<br>10,000円</button></div>
+    <label class="field">連絡事項<textarea id="bookingNote" maxlength="500" placeholder="当日のご希望など（任意）"></textarea></label>
+    <div id="bookingStatus"></div><button id="bookingButton" class="btn primary" onclick="submitBooking()">この内容で予約申請</button>
+  </section>
+
+  <section class="card hidden" id="account">
+    <div class="account-head"><div><div style="font-size:12px;color:var(--muted)">ログイン中</div><h2 id="accountName" class="title" style="margin:0"></h2></div><button class="link" onclick="logoutCustomer()">ログアウト</button></div>
+    <h3 class="title" style="font-size:16px;margin-top:16px">ご予約情報</h3><div id="myBookings"></div>
+    <button class="btn primary" style="margin-top:12px" onclick="scrollAvailability()">新しい予約を追加</button>
+  </section>
+
+  <a class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:12px" href="./">ホームページへ戻る</a>
+  <div class="footer">医療行為ではなく、体のお手入れとコンディショニングを目的とした自費サービスです。</div>
+</main>
+<script>
+const SUPABASE_URL='https://wsstzrflaaotawzojxzw.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_BEH2SD2OZgtVpqPtbx-QFg_bIS3g5XJ';
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+let session=null,profile=null,slots=[],view=new Date(),selectedSlot=null,selectedDuration=null,selectedPrice=null;
+view.setDate(1);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+function showStatus(id,message,error=false){$(id).innerHTML=message?`<div class="status${error?' error':''}">${esc(message)}</div>`:''}
+function showPanel(id){['register','login'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$(id).scrollIntoView({behavior:'smooth',block:'start'})}
+function localDate(iso){return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(iso))}
+function localTime(iso){return new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso))}
+async function loadSlots(){
+ const from=new Date();from.setHours(0,0,0,0);const to=new Date(view.getFullYear(),view.getMonth()+2,1);
+ const {data,error}=await db.from('meguru_availability_slots').select('id,starts_at').eq('is_open',true).gte('starts_at',from.toISOString()).lt('starts_at',to.toISOString()).order('starts_at');
+ if(error){$('calendar').innerHTML='<div class="status error" style="grid-column:1/-1">空き状況を読み込めませんでした。</div>';return}
+ slots=data||[];renderCalendar();
+}
+function renderCalendar(){
+ const y=view.getFullYear(),m=view.getMonth();$('monthLabel').textContent=`${y}年${m+1}月`;$('calendar').innerHTML='';
+ const first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();for(let i=0;i<first;i++)$('calendar').insertAdjacentHTML('beforeend','<div class="day empty"></div>');
+ for(let d=1;d<=last;d++){const key=`${y}/${String(m+1).padStart(2,'0')}/${String(d).padStart(2,'0')}`;const count=slots.filter(s=>localDate(s.starts_at)===key).length;const el=document.createElement('button');el.className=`day ${count?'open':'closed'}`;el.disabled=!count;el.innerHTML=`<b>${d}</b>${count?`<small>空きあり</small>`:'<small>—</small>'}`;if(count)el.onclick=()=>selectDate(key,el);$('calendar').appendChild(el)}
+}
+function moveMonth(n){view.setMonth(view.getMonth()+n);selectedSlot=null;$('slotArea').classList.add('hidden');loadSlots()}
+function selectDate(key,el){document.querySelectorAll('.day').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');const list=slots.filter(s=>localDate(s.starts_at)===key);$('slotTitle').textContent=`${key} の空き時間`;$('slots').innerHTML='';list.forEach(s=>{const b=document.createElement('button');b.className='slot';b.textContent=localTime(s.starts_at)+'〜';b.onclick=()=>selectSlot(s,b);$('slots').appendChild(b)});$('slotArea').classList.remove('hidden')}
+function selectSlot(slot,el){document.querySelectorAll('#slots .slot').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');selectedSlot=slot;selectedDuration=null;selectedPrice=null;['duration60','duration90'].forEach(id=>$(id).classList.remove('selected'));$('selectedSlot').textContent=`${localDate(slot.starts_at)} ${localTime(slot.starts_at)}〜`;$('bookingForm').classList.remove('hidden');$('bookingForm').scrollIntoView({behavior:'smooth',block:'start'})}
+function chooseDuration(minutes,price){selectedDuration=minutes;selectedPrice=price;['duration60','duration90'].forEach(id=>$(id).classList.toggle('selected',id===`duration${minutes}`))}
+async function registerCustomer(e){
+ e.preventDefault();showStatus('regStatus','');if($('regPassword').value!==$('regPassword2').value)return showStatus('regStatus','確認用パスワードが一致しません。',true);
+ const button=$('regButton');button.disabled=true;button.textContent='登録中…';
+ const metadata={full_name:$('regName').value.trim(),kana:$('regKana').value.trim(),phone:$('regPhone').value.trim(),address:$('regAddress').value.trim(),age:$('regAge').value?Number($('regAge').value):null,consultation:$('regConsultation').value.trim(),referrer:$('regReferrer').value.trim(),parking:$('regParking').value,treatment_space:$('regSpace').value};
+ const {data,error}=await db.auth.signUp({email:$('regEmail').value.trim(),password:$('regPassword').value,options:{data:metadata}});button.disabled=false;button.textContent='登録する';
+ if(error)return showStatus('regStatus',error.message==='User already registered'?'このメールアドレスは登録済みです。':`登録できませんでした：${error.message}`,true);
+ if(!data.session){showStatus('regStatus','確認メールを送信しました。メール内のリンクを開いてからログインしてください。');return}
+ session=data.session;await loadProfile();showStatus('regStatus','登録が完了しました。');showAccount();
+}
+async function loginCustomer(e){e.preventDefault();const button=$('loginButton');button.disabled=true;button.textContent='確認中…';const {data,error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});button.disabled=false;button.textContent='ログイン';if(error)return showStatus('loginStatus','メールアドレスまたはパスワードが正しくありません。',true);session=data.session;await loadProfile();showAccount()}
+async function loadProfile(){if(!session)return;const {data}=await db.from('meguru_profiles').select('*').eq('user_id',session.user.id).single();profile=data||null}
+async function showAccount(){['register','login'].forEach(id=>$(id).classList.add('hidden'));$('account').classList.remove('hidden');$('accountName').textContent=(profile?.full_name||'お客様')+' 様';await loadBookings();$('account').scrollIntoView({behavior:'smooth',block:'start'})}
+async function loadBookings(){if(!session)return;const {data,error}=await db.from('meguru_bookings').select('id,status,duration_minutes,price,note,created_at,meguru_availability_slots(starts_at)').order('created_at',{ascending:false});if(error){$('myBookings').innerHTML='<div class="status error">予約情報を読み込めませんでした。</div>';return}const active=(data||[]).filter(x=>x.status!=='cancelled');$('myBookings').innerHTML=active.length?active.map(b=>`<div class="booking"><strong>${esc(localDate(b.meguru_availability_slots.starts_at))} ${esc(localTime(b.meguru_availability_slots.starts_at))}〜</strong><br>${b.duration_minutes}分・${Number(b.price).toLocaleString()}円　<span class="badge">${b.status==='confirmed'?'確定':'申請中'}</span>${b.status==='pending'?`<button class="btn danger" style="margin-top:9px" onclick="cancelBooking('${b.id}')">キャンセル</button>`:''}</div>`).join(''):'<div class="note">現在、予約情報はありません。</div>'}
+async function submitBooking(){
+ showStatus('bookingStatus','');if(!selectedSlot)return showStatus('bookingStatus','日時を選択してください。',true);if(!selectedDuration)return showStatus('bookingStatus','ご利用時間を選択してください。',true);if(!session){showStatus('bookingStatus','予約にはお客様登録またはログインが必要です。',true);showPanel('login');return}
+ const button=$('bookingButton');button.disabled=true;button.textContent='送信中…';const {error}=await db.from('meguru_bookings').insert({user_id:session.user.id,slot_id:selectedSlot.id,duration_minutes:selectedDuration,price:selectedPrice,note:$('bookingNote').value.trim()});button.disabled=false;button.textContent='この内容で予約申請';
+ if(error){const msg=error.code==='23505'?'この時間は先ほど予約済みになりました。別の時間をお選びください。':'予約申請を送信できませんでした。';showStatus('bookingStatus',msg,true);await loadSlots();return}
+ showStatus('bookingStatus','予約申請を受け付けました。確認後にご連絡します。');selectedSlot=null;await Promise.all([loadSlots(),loadBookings()]);$('account').classList.remove('hidden')
+}
+async function cancelBooking(id){if(!confirm('この予約申請をキャンセルしますか？'))return;const {error}=await db.from('meguru_bookings').update({status:'cancelled'}).eq('id',id).eq('status','pending');if(error)return alert('キャンセルできませんでした。');await Promise.all([loadBookings(),loadSlots()])}
+async function logoutCustomer(){await db.auth.signOut();session=null;profile=null;$('account').classList.add('hidden');showPanel('login')}
+function scrollAvailability(){$('availability').scrollIntoView({behavior:'smooth',block:'start'})}
+async function init(){const {data}=await db.auth.getSession();session=data.session;if(session){await loadProfile();await showAccount()}await loadSlots();db.auth.onAuthStateChange((_event,newSession)=>{session=newSession})}
+init();
+</script>
+</body>
+</html>
