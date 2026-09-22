@@ -234,7 +234,14 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
   </div>
   <div class="pad pt-12">
     <div id="pub-closed-notice" style="display:none"></div>
-    <div id="pub-th-select">
+    <div id="pub-course-select">
+      <p style="font-size:15px;font-weight:600;margin-bottom:14px;text-align:center">コースを選んでください</p>
+      <div id="pub-course-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="th-select-card" data-service-unit="3" onclick="pubSelectService(3)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">60分</div><div style="font-size:14px">7,000円</div></div>
+        <div class="th-select-card" data-service-unit="4" onclick="pubSelectService(4)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">90分</div><div style="font-size:14px">10,000円</div></div>
+      </div>
+    </div>
+    <div id="pub-th-select" style="display:none">
       <p style="font-size:15px;font-weight:600;margin-bottom:14px;text-align:center">担当を選んでください</p>
       <div id="pub-th-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"></div>
     </div>
@@ -243,6 +250,7 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
         <button class="btn btn-sm" onclick="pubResetTherapist()">← 担当変更</button>
         <span id="pub-th-label" style="font-size:14px;font-weight:600"></span>
       </div>
+      <button class="btn btn-sm" onclick="pubResetService()" style="margin-bottom:10px">コース変更</button>
       <p style="font-size:12px;color:#8E8E93;margin-bottom:10px">空いている時間のみ表示（タップで予約）</p>
       <div id="pub-week-nav" style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <button class="btn btn-sm" onclick="pubWeekNav(-1)">‹ 前週</button>
@@ -828,7 +836,7 @@ let clinicPhone="000-000-0000";
 let patients={};
 let bookings={};       // {date:{staffId:{time:pid|null}, ...}}
 let bookingStatuses={}; // {date:{staffId:{time:'reserved'|'done'|'cancelled'|'transfer'}}}
-let bookingUnits={}; // {date:{staffId:{time:1|2}}} 1単位(20分)か2単位(40分/通常)かを記録
+let bookingUnits={}; // 予約コース識別値。3=60分・7,000円、4=90分・10,000円（旧データの1/2も読込可能）
 let notifications=[];
 let settings={start:"",end:"",tstart:"",tend:""};
 let externalLinks={homepage:"",instagram:""};
@@ -845,10 +853,24 @@ let schedTherapist="",schedView="day",schedOffset=0;
 let calYear=TODAY.getFullYear(),calMonth=TODAY.getMonth(),calSelected=null;
 let adminBookSelected=null,bkWeekOffset=0,pubWeekOffset=0;
 let pubTherapist=null;
+let pubServiceUnit=0;
 let pubTargetDate=null;
 let topCalYear=TODAY.getFullYear(),topCalMonth=TODAY.getMonth();
 let topCalBookings={};
 let businessHoursMatrix=defaultBusinessHoursMatrix(); // DB読み込み前はデフォルト値を使用
+
+const SERVICE_COURSES={
+  3:{duration:60,price:7000,label:'60分 ／ 7,000円'},
+  4:{duration:90,price:10000,label:'90分 ／ 10,000円'}
+};
+function bookingDurationMinutes(unit){
+  const n=Number(unit)||2;
+  return SERVICE_COURSES[n]?.duration||(n*20);
+}
+function bookingCourseLabel(unit){
+  const n=Number(unit)||2;
+  return SERVICE_COURSES[n]?.label||`${bookingDurationMinutes(n)}分`;
+}
 
 // ---- スタッフ（担当PT）管理 ----
 // staffList: [{id:'staff1', name:'PT A'}, ...] 設定タブから増減可能
@@ -974,9 +996,9 @@ function isLeaveForSlot(ds,th,time){
 // 予約時間全体（20分×単位数）がPT休暇にかからないかを確認する。
 // 例：40分予約なら開始時刻だけでなく、開始+20分の枠も休暇対象なら予約不可。
 function isLeaveForBooking(ds,th,startTime,unit=2){
-  const n=Math.max(1,Number(unit)||2);
-  for(let i=0;i<n;i++){
-    if(isLeaveForSlot(ds,th,addMinutesToTime(startTime,i*20)))return true;
+  const duration=bookingDurationMinutes(unit);
+  for(let offset=0;offset<duration;offset+=20){
+    if(isLeaveForSlot(ds,th,addMinutesToTime(startTime,offset)))return true;
   }
   return false;
 }
@@ -1153,7 +1175,7 @@ function hasSpecialBusinessDay(ds,therapist){
 // 臨時営業日は「開始-終了」で登録されるため、その登録範囲内なら開始時刻から予約可能。
 function isSpecialBusinessRangeCovers(ds,therapist,time,unit=2){
   const target=timeMins(time);
-  const endTarget=target+(Math.max(1,Number(unit)||2)-1)*20;
+  const endTarget=target+bookingDurationMinutes(unit);
   return specialDays.some(s=>{
     if(s.special_date!==ds||s.therapist!==therapist)return false;
     const raw=String(s.time_slot||'').trim();
@@ -1161,16 +1183,16 @@ function isSpecialBusinessRangeCovers(ds,therapist,time,unit=2){
     if(parts.length<2)return normalizeTime(parts[0])===normalizeTime(time);
     const start=timeMins(parts[0]);
     const end=timeMins(parts[1]);
-    return target>=start&&endTarget<end;
+    return target>=start&&endTarget<=end;
   });
 }
 function isBookableStart(ds,therapist,time,unit=2){
-  const n=Math.max(1,Number(unit)||2);
+  const duration=bookingDurationMinutes(unit);
   const nt=normalizeTime(time);
   if(!isSlotAvailable(ds,nt,therapist))return false;
-  if(isSpecialBusinessRangeCovers(ds,therapist,nt,n)){
-    for(let i=0;i<n;i++){
-      if(isLeaveForSlot(ds,therapist,addMinutesToTime(nt,i*20))||isHolidayPeriodOff(ds,addMinutesToTime(nt,i*20)))return false;
+  if(isSpecialBusinessRangeCovers(ds,therapist,nt,unit)){
+    for(let offset=0;offset<duration;offset+=20){
+      if(isLeaveForSlot(ds,therapist,addMinutesToTime(nt,offset))||isHolidayPeriodOff(ds,addMinutesToTime(nt,offset)))return false;
     }
     return true;
   }
@@ -1178,8 +1200,8 @@ function isBookableStart(ds,therapist,time,unit=2){
   // 2単位目の+20分は独立した開始枠として登録されていない。
   // そのため「+20分がtimesForDateに存在するか」は判定条件にしない。
   // 2単位分の実時間について、営業・休診・PT休暇だけを確認する。
-  for(let i=1;i<n;i++){
-    const t=addMinutesToTime(nt,i*20);
+  for(let offset=20;offset<duration;offset+=20){
+    const t=addMinutesToTime(nt,offset);
     if(!isSlotAvailable(ds,t,therapist))return false;
   }
   return true;
@@ -1433,7 +1455,7 @@ function getPatientUpcoming(pid){
         const normT=normalizeTime(time);
         const st=bookingStatuses[date]?.[th]?.[time]||'reserved';
         if(bpid===pid&&st!=='cancelled'&&st!=='reference')
-          list.push({date,time:normT,therapist:th,status:st});
+          list.push({date,time:normT,therapist:th,status:st,unit:bookingUnits[date]?.[th]?.[time]||2});
       });
     });
   });
@@ -1448,6 +1470,9 @@ async function dbBookSlot(date,therapist,time,pid,unit=2,reference=false){
 
   // PT休暇（年休・半休・時間休）は予約処理側でも必ず再チェックする。
   // 画面の空き枠表示をすり抜けた場合でも、休暇中の担当者には予約できないようにする。
+  if(!isBookableStart(date,therapist,normTime,unit)){
+    return{ok:false,reason:`この開始時刻では${bookingCourseLabel(unit)}の予約時間を確保できません。別の時間をお選びください。`};
+  }
   if(isLeaveForBooking(date,therapist,normTime,unit)){
     return{ok:false,reason:`${getStaffName(therapist)}はこの時間帯が休暇のため予約できません。別の時間をお選びください。`};
   }
@@ -1456,7 +1481,7 @@ async function dbBookSlot(date,therapist,time,pid,unit=2,reference=false){
   // （cancelled/done/transferの行も含めて確認する。これらの行は削除せずDBに残っているため、
   //   time_slotの組み合わせに対するユニーク制約に抵触しないよう、INSERTではなくUPDATEで再利用する）
   const {data:exRows,error:exErr}=await sb.from('rehab_bookings')
-    .select('id,patient_id,time_slot,status')
+    .select('id,patient_id,time_slot,status,unit')
     .eq('booking_date',date)
     .eq('therapist',therapist);
   if(exErr) console.warn('重複チェックエラー',exErr);
@@ -1466,8 +1491,8 @@ async function dbBookSlot(date,therapist,time,pid,unit=2,reference=false){
   const existing=(exRows||[]).find(r=>{
     const existingStatus=r.status;
     if(!['reserved','reference','noshow','done'].includes(existingStatus))return false;
-    const startA=timeMins(r.time_slot),endA=startA+(Number(r.unit)||2)*20;
-    const startB=timeMins(normTime),endB=startB+(Number(unit)||2)*20;
+    const startA=timeMins(r.time_slot),endA=startA+bookingDurationMinutes(r.unit);
+    const startB=timeMins(normTime),endB=startB+bookingDurationMinutes(unit);
     return startA<endB && startB<endA;
   });
   console.log('既存レコード確認結果',{existing, checked_time:normTime, all_slots:(exRows||[]).map(r=>({t:r.time_slot,s:r.status}))});
@@ -1855,8 +1880,7 @@ function bookingOccupiesTime(b,time){
   if(['reserved','reference','noshow','done'].indexOf(b.status)<0)return false;
   const start=timeMins(b.time_slot);
   const target=timeMins(time);
-  const units=Number(b.unit)||2;
-  return target>=start && target<start+(units*20);
+  return target>=start && target<start+bookingDurationMinutes(b.unit);
 }
 function topCalBookingAt(ds,therapist,time){
   const rows=Object.values(topCalBookings[ds]?.[therapist]||{});
@@ -1880,7 +1904,7 @@ function topCalHasOpen(ds){
     if(!times.length)return false;
     if(isDayOff(ds)&&!hasSpecialBusinessDay(ds,s.id))return false;
     // トップカレンダーも、週間表・空き状況と同じ共通判定を使用する。
-    return times.some(t=>isOpenStartFromCurrentCache(ds,s.id,t));
+    return times.some(t=>isOpenStartFromCurrentCache(ds,s.id,t,3));
   });
 }
 async function renderTopAvailabilityCalendar(){
@@ -1922,6 +1946,7 @@ async function renderTopAvailabilityCalendar(){
 function openPublicDate(ds){
   pubTargetDate=ds;
   pubTherapist=null;
+  pubServiceUnit=0;
   const d=parseLocalDate(ds);
   const diffDays=Math.round((monday(d)-monday(TODAY))/(24*60*60*1000));
   pubWeekOffset=Math.floor(diffDays/7);
@@ -2706,6 +2731,9 @@ async function deleteLeave(id,th,ds){
 
 // ---- PUBLIC SLOTS ----
 function openPublicSlots(){
+  pubServiceUnit=0;
+  pubTherapist=null;
+  pubTargetDate=null;
   showScreen('s-public');
   renderPublicScreenState();
 }
@@ -2724,8 +2752,20 @@ function renderPublicScreenState(){
   const noticeEl=document.getElementById('pub-closed-notice');
   noticeEl.style.display=closed?'block':'none';
   noticeEl.innerHTML=closed?receptionClosedNoticeHTML():'';
-  document.getElementById('pub-th-select').style.display=closed?'none':(pubTherapist?'none':'block');
-  document.getElementById('pub-slots-wrap').style.display=closed?'none':(pubTherapist?'block':'none');
+  document.getElementById('pub-course-select').style.display=closed?'none':(pubServiceUnit?'none':'block');
+  document.getElementById('pub-th-select').style.display=closed||!pubServiceUnit||pubTherapist?'none':'block';
+  document.getElementById('pub-slots-wrap').style.display=closed?'none':(pubServiceUnit&&pubTherapist?'block':'none');
+}
+function pubSelectService(unit){
+  pubServiceUnit=Number(unit);
+  pubTherapist=null;
+  document.querySelectorAll('#pub-course-cards .th-select-card').forEach(card=>card.classList.toggle('active',Number(card.dataset.serviceUnit)===pubServiceUnit));
+  renderPublicScreenState();
+}
+function pubResetService(){
+  pubServiceUnit=0;
+  pubTherapist=null;
+  renderPublicScreenState();
 }
 function pubSelectTherapist(t){
   if(!isReceptionOpen())return;
@@ -2750,8 +2790,7 @@ function pubSelectTherapist(t){
 function pubResetTherapist(){
   pubTherapist=null;
   pubTargetDate=null;
-  document.getElementById('pub-th-select').style.display='block';
-  document.getElementById('pub-slots-wrap').style.display='none';
+  renderPublicScreenState();
 }
 function pubWeekNav(d){
   // 週移動したら、カレンダーから選択した特定日へのフォーカスを解除する。
@@ -2788,10 +2827,14 @@ async function refreshBookingsForDateRange(fromDate,toDate){
 
 // 「空き状況の確認」と管理者週間表で完全に同じ開始枠判定を使う。
 // 40分予約（2単位）は開始時刻＋20分の両方が空いている必要がある。
-function isOpenStartFromCurrentCache(ds,therapist,time){
+function isOpenStartFromCurrentCache(ds,therapist,time,unit=2){
   const nt=normalizeTime(time);
-  if(!isBookableStart(ds,therapist,nt,2))return false;
-  return !weekTableBookingAt(ds,therapist,nt) && !weekTableBookingAt(ds,therapist,addMinutesToTime(nt,20));
+  if(!isBookableStart(ds,therapist,nt,unit))return false;
+  const duration=bookingDurationMinutes(unit);
+  for(let offset=0;offset<duration;offset+=20){
+    if(weekTableBookingAt(ds,therapist,addMinutesToTime(nt,offset)))return false;
+  }
+  return true;
 }
 
 async function renderPublicSlots(){
@@ -2830,7 +2873,7 @@ async function renderPublicSlots(){
     }
     ensureBookingShape(ds);
     const openTimes=times
-      .filter(t=>isOpenStartFromCurrentCache(ds,pubTherapist,t))
+      .filter(t=>isOpenStartFromCurrentCache(ds,pubTherapist,t,pubServiceUnit))
       .sort((a,b)=>{const [ah,am]=a.split(':').map(Number);const [bh,bm]=b.split(':').map(Number);return(ah*60+am)-(bh*60+bm);});
     if(!openTimes.length)continue;
     anyOpen=true;
@@ -2850,7 +2893,7 @@ function pubBookModal(dayLabel,dateStr2,time,fullDate){
   openModal(`<div class="modal-handle"></div>
     <div class="modal-title">📅 予約する</div>
     <p style="font-size:15px;font-weight:500;margin-bottom:4px">${dateStr2} ${dayLabel} ${time}</p>
-    <p style="font-size:13px;color:#8E8E93;margin-bottom:14px">担当：${getStaffName(pubTherapist)} ／ 40分 ／ 2単位</p>
+    <p style="font-size:13px;color:#8E8E93;margin-bottom:14px">担当：${getStaffName(pubTherapist)} ／ ${bookingCourseLabel(pubServiceUnit)}</p>
     <div class="notice" style="margin-bottom:14px">⚠️ 診察日と同日の予約はできません</div>
     <div class="input-group"><label>お名前</label>
       <input type="text" id="pub-name" placeholder="ご登録のお名前" autocomplete="username">
@@ -2862,10 +2905,10 @@ function pubBookModal(dayLabel,dateStr2,time,fullDate){
     <p id="pub-book-err" style="font-size:13px;color:#FF3B30;margin-bottom:10px;display:none"></p>
     <div style="display:flex;gap:8px">
       <button class="btn btn-block" onclick="closeModal()">戻る</button>
-      <button class="btn btn-primary btn-block" id="pub-submit" onclick="pubDoBook('${fullDate}','${time}','${dateStr2}','${dayLabel}')">予約する</button>
+      <button class="btn btn-primary btn-block" id="pub-submit" onclick="pubDoBook('${fullDate}','${time}','${dateStr2}','${dayLabel}',${pubServiceUnit})">予約する</button>
     </div>`);
 }
-async function pubDoBook(fullDate,time,dateStr2,dayLabel){
+async function pubDoBook(fullDate,time,dateStr2,dayLabel,unit){
   const pubName=document.getElementById('pub-name').value;
   const pubPw=document.getElementById('pub-pw').value;
   const err=document.getElementById('pub-book-err');
@@ -2885,7 +2928,7 @@ async function pubDoBook(fullDate,time,dateStr2,dayLabel){
   const pid=auth.pid;
   btn.textContent='処理中...';
   const normTime=normalizeTime(time);
-  const r=await dbBookSlot(fullDate,pubTherapist,normTime,pid);
+  const r=await dbBookSlot(fullDate,pubTherapist,normTime,pid,Number(unit));
   btn.disabled=false;btn.textContent='予約する';
   if(!r.ok){err.textContent=r.reason;err.style.display='block';
     await reloadBookings();renderPublicSlots();return;}
@@ -2894,7 +2937,7 @@ async function pubDoBook(fullDate,time,dateStr2,dayLabel){
   const prevActorType=currentActorType,prevActorPid=currentActorPatientId;
   setActor('patient',pid);
   try{
-    await dbAddPatientBookingNotification(pid,`${p.name}（${pid}）が ${dateStr2} ${dayLabel} ${normTime}（${getStaffName(pubTherapist)}）に予約`);
+    await dbAddPatientBookingNotification(pid,`${p.name}（${pid}）が ${dateStr2} ${dayLabel} ${normTime}（${getStaffName(pubTherapist)}・${bookingCourseLabel(unit)}）に予約`);
   }finally{
     setActor(prevActorType,prevActorPid);
   }
@@ -3327,7 +3370,7 @@ function renderMyBook(){
           <div>
             <span style="font-weight:700;font-size:16px">${m}月${day}日（${wd}）</span>${label}
             <div style="font-size:14px;color:#007AFF;font-weight:600;margin-top:2px">${u.time}</div>
-            <div style="font-size:12px;color:#8E8E93;margin-top:2px">${getStaffName(u.therapist)} ／ 40分 ／ 2単位</div>
+            <div style="font-size:12px;color:#8E8E93;margin-top:2px">${getStaffName(u.therapist)} ／ ${bookingCourseLabel(u.unit)}</div>
           </div>
           <button class="btn btn-danger btn-sm" onclick="showCancelModal('${u.date}','${u.time}','${u.therapist}')">キャンセル</button>
         </div>
@@ -3357,7 +3400,7 @@ function renderBanner(){
     el.innerHTML=`<div class="next-banner">
       <div class="next-banner-label">次回の予約</div>
       <div class="next-banner-date">${m}月${day}日（${wd}） ${n.time}</div>
-      <div class="next-banner-sub">${getStaffName(n.therapist)} ／ 40分 ／ 2単位</div>
+      <div class="next-banner-sub">${getStaffName(n.therapist)} ／ ${bookingCourseLabel(n.unit)}</div>
     </div>`;
   } else {
     el.innerHTML=`<div style="background:#F5F5F7;padding:12px 14px;border-radius:12px;font-size:13px;color:#8E8E93;text-align:center">現在、予約はありません</div>`;
@@ -3373,7 +3416,7 @@ function renderUpcoming(){
     const d=parseLocalDate(u.date);const m=d.getMonth()+1,day=d.getDate(),wd=DAY_NAMES[d.getDay()];
     html+=`<div class="card" style="display:flex;align-items:center;gap:10px">
       <div style="flex:1"><div style="font-weight:600;font-size:15px">${m}月${day}日（${wd}） ${u.time}</div>
-      <div style="font-size:12px;color:#8E8E93;margin-top:2px">${getStaffName(u.therapist)} ／ 40分 ／ 2単位</div></div>
+      <div style="font-size:12px;color:#8E8E93;margin-top:2px">${getStaffName(u.therapist)} ／ ${bookingCourseLabel(u.unit)}</div></div>
       <button class="btn btn-danger btn-sm" onclick="showCancelModal('${u.date}','${u.time}','${u.therapist}')">キャンセル</button>
     </div>`;
   });
@@ -3389,6 +3432,11 @@ function renderReserve(){
   }
   el.innerHTML=`<div class="pad pt-12">
     <div class="notice-blue" style="margin-bottom:14px">受付期間：${settings.start||'指定なし'}〜${settings.end||'指定なし'}${(settings.tstart&&settings.tend)?`（${settings.tstart}〜${settings.tend}）`:''}</div>
+    <p style="font-size:14px;font-weight:600;margin-bottom:10px">コースを選択</p>
+    <div id="res-service-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="th-select-card ${resServiceUnit===3?'active':''}" data-service-unit="3" onclick="resSelectService(3)"><div style="font-size:18px;font-weight:700">60分</div><div style="font-size:13px;margin-top:3px">7,000円</div></div>
+      <div class="th-select-card ${resServiceUnit===4?'active':''}" data-service-unit="4" onclick="resSelectService(4)"><div style="font-size:18px;font-weight:700">90分</div><div style="font-size:13px;margin-top:3px">10,000円</div></div>
+    </div>
     <p style="font-size:14px;font-weight:600;margin-bottom:12px">担当を選んでから空き枠を選択</p>
     <div id="res-th-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">${staffList.map(s=>`
       <div class="th-select-card ${p.therapist===s.id?'active':''}" data-staff-id="${s.id}" onclick="resSelectTherapist('${s.id}')">
@@ -3405,8 +3453,14 @@ function renderReserve(){
   resSelectTherapist(p.therapist);
 }
 
-let resWeekOffset=0,resTherapist='';
+let resWeekOffset=0,resTherapist='',resServiceUnit=3;
 function resWeekNav(d){resWeekOffset+=d;renderResSlots();}
+function resSelectService(unit){
+  resServiceUnit=Number(unit);
+  resWeekOffset=0;
+  document.querySelectorAll('#res-service-cards .th-select-card').forEach(card=>card.classList.toggle('active',Number(card.dataset.serviceUnit)===resServiceUnit));
+  if(resTherapist)renderResSlots();
+}
 function resSelectTherapist(t){
   resTherapist=t;resWeekOffset=0;
   document.querySelectorAll('#res-th-cards .th-select-card').forEach(card=>{
@@ -3434,7 +3488,7 @@ async function renderResSlots(){
     if((isHoliday(ds)||dow===0)&&!hasSpecialBusinessDay(ds,resTherapist)){html+=`<div style="margin-bottom:8px;font-size:12px;color:#B00020">🔴 ${d.getMonth()+1}/${d.getDate()}（${DAY_NAMES[dow]}）休診日</div>`;continue;}
     ensureBookingShape(ds);
     const openTimes=times
-      .filter(t=>isOpenStartFromCurrentCache(ds,resTherapist,t))
+      .filter(t=>isOpenStartFromCurrentCache(ds,resTherapist,t,resServiceUnit))
       .sort((a,b)=>{const [ah,am]=a.split(':').map(Number);const [bh,bm]=b.split(':').map(Number);return(ah*60+am)-(bh*60+bm);});
     if(!openTimes.length)continue;
     anyOpen=true;
@@ -3492,12 +3546,12 @@ function showReserveModal(dayLabel,dateStr2,time,fullDate,therapist){
     <div class="modal-title">📅 予約確認</div>
     <p style="font-size:16px;font-weight:600;margin-bottom:4px">${dateStr2} ${dayLabel}</p>
     <p style="font-size:20px;font-weight:700;color:#007AFF;margin-bottom:4px">${time}</p>
-    <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">${getStaffName(therapist)} ／ 40分 ／ 2単位</p>
+    <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">${getStaffName(therapist)} ／ ${bookingCourseLabel(resServiceUnit)}</p>
     <div class="notice" style="margin-bottom:14px">⚠️ 診察日と同日の予約はできません</div>
     <p id="res-err" style="font-size:13px;color:#FF3B30;margin-bottom:10px;display:none"></p>
     <div style="display:flex;gap:8px">
       <button class="btn btn-block" onclick="closeModal()">戻る</button>
-      <button class="btn btn-primary btn-block" id="res-submit" onclick="doReserve('${fullDate}','${time}','${dateStr2}','${dayLabel}','${therapist}')">予約する</button>
+      <button class="btn btn-primary btn-block" id="res-submit" onclick="doReserve('${fullDate}','${time}','${dateStr2}','${dayLabel}','${therapist}',${resServiceUnit})">予約する</button>
     </div>`);
 }
 async function doCancel(date,time,therapist){
@@ -3522,7 +3576,7 @@ async function doCancel(date,time,therapist){
   showToast('キャンセルしました');
 }
 
-async function doReserve(fullDate,time,dateStr2,dayLabel,therapist){
+async function doReserve(fullDate,time,dateStr2,dayLabel,therapist,unit){
   const p=patients[currentPid];
   const btn=document.getElementById('res-submit');
 
@@ -3549,10 +3603,10 @@ async function doReserve(fullDate,time,dateStr2,dayLabel,therapist){
   }
 
   btn.disabled=true;btn.textContent='処理中...';
-  const r=await dbBookSlot(fullDate,therapist,normalizeTime(time),currentPid);
+  const r=await dbBookSlot(fullDate,therapist,normalizeTime(time),currentPid,Number(unit));
   btn.disabled=false;btn.textContent='予約する';
   if(!r.ok){document.getElementById('res-err').textContent=r.reason;document.getElementById('res-err').style.display='block';return;}
-  await dbAddPatientBookingNotification(currentPid,`${p.name}（${currentPid}）が ${dateStr2} ${dayLabel} ${normalizeTime(time)}（${getStaffName(therapist)}）に予約`);
+  await dbAddPatientBookingNotification(currentPid,`${p.name}（${currentPid}）が ${dateStr2} ${dayLabel} ${normalizeTime(time)}（${getStaffName(therapist)}・${bookingCourseLabel(unit)}）に予約`);
   // DBから最新データを再読み込み
   await reloadBookings();
   closeModal();renderBanner();renderMyBook();renderReserve();
