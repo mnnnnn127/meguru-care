@@ -256,7 +256,7 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
         <div class="th-select-card" data-service-unit="3" onclick="pubSelectService(3)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">60分</div><div style="font-size:14px">7,000円</div></div>
         <div class="th-select-card" data-service-unit="4" onclick="pubSelectService(4)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">90分</div><div style="font-size:14px">10,000円</div></div>
       </div>
-      <p style="font-size:12px;color:#636366;line-height:1.6;margin:-4px 2px 16px">＊紹介割1,000円はお支払い時に確認させていただきます。</p>
+      <p style="font-size:12px;color:#636366;line-height:1.6;margin:-4px 2px 16px">＊紹介割（紹介した、紹介された）1,000円はお支払いの時に確認の上ひかせていただきます。</p>
     </div>
     <div id="pub-th-select" style="display:none">
       <p style="font-size:15px;font-weight:600;margin-bottom:14px;text-align:center">担当を選んでください</p>
@@ -3040,7 +3040,7 @@ function renderReserve(){
       <div class="th-select-card ${resServiceUnit===3?'active':''}" data-service-unit="3" onclick="resSelectService(3)"><div style="font-size:18px;font-weight:700">60分</div><div style="font-size:13px;margin-top:3px">7,000円</div></div>
       <div class="th-select-card ${resServiceUnit===4?'active':''}" data-service-unit="4" onclick="resSelectService(4)"><div style="font-size:18px;font-weight:700">90分</div><div style="font-size:13px;margin-top:3px">10,000円</div></div>
     </div>
-    <p style="font-size:12px;color:#636366;line-height:1.6;margin:-4px 2px 16px">＊紹介割1,000円はお支払い時に確認させていただきます。</p>
+    <p style="font-size:12px;color:#636366;line-height:1.6;margin:-4px 2px 16px">＊紹介割（紹介した、紹介された）1,000円はお支払いの時に確認の上ひかせていただきます。</p>
     <p style="font-size:14px;font-weight:600;margin-bottom:12px">担当を選んでから空き枠を選択</p>
     <div id="res-th-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">${staffList.map(s=>`
       <div class="th-select-card ${p.therapist===s.id?'active':''}" data-staff-id="${s.id}" onclick="resSelectTherapist('${s.id}')">
