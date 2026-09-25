@@ -2533,11 +2533,26 @@ async function renderWeekTable(){
   if(sumEl)sumEl.innerHTML=isWeekendView?'<div style="font-size:11px;color:#8E8E93;margin-top:4px">※ 土曜日・日曜日に営業がある場合のみ表示しています。</div>':'';
 }
 
-// 月間表：毎月を1〜7日、8〜14日、15〜21日、22〜28日、29日〜月末の5週に分けて表示する。
+// 月間表：各週を日曜日始まり・土曜日終わりで表示する。
+// 月初・月末の週は、曜日の並びを崩さないため前月・翌月の日付も含める。
+function monthTableWeeks(monthStart){
+  const first=new Date(monthStart.getFullYear(),monthStart.getMonth(),1);
+  const last=new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0);
+  const gridStart=addDays(first,-first.getDay());
+  const gridEnd=addDays(last,6-last.getDay());
+  const weeks=[];
+  for(let ws=new Date(gridStart);ws<=gridEnd;ws=addDays(ws,7)){
+    weeks.push(Array.from({length:7},(_,i)=>addDays(ws,i)));
+  }
+  return weeks;
+}
+
 async function loadMonthTableBookings(monthStart){
-  const monthEnd=new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0);
-  const from=dateStr(monthStart),to=dateStr(monthEnd);
-  for(let d=new Date(monthStart);d<=monthEnd;d=addDays(d,1)){
+  const weeks=monthTableWeeks(monthStart);
+  const rangeStart=weeks[0][0];
+  const rangeEnd=weeks[weeks.length-1][6];
+  const from=dateStr(rangeStart),to=dateStr(rangeEnd);
+  for(let d=new Date(rangeStart);d<=rangeEnd;d=addDays(d,1)){
     const ds=dateStr(d);
     delete bookings[ds];
     delete bookingStatuses[ds];
@@ -2571,15 +2586,7 @@ async function weekTableNav(delta){
   await renderWeekTable();
 }
 
-function monthTableWeekDays(monthStart,weekIndex){
-  const firstDay=1+weekIndex*7;
-  const lastDay=Math.min(firstDay+6,new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0).getDate());
-  const days=[];
-  for(let day=firstDay;day<=lastDay;day++)days.push(new Date(monthStart.getFullYear(),monthStart.getMonth(),day));
-  return days;
-}
-
-function renderMonthWeekTable(days,weekNumber){
+function renderMonthWeekTable(days,weekNumber,monthStart){
   const THERAPISTS=staffList.map(s=>s.id);
   const TH_NAMES=staffList.map(s=>s.name.replace(/^PT ?/,''));
   const allTimes=new Set();
@@ -2599,10 +2606,12 @@ function renderMonthWeekTable(days,weekNumber){
     <th style="border:1px solid #D1D1D6;padding:4px 6px;background:#F9FAFB;min-width:64px;position:sticky;left:0;z-index:2"></th>`;
   days.forEach(d=>{
     const ds=dateStr(d),dow=d.getDay();
+    const outsideMonth=d.getMonth()!==monthStart.getMonth();
     const anySpecial=staffList.some(s=>hasSpecialBusinessDay(ds,s.id));
     const off=isDayOff(ds)&&!anySpecial;
-    const bg=off?'#F3F4F6':'#EFF6FF';
-    table+=`<th colspan="${THERAPISTS.length}" onclick="weekTableBulkDoneModal('${ds}')" style="border:1px solid #D1D1D6;padding:5px 4px;background:${bg};text-align:center;min-width:${CELL_W};cursor:pointer" title="クリックすると一括実施済・一括キャンセルを選択できます"><div style="font-weight:600">${DAY_NAMES[dow]}</div><div style="font-size:10px;color:#6B7280">${d.getMonth()+1}/${d.getDate()}</div>${off?'<div style="font-size:9px;color:#B00020">休診</div>':anySpecial?'<div style="font-size:9px;color:#8B4500">臨時営業</div>':''}</th>`;
+    const bg=outsideMonth?'#F7F7F8':off?'#F3F4F6':'#EFF6FF';
+    const dayColor=dow===0?'#B91C1C':dow===6?'#1D4ED8':'#1C1C1E';
+    table+=`<th colspan="${THERAPISTS.length}" onclick="weekTableBulkDoneModal('${ds}')" style="border:1px solid #D1D1D6;padding:5px 4px;background:${bg};text-align:center;min-width:${CELL_W};cursor:pointer;${outsideMonth?'opacity:.58;':''}" title="クリックすると一括実施済・一括キャンセルを選択できます"><div style="font-weight:600;color:${dayColor}">${DAY_NAMES[dow]}</div><div style="font-size:10px;color:#6B7280">${d.getMonth()+1}/${d.getDate()}</div>${off?'<div style="font-size:9px;color:#B00020">休診</div>':anySpecial?'<div style="font-size:9px;color:#8B4500">臨時営業</div>':''}</th>`;
   });
   table+=`</tr><tr><th style="border:1px solid #D1D1D6;background:#F9FAFB;position:sticky;left:0;z-index:2"></th>`;
   days.forEach(d=>{
@@ -2699,9 +2708,10 @@ async function renderWeekTable(){
   const el=document.getElementById('weektable-body');
   if(!el)return;
   document.getElementById('weektable-label').textContent=`${monthStart.getFullYear()}年${monthStart.getMonth()+1}月`;
-  el.innerHTML=[0,1,2,3,4].map(i=>renderMonthWeekTable(monthTableWeekDays(monthStart,i),i+1)).join('');
+  const weeks=monthTableWeeks(monthStart);
+  el.innerHTML=weeks.map((days,i)=>renderMonthWeekTable(days,i+1,monthStart)).join('');
   const sumEl=document.getElementById('weektable-summary');
-  if(sumEl)sumEl.innerHTML='<div style="font-size:11px;color:#718078;margin:6px 4px 12px">※ 実施した予約を「紹介なし／紹介あり」とコース別に集計します。交通費欄をクリックすると、予約ごとの交通費を入力できます。</div>';
+  if(sumEl)sumEl.innerHTML='<div style="font-size:11px;color:#718078;margin:6px 4px 12px">※ 各週は日曜日から土曜日の順です。前月・翌月の日付は薄く表示します。実施した予約を「紹介なし／紹介あり」とコース別に集計し、交通費欄から予約ごとの交通費を入力できます。</div>';
 }
 
 function openTravelCostModal(ds,therapist){
