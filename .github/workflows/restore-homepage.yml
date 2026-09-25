@@ -1,0 +1,27 @@
+name: One-time homepage restore
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.event.head_commit.message == 'Run one-time homepage restore'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore and update homepage
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout 4bc66b450a31097f56e6e3c43c1510e825cd16ce -- index.html
+          perl -0pi -e 's{https://mnnnnn127.github.io/meguru-care/calendar\.html}{https://mnnnnn127.github.io/meguru-care/reservation-v2.html}' index.html
+          git add index.html
+          git commit -m "Restore homepage and update reservation link"
+          git push
