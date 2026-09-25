@@ -4433,6 +4433,7 @@ async function renderLogs(){
 // ---- DEADLINE ----
 function renderDeadline(){
   const tb=document.getElementById('dl-tb');
+  if(!tb)return;
   const base=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
   const thisMonthEnd=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);
   const nextMonthEnd=new Date(TODAY.getFullYear(),TODAY.getMonth()+2,0);
