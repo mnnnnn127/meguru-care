@@ -2488,7 +2488,6 @@ function pubBookModal(dayLabel,dateStr2,time,fullDate){
     <div class="modal-title">📅 予約する</div>
     <p style="font-size:15px;font-weight:500;margin-bottom:4px">${dateStr2} ${dayLabel} ${time}</p>
     <p style="font-size:13px;color:#8E8E93;margin-bottom:14px">担当：${getStaffName(pubTherapist)} ／ ${bookingCourseLabel(pubServiceUnit)}</p>
-    <div class="notice" style="margin-bottom:14px">⚠️ 診察日と同日の予約はできません</div>
     <div class="input-group"><label>お名前</label>
       <input type="text" id="pub-name" placeholder="ご登録のお名前" autocomplete="username">
     </div>
@@ -3152,7 +3151,6 @@ function showReserveModal(dayLabel,dateStr2,time,fullDate,therapist){
     <p style="font-size:16px;font-weight:600;margin-bottom:4px">${dateStr2} ${dayLabel}</p>
     <p style="font-size:20px;font-weight:700;color:#007AFF;margin-bottom:4px">${time}</p>
     <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">${getStaffName(therapist)} ／ ${bookingCourseLabel(resServiceUnit)}</p>
-    <div class="notice" style="margin-bottom:14px">⚠️ 診察日と同日の予約はできません</div>
     <p id="res-err" style="font-size:13px;color:#FF3B30;margin-bottom:10px;display:none"></p>
     <div style="display:flex;gap:8px">
       <button class="btn btn-block" onclick="closeModal()">戻る</button>
