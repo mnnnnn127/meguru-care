@@ -4081,7 +4081,7 @@ function getStaffReplyText(n){
   // 将来の表記揺れに備えたフォールバック
   m=msg.match(/(?:が\s+)(\d{1,2})\/(\d{1,2})\s+(\d{1,2}:\d{2})/);
   if(m && msg.includes('予約'))return `${Number(m[1])}月${Number(m[2])}日${m[3].replace(':','：')}　追加　確認しました。`;
-  return '予約変更を確認しました。';
+  return 'ご予約を承りました。ご予約ありがとうございます。';
 }
 function isApprovedNotification(n){
   return String(n?.text||'').includes(STAFF_REPLY_MARK);
