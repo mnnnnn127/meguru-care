@@ -472,18 +472,17 @@ body.admin-page .customer-admin-title{color:var(--admin-text)}
       <div class="tab2 active" onclick="switchTab('a','notify',this)">ホーム</div>
       <div class="tab2" onclick="switchTab('a','patients',this)">お客様情報</div>
       <div class="tab2" onclick="switchTab('a','schedule',this)">予約一覧</div>
-      <div class="tab2" onclick="switchTab('a','message',this)">メッセージ</div>
-      <div class="tab2" onclick="switchTab('a','actuals',this)">収支</div>
-      <div class="tab2" onclick="switchTab('a','settings',this)">設定</div>
       <div class="tab2" onclick="switchTab('a','weektable',this)">月間表</div>
+      <div class="tab2" onclick="switchTab('a','message',this)">メッセージ</div>
+      <div class="tab2" onclick="switchTab('a','booking',this)">固定予約</div>
+      <div class="tab2" onclick="switchTab('a','actuals',this)">収支</div>
       <div class="tab2" onclick="switchTab('a','expenses',this)">経費</div>
-      <div class="tab2" onclick="switchTab('a','booking',this)">代理予約</div>
       <div class="tab2" onclick="switchTab('a','slots',this)">枠設定</div>
       <div class="tab2" onclick="switchTab('a','holidays',this)">休診日</div>
       <div class="tab2" onclick="switchTab('a','leaves',this)">休暇申請</div>
+      <div class="tab2" onclick="switchTab('a','topedit',this)">トップ画面</div>
+      <div class="tab2" onclick="switchTab('a','settings',this)">設定</div>
       <div class="tab2" onclick="switchTab('a','logs',this)">操作ログ</div>
-      <div class="tab2" onclick="switchTab('a','deadline',this)">期限</div>
-      <div class="tab2" onclick="switchTab('a','topedit',this)">トップ画面編集</div>
     </div>
   </div>
 
@@ -739,19 +738,6 @@ body.admin-page .customer-admin-title{color:var(--admin-text)}
   <div class="pad pt-12" id="atab-logs" style="display:none">
     <div style="font-size:14px;font-weight:600;margin-bottom:12px">操作履歴（直近50件）</div>
     <div id="log-list"></div>
-  </div>
-
-  <!-- 期限アラート -->
-  <div class="pad pt-12" id="atab-deadline" style="display:none">
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-      <span class="badge badge-warn">残60日以下</span>
-      <span class="badge badge-alert">残30日以下</span>
-      <span class="badge badge-danger">残14日以下</span>
-      <span class="badge badge-expired">期限切れ</span>
-    </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="table-wrap"><table><thead><tr><th>ID</th><th>お客様名</th><th>疾患</th><th>期限</th><th>状態</th></tr></thead><tbody id="dl-tb"></tbody></table></div>
-    </div>
   </div>
 
   <!-- トップ画面編集 -->
@@ -2168,7 +2154,7 @@ function showScreen(id){
 }
 function switchTab(prefix,name,el){
   const all=prefix==='p'?['mybook','reserve','history']:
-    ['notify','message','weektable','expenses','schedule','patients','booking','slots','holidays','leaves','logs','deadline','topedit','settings','actuals'];
+    ['notify','message','weektable','expenses','schedule','patients','booking','slots','holidays','leaves','logs','topedit','settings','actuals'];
   all.forEach(t=>{const e=document.getElementById(prefix+'tab-'+t);if(e)e.style.display='none';});
   const t=document.getElementById(prefix+'tab-'+name);if(t)t.style.display='block';
   // tab と tab2 両方のactiveを解除
@@ -2194,7 +2180,6 @@ function switchTab(prefix,name,el){
   if(name==='slots'){populateStaffSelect('slot-th');renderSlotDefs();}
   if(name==='leaves'){populateStaffSelect('lv-th');renderLeaveFilterButtons();leaveFilter=staffList[0]?.id||'';renderLeaves(leaveFilter);}
   if(name==='logs')renderLogs();
-  if(name==='deadline')renderDeadline();
   if(name==='settings'){renderSettingsDisplay();renderBusinessHoursTable();renderStaffListArea();populateStaffSelect('sp-th');renderSpecialDaysList();renderCustomerExtraFieldsSettings();}
   if(name==='topedit'){populateClinicSettingsInputs();populateExternalLinkInputs();populateTopNoticeInput();}
   if(name==='actuals'){renderActuals();}
@@ -2794,7 +2779,7 @@ function weekTableBookModal(ds,therapist,time){
   const baseTaken=!!(bookings[ds]?.[therapist]?.[baseTime]);
   const secondTaken=!!(bookings[ds]?.[therapist]?.[secondTime]);
   openModal(`<div class="modal-handle"></div>
-    <div class="modal-title">📅 代理予約</div>
+    <div class="modal-title">📅 固定予約</div>
     <p style="font-size:14px;font-weight:500;margin-bottom:4px">${m}月${day}日（${wd}） ${time}${!isBaseSlot?'　<span style="font-size:12px;color:#8B4500">（1単位・後半20分）</span>':''}</p>
     <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">担当：${getStaffName(therapist)}</p>
     <div class="input-group">
@@ -4914,14 +4899,14 @@ function renderBasicBookingTable(){
   el.innerHTML=html;
 }
 
-// 基本表のお客様登録は、週間表の代理予約と同じお客様選択モーダル方式にする。
+// 基本表のお客様登録は、月間表の固定予約と同じお客様選択モーダル方式にする。
 let basicBookingPickerKey=null;
 function openBasicBookingPatientPicker(therapist,dow,time){
   basicBookingPickerKey={therapist,dow,time};
   const current=getBasicBookingPid(therapist,dow,time);
   const currentPatient=current?patients[current]:null;
   openModal(`<div class="modal-handle"></div>
-    <div class="modal-title">📅 代理予約 ― お客様を選択</div>
+    <div class="modal-title">📅 固定予約 ― お客様を選択</div>
     <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">担当：${escapeHtml(getStaffName(therapist))} ／ ${escapeHtml(DAY_NAMES[dow])} ／ ${escapeHtml(time)}</p>
     ${currentPatient?`<div style="background:#F5F5F7;border-radius:10px;padding:9px 11px;margin-bottom:10px;font-size:12px">現在：<strong>${escapeHtml(currentPatient.name||'')}</strong>　${escapeHtml(currentPatient.kana||currentPatient.furigana||'')} ／ ${escapeHtml(current)}</div>`:''}
     <div class="input-group">
