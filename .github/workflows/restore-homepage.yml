@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   restore:
-    if: github.event.head_commit.message == 'Run one-time homepage restore'
+    if: startsWith(github.event.head_commit.message, 'Run one-time homepage restore')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
