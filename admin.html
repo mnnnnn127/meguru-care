@@ -214,10 +214,40 @@ body.admin-page .customer-info-card{background:var(--admin-card);border-color:va
 body.admin-page .customer-info-name,
 body.admin-page .customer-info-value,
 body.admin-page .customer-admin-title{color:var(--admin-text)}
+.admin-home-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:16px}
+.admin-home-stat{background:var(--admin-card);border:1px solid var(--admin-line);border-radius:16px;padding:20px 18px;min-height:104px;display:flex;flex-direction:column;justify-content:center}
+.admin-home-stat-value{font-size:30px;line-height:1;font-weight:800;color:var(--admin-text);margin-bottom:9px}
+.admin-home-stat-label{font-size:13px;color:var(--admin-muted)}
+.admin-home-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;align-items:start}
+.admin-home-panel{background:var(--admin-card);border:1px solid var(--admin-line);border-radius:16px;padding:16px 18px;min-width:0}
+.admin-home-panel-title{font-size:17px;font-weight:800;color:var(--admin-text);margin-bottom:12px}
+.admin-home-empty{background:#f1f5f1;color:var(--admin-muted);border-radius:10px;padding:12px;font-size:13px}
+.admin-list-card{background:var(--admin-card);border:1px solid var(--admin-line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.admin-booking-grid{display:grid;grid-template-columns:150px 90px 130px minmax(160px,1fr);gap:12px;align-items:center}
+.message-layout{display:grid;grid-template-columns:minmax(220px,320px) minmax(0,1fr);gap:16px;min-height:560px}
+.message-customer-list{max-height:600px;overflow:auto}
+.message-customer-btn{display:block;width:100%;padding:12px;border:0;border-bottom:1px solid var(--admin-line);background:#fff;text-align:left;cursor:pointer;font-family:inherit}
+.message-customer-btn.active{background:#edf5f0;color:#315e4f}
+.message-thread{height:390px;overflow:auto;background:#f5f7f5;border-radius:12px;padding:14px}
+.message-bubble{max-width:78%;padding:10px 12px;border-radius:14px;margin-bottom:10px;font-size:14px;line-height:1.55;white-space:pre-wrap}
+.message-bubble.admin{margin-left:auto;background:#dfeee6;color:#233b32}
+.message-bubble.customer{margin-right:auto;background:#fff;border:1px solid var(--admin-line)}
+.finance-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.finance-kpi{border:1px solid var(--admin-line);border-radius:14px;background:#fff;padding:16px}
+.finance-kpi strong{display:block;font-size:22px;margin-top:6px}
+.expense-add-grid{display:grid;grid-template-columns:160px minmax(180px,1fr) 160px auto;gap:10px;align-items:end}
 @media(max-width:700px){
   body.admin-page #s-admin-login .nav,body.admin-page #s-admin .nav{padding-left:16px;padding-right:16px}
   body.admin-page .admin-menu-shell{padding-left:16px;padding-right:16px}
   body.admin-page #s-admin .nav-title{font-size:21px}
+  .admin-home-stats{grid-template-columns:1fr;gap:10px}
+  .admin-home-stat{min-height:82px;padding:15px 16px}
+  .admin-home-grid{grid-template-columns:1fr;gap:12px}
+  .admin-booking-grid{grid-template-columns:1fr 1fr;gap:6px 10px}
+  .message-layout{grid-template-columns:1fr;min-height:0}
+  .message-customer-list{max-height:240px}
+  .finance-kpis{grid-template-columns:1fr}
+  .expense-add-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -435,18 +465,18 @@ body.admin-page .customer-admin-title{color:var(--admin-text)}
 <div id="s-admin" class="screen">
   <div class="nav">
     <div><div class="nav-title">めぐる訪問ケア｜管理画面</div><div class="nav-sub" id="admin-date-sub"></div></div>
-    <button class="btn btn-sm" onclick="setActor('system');window.location.href='reservation-v2.html'">予約ページへ</button>
+    <button class="btn btn-sm" onclick="setActor('system');try{sessionStorage.removeItem('meguru_admin_authenticated')}catch(e){}window.location.href='reservation-v2.html'">予約ページへ</button>
   </div>
   <div class="admin-menu-shell" style="background:#fff;border-bottom:1px solid #E5E5EA">
     <div class="admin-menu-grid">
       <div class="tab2 active" onclick="switchTab('a','notify',this)">ホーム</div>
       <div class="tab2" onclick="switchTab('a','patients',this)">お客様情報</div>
       <div class="tab2" onclick="switchTab('a','schedule',this)">予約一覧</div>
-      <div class="tab2" onclick="switchTab('a','notify',this);setTimeout(()=>document.getElementById('patient-message-select-btn')?.scrollIntoView({behavior:'smooth'}),0)">メッセージ</div>
-      <div class="tab2" onclick="switchTab('a','actuals',this)">実績一覧</div>
+      <div class="tab2" onclick="switchTab('a','message',this)">メッセージ</div>
+      <div class="tab2" onclick="switchTab('a','actuals',this)">収支</div>
       <div class="tab2" onclick="switchTab('a','settings',this)">設定</div>
-      <div class="tab2" onclick="switchTab('a','weektable',this)">週間表</div>
-      <div class="tab2" onclick="switchTab('a','calendar',this)">カレンダー</div>
+      <div class="tab2" onclick="switchTab('a','weektable',this)">月間表</div>
+      <div class="tab2" onclick="switchTab('a','expenses',this)">経費</div>
       <div class="tab2" onclick="switchTab('a','booking',this)">代理予約</div>
       <div class="tab2" onclick="switchTab('a','slots',this)">枠設定</div>
       <div class="tab2" onclick="switchTab('a','holidays',this)">休診日</div>
@@ -459,43 +489,59 @@ body.admin-page .customer-admin-title{color:var(--admin-text)}
 
   <!-- お知らせ -->
   <div class="pad pt-12" id="atab-notify">
-    <!-- 本日の予定 -->
-    <div style="margin-bottom:16px">
-      <div style="font-size:15px;font-weight:600;margin-bottom:10px">📋 本日の予定</div>
-      <div id="today-schedule"></div>
+    <div class="admin-home-stats">
+      <div class="admin-home-stat"><div class="admin-home-stat-value" id="home-today-count">0</div><div class="admin-home-stat-label">本日の予定</div></div>
+      <div class="admin-home-stat"><div class="admin-home-stat-value" id="home-request-count">0</div><div class="admin-home-stat-label">予約申請</div></div>
+      <div class="admin-home-stat"><div class="admin-home-stat-value" id="home-unread-count">0</div><div class="admin-home-stat-label">未読メッセージ</div></div>
     </div>
-    <hr style="border:none;border-top:1px solid #E5E5EA;margin-bottom:16px">
+    <div class="admin-home-grid">
+      <section class="admin-home-panel">
+        <div class="admin-home-panel-title">◆ 本日の予定</div>
+        <div id="today-schedule"></div>
+      </section>
+      <section class="admin-home-panel">
+        <div class="admin-home-panel-title">◆ お客様より予約申請</div>
+        <div id="home-reservation-requests"></div>
+      </section>
+    </div>
     <!-- 通知 -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <span style="font-size:15px;font-weight:600">直近の予約変更</span>
-      <span class="badge badge-danger" id="notif-cnt" style="display:none"></span>
-    </div>
-    <div id="notif-list"></div>
-    <div id="notif-empty" class="empty" style="display:none">✅ 未確認のお知らせはありません</div>
-
-    <!-- お客様へメッセージ -->
-    <div style="margin-top:22px;padding-top:16px;border-top:1px solid #E5E5EA">
-      <div style="font-size:15px;font-weight:600;margin-bottom:10px">💬 お客様へメッセージ</div>
-      <div class="card" style="margin:0">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-          <button class="btn btn-sm" id="patient-message-select-btn" onclick="openPatientMessageModal()">お客様を選択</button>
-          <div id="patient-message-selected" style="font-size:13px;color:#8E8E93;flex:1">お客様が選択されていません</div>
-        </div>
-        <div class="input-group" style="margin-bottom:10px">
-          <label>メッセージ（自由記載）</label>
-          <textarea id="patient-message-text" rows="4" placeholder="お客様へ伝える内容を入力してください" style="width:100%;resize:vertical;box-sizing:border-box"></textarea>
-        </div>
-        <button class="btn btn-primary btn-block" id="patient-message-send-btn" onclick="sendPatientMessage()">送信</button>
+    <div class="admin-home-panel" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span class="admin-home-panel-title" style="margin:0">◆ 直近の予約変更</span>
+        <span class="badge badge-danger" id="notif-cnt" style="display:none"></span>
       </div>
+      <div id="notif-list"></div>
+      <div id="notif-empty" class="empty" style="display:none">✅ 未確認のお知らせはありません</div>
+    </div>
+
+  </div>
+
+  <!-- メッセージ -->
+  <div class="pad pt-12" id="atab-message" style="display:none">
+    <div class="customer-admin-title">メッセージ</div>
+    <div class="customer-admin-note">お客様を選択すると、これまでのメッセージを確認して返信できます。</div>
+    <div class="message-layout">
+      <section class="admin-home-panel">
+        <input type="search" id="message-customer-search" placeholder="お客様名で検索" oninput="renderMessageCustomerList()" style="margin-bottom:10px">
+        <div id="message-customer-list" class="message-customer-list"></div>
+      </section>
+      <section class="admin-home-panel">
+        <div id="message-thread-title" class="admin-home-panel-title">お客様を選択してください</div>
+        <div id="message-thread" class="message-thread"><div class="admin-home-empty">左の一覧からお客様を選択してください。</div></div>
+        <div style="margin-top:12px">
+          <textarea id="message-reply-text" rows="3" placeholder="返信メッセージを入力" style="width:100%;resize:vertical;box-sizing:border-box" disabled></textarea>
+          <button class="btn btn-primary btn-block" id="message-reply-btn" onclick="sendConversationReply()" style="margin-top:8px" disabled>返信する</button>
+        </div>
+      </section>
     </div>
   </div>
 
-  <!-- 週間スケジュール表 -->
+  <!-- 月間スケジュール表 -->
   <div id="atab-weektable" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid #E5E5EA">
-      <button class="btn btn-sm" onclick="weekTableNav(-1)">‹ 前週</button>
+      <button class="btn btn-sm" onclick="weekTableNav(-1)">‹ 前月</button>
       <span id="weektable-label" style="flex:1;text-align:center;font-size:14px;font-weight:600"></span>
-      <button class="btn btn-sm" onclick="weekTableNav(1)">次週 ›</button>
+      <button class="btn btn-sm" onclick="weekTableNav(1)">次月 ›</button>
       <button class="btn btn-sm btn-orange" onclick="printWeekTable()">🖨 PDF</button>
     </div>
     <div style="padding:10px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch">
@@ -509,31 +555,38 @@ body.admin-page .customer-admin-title{color:var(--admin-text)}
     </div>
   </div>
 
-  <!-- カレンダー -->
-  <div id="atab-calendar" style="display:none">
-    <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:#fff;border-bottom:1px solid #E5E5EA">
-      <button class="btn btn-sm" onclick="calNav(-1)">‹</button>
-      <span id="cal-label" style="flex:1;text-align:center;font-size:15px;font-weight:600"></span>
-      <button class="btn btn-sm" onclick="calNav(1)">›</button>
-    </div>
-    <div class="pad pt-12">
-      <div class="card" style="padding:12px"><div id="cal-grid"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#8E8E93">
-          <span>🟢予約あり</span><span style="color:#B00020">🔴休診日</span>
-        </div>
+  <!-- 経費 -->
+  <div id="atab-expenses" class="pad pt-12" style="display:none">
+    <div class="customer-admin-title">経費</div>
+    <div class="admin-home-panel" style="margin-bottom:16px">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <label style="font-size:13px;font-weight:700">月別経費</label>
+        <input type="month" id="expense-month" onchange="renderExpenses()" style="width:170px">
+        <strong id="expense-month-total" style="font-size:20px;color:#b45309">0円</strong>
       </div>
-      <div id="cal-detail" style="display:none"></div>
+    </div>
+    <div class="admin-home-panel" style="margin-bottom:16px">
+      <div class="admin-home-panel-title">追加登録</div>
+      <div class="expense-add-grid">
+        <div class="input-group" style="margin:0"><label>日にち</label><input type="date" id="expense-date"></div>
+        <div class="input-group" style="margin:0"><label>内容（自由記載）</label><input type="text" id="expense-note" placeholder="例：ガソリン代"></div>
+        <div class="input-group" style="margin:0"><label>金額</label><input type="number" id="expense-amount" min="0" step="1" placeholder="0"></div>
+        <button class="btn btn-primary" onclick="addExpense()">決定</button>
+      </div>
+    </div>
+    <div class="admin-home-panel">
+      <div class="admin-home-panel-title">経費一覧</div>
+      <div id="expense-list"></div>
     </div>
   </div>
 
-  <!-- スケジュール -->
+  <!-- 予約一覧 -->
   <div id="atab-schedule" style="display:none">
-    <div class="day-nav">
-      <button class="btn btn-sm" onclick="schedNav(-1)">‹ 前日</button>
-      <span id="sched-label" class="day-nav-label"></span>
-      <button class="btn btn-sm" onclick="schedNav(1)">翌日 ›</button>
+    <div class="pad pt-12">
+      <div class="customer-admin-title">予約一覧</div>
+      <div class="customer-admin-note">予約確定したお客様を、予約日の早い順に表示しています。</div>
+      <div id="sched-body"></div>
     </div>
-    <div class="pad pt-12" id="sched-body"></div>
   </div>
 
   <!-- お客様管理 -->
@@ -830,29 +883,19 @@ body.admin-page .customer-admin-title{color:var(--admin-text)}
     </div>
   </div>
 
-  <!-- 実績表 -->
+  <!-- 収支 -->
   <div id="atab-actuals" class="actuals-screen" style="display:none">
     <div class="actuals-toolbar">
       <button class="btn btn-sm" onclick="switchTab('a','notify',document.querySelector('#s-admin .tab2'))">← 管理画面</button>
-      <div class="actuals-title">📊 リハビリ実績表</div>
+      <div class="actuals-title">収支</div>
       <div class="actuals-actions">
-        <label style="font-size:12px;color:#8E8E93">年度</label>
-        <select id="actuals-fy" style="width:130px;min-height:36px;padding:7px 30px 7px 10px" onchange="renderActuals()"></select>
+        <label style="font-size:12px;color:#8E8E93">年</label>
+        <select id="actuals-fy" style="width:120px;min-height:36px;padding:7px 30px 7px 10px" onchange="renderActuals()"></select>
         <button class="btn btn-sm btn-green" onclick="renderActuals()">↻ 再集計</button>
-        <button class="btn btn-sm btn-orange" onclick="printActuals()">🖨 印刷</button>
       </div>
     </div>
     <div class="actuals-kpi" id="actuals-kpi"></div>
-    <div id="actuals-body"><div class="actuals-loading">年度を選択してください</div></div>
-    <div class="actuals-note">
-      ※「実際取得単位数」は予約ステータスが「実施済」の単位数を集計します。<br>
-      ※「キャンセル単位数」は「お知らせ」内の「お客様からの予約変更」に記録されたお客様自身のキャンセルを1件=2単位として集計します。<br>
-      ※「予約空き数」は設定された空き枠を1枠=2単位として集計します。<br>
-      ※「担当者別」は、その月に実施済となったお客様のユニーク人数。「運動器お客様数」は担当者別お客様数の総和です。<br>
-      ※「新規お客様数（開始）」は「お客様管理」の「リハビリ開始日」を月別に集計します。<br>
-      ※現在の予約システムには脳血管リハ・医療のみ・実施計画書・医1/医2の区分データがないため、それらは自動算定せず「—」表示にしています。<br>
-      ※診療報酬の金額は請求データそのものではないため自動推定せず、単価を設定した場合のみ表示します。
-    </div>
+    <div id="actuals-body"><div class="actuals-loading">年を選択してください</div></div>
   </div>
 </div><!-- end s-admin -->
 </div><!-- end app -->
@@ -893,6 +936,8 @@ let patients={};
 let bookings={};       // {date:{staffId:{time:pid|null}, ...}}
 let bookingStatuses={}; // {date:{staffId:{time:'reserved'|'done'|'cancelled'|'transfer'}}}
 let bookingUnits={}; // 予約コース識別値。3=60分・7,000円、4=90分・10,000円（旧データの1/2も読込可能）
+let bookingBillingMeta={}; // {"日付|担当|時間":{referral:boolean,travel:number}}
+let expenseEntries=[]; // [{id,date,note,amount,createdAt}]
 let notifications=[];
 let settings={start:"",end:"",tstart:"",tend:""};
 let externalLinks={homepage:"",instagram:""};
@@ -902,7 +947,6 @@ let holidayData=[];   // 全休診日レコード（period情報含む）
 let leaves={};
 let leaveData=[];
 let weekTableOffset=0;
-let weekTableWeekendMode=false;
 let leaveFilter='';
 let currentPid=null;
 let schedTherapist="",schedView="day",schedOffset=0;
@@ -927,6 +971,22 @@ function bookingCourseLabel(unit){
   const n=Number(unit)||2;
   return SERVICE_COURSES[n]?.label||`${bookingDurationMinutes(n)}分`;
 }
+function bookingPrice(unit){
+  return Number(unit)===4?10000:7000;
+}
+function bookingMetaKey(ds,therapist,time){return `${ds}|${therapist}|${normalizeTime(time)}`;}
+function bookingBilling(ds,therapist,time){return bookingBillingMeta[bookingMetaKey(ds,therapist,time)]||{};}
+function bookingSalesPrice(ds,therapist,time,unit){
+  const referral=!!bookingBilling(ds,therapist,time).referral;
+  return Number(unit)===4?(referral?9000:10000):(referral?6000:7000);
+}
+function bookingBillingLabel(ds,therapist,time,unit){
+  const referral=!!bookingBilling(ds,therapist,time).referral;
+  return `${referral?'紹介あり':'紹介なし'}${Number(unit)===4?'90分':'60分'}`;
+}
+function bookingTravel(ds,therapist,time){return Math.max(0,Number(bookingBilling(ds,therapist,time).travel)||0);}
+async function saveBookingBillingMeta(){await dbSaveSetting('booking_billing_meta',JSON.stringify(bookingBillingMeta));}
+async function saveExpenseEntries(){await dbSaveSetting('business_expenses',JSON.stringify(expenseEntries));}
 
 // ---- スタッフ（担当PT）管理 ----
 // staffList: [{id:'staff1', name:'PT A'}, ...] 設定タブから増減可能
@@ -1443,6 +1503,12 @@ async function loadAllData(){
         rehabBillingStartDates=(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))?parsed:{};
       }catch(e){ rehabBillingStartDates={}; }
     }
+    if(r.key==='booking_billing_meta'){
+      try{const parsed=JSON.parse(r.value||'{}');bookingBillingMeta=(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))?parsed:{};}catch(e){bookingBillingMeta={};}
+    }
+    if(r.key==='business_expenses'){
+      try{const parsed=JSON.parse(r.value||'[]');expenseEntries=Array.isArray(parsed)?parsed:[];}catch(e){expenseEntries=[];}
+    }
     if(r.key==='last_updated'){
       try{
         const d=new Date(r.value);
@@ -1490,7 +1556,7 @@ async function loadAllData(){
   });
 
   // notifications
-  notifications=(ndRes.data||[]).map(n=>({id:n.id,text:n.message,time:fmtTime(n.created_at),operator:n.operator||'patient'}));
+  notifications=(ndRes.data||[]).map(n=>({id:n.id,text:n.message,time:fmtTime(n.created_at),createdAt:n.created_at,operator:n.operator||'patient'}));
 
   // 臨時営業日
   specialDays=(spRes&&spRes.data)?spRes.data.map(s=>({...s,time_slot:normalizeTime(s.time_slot)})):[];
@@ -1713,7 +1779,7 @@ async function dbAddNotification(text, operator=null){
     .insert({message:text,operator:actor})
     .select().single();
   if(error){ console.error('通知保存失敗:',error); return false; }
-  notifications.unshift({id:data.id,text:data.message,time:'たった今',operator:data.operator});
+  notifications.unshift({id:data.id,text:data.message,time:'たった今',createdAt:data.created_at||new Date().toISOString(),operator:data.operator});
   await sb.from('rehab_operation_logs').insert({operator:actor,action:'notify',detail:text});
   if(document.getElementById('notif-list')) renderNotifications();
   return true;
@@ -1734,7 +1800,7 @@ async function dbAddPatientBookingNotification(patientId,text){
     console.error('お客様予約変更通知保存失敗:',error);
     return false;
   }
-  notifications.unshift({id:data.id,text:data.message,time:'たった今',operator:data.operator});
+  notifications.unshift({id:data.id,text:data.message,time:'たった今',createdAt:data.created_at||new Date().toISOString(),operator:data.operator});
   await sb.from('rehab_operation_logs').insert({operator:pid,action:'notify',detail:text});
   if(document.getElementById('notif-list')) renderNotifications();
   return true;
@@ -1763,7 +1829,7 @@ async function dbAddPatientMessage(patientId,text){
     console.error('お客様へのメッセージ保存失敗:',error);
     return {ok:false,reason:'メッセージの送信に失敗しました'};
   }
-  notifications.unshift({id:data.id,text:data.message,time:'たった今',operator:data.operator});
+  notifications.unshift({id:data.id,text:data.message,time:'たった今',createdAt:data.created_at||new Date().toISOString(),operator:data.operator});
   await dbLog('admin','patient_message',`${pid}：${msg}`);
   return {ok:true};
 }
@@ -1839,6 +1905,77 @@ async function sendPatientMessage(){
   if(btn)btn.disabled=false;
   renderNotifications();
   showToast('お客様へメッセージを送信しました','#34C759');
+}
+
+function patientConversationItems(pid){
+  return notifications.filter(n=>String(n.operator)===String(pid)).filter(n=>{
+    if(hasPatientMessageMark(n.text))return true;
+    return !isPatientBookingChange(n);
+  }).map(n=>({
+    id:n.id,
+    direction:hasPatientMessageMark(n.text)?'admin':'customer',
+    text:hasPatientMessageMark(n.text)?getPatientMessageText(n):getOriginalNotificationText(n),
+    time:n.time||'',
+    createdAt:n.createdAt||''
+  })).filter(n=>n.text).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt))||Number(a.id)-Number(b.id));
+}
+
+function renderMessageCustomerList(){
+  const el=document.getElementById('message-customer-list');
+  if(!el)return;
+  const q=String(document.getElementById('message-customer-search')?.value||'').trim().toLowerCase();
+  const rows=Object.entries(patients).filter(([id,p])=>!isArchivedPatient(id)&&(!q||[id,p.name,p.kana,p.furigana].filter(Boolean).some(v=>String(v).toLowerCase().includes(q))));
+  if(!rows.length){el.innerHTML='<div class="admin-home-empty">該当するお客様はいません。</div>';return;}
+  el.innerHTML=rows.sort((a,b)=>String(a[1].name||'').localeCompare(String(b[1].name||''),'ja')).map(([id,p])=>{
+    const count=patientConversationItems(id).length;
+    return `<button class="message-customer-btn${String(selectedPatientMessageId)===String(id)?' active':''}" onclick="selectMessageCustomer('${escapeJs(id)}')"><strong>${escapeHtml(p.name||id)}</strong><div style="font-size:11px;color:#718078;margin-top:3px">${count?`メッセージ ${count}件`:'メッセージなし'}</div></button>`;
+  }).join('');
+}
+
+function renderMessageThread(){
+  const title=document.getElementById('message-thread-title');
+  const el=document.getElementById('message-thread');
+  const text=document.getElementById('message-reply-text');
+  const btn=document.getElementById('message-reply-btn');
+  if(!el)return;
+  const p=patients[selectedPatientMessageId];
+  if(!p){
+    if(title)title.textContent='お客様を選択してください';
+    el.innerHTML='<div class="admin-home-empty">左の一覧からお客様を選択してください。</div>';
+    if(text)text.disabled=true;if(btn)btn.disabled=true;return;
+  }
+  if(title)title.textContent=`${p.name} さんとのメッセージ`;
+  if(text)text.disabled=false;if(btn)btn.disabled=false;
+  const items=patientConversationItems(selectedPatientMessageId);
+  el.innerHTML=items.length?items.map(m=>`<div class="message-bubble ${m.direction}">${escapeHtml(m.text)}<div style="font-size:10px;color:#718078;margin-top:5px;text-align:${m.direction==='admin'?'right':'left'}">${escapeHtml(m.time)}</div></div>`).join(''):'<div class="admin-home-empty">まだメッセージはありません。下から最初のメッセージを送信できます。</div>';
+  el.scrollTop=el.scrollHeight;
+}
+
+function selectMessageCustomer(id){
+  selectedPatientMessageId=String(id);
+  renderMessageCustomerList();
+  renderMessageThread();
+}
+
+function renderMessageCenter(){
+  renderMessageCustomerList();
+  renderMessageThread();
+}
+
+async function sendConversationReply(){
+  const textEl=document.getElementById('message-reply-text');
+  const btn=document.getElementById('message-reply-btn');
+  const msg=String(textEl?.value||'').trim();
+  if(!selectedPatientMessageId){showToast('お客様を選択してください');return;}
+  if(!msg){showToast('返信メッセージを入力してください');return;}
+  if(btn)btn.disabled=true;
+  const r=await dbAddPatientMessage(selectedPatientMessageId,msg);
+  if(btn)btn.disabled=false;
+  if(!r.ok){showToast(r.reason||'送信に失敗しました');return;}
+  textEl.value='';
+  renderMessageCenter();
+  renderNotifications();
+  showToast('返信メッセージを送信しました','#34C759');
 }
 
 async function dbLog(operator,action,detail){
@@ -2031,7 +2168,7 @@ function showScreen(id){
 }
 function switchTab(prefix,name,el){
   const all=prefix==='p'?['mybook','reserve','history']:
-    ['notify','weektable','calendar','schedule','patients','booking','slots','holidays','leaves','logs','deadline','topedit','settings','actuals'];
+    ['notify','message','weektable','expenses','schedule','patients','booking','slots','holidays','leaves','logs','deadline','topedit','settings','actuals'];
   all.forEach(t=>{const e=document.getElementById(prefix+'tab-'+t);if(e)e.style.display='none';});
   const t=document.getElementById(prefix+'tab-'+name);if(t)t.style.display='block';
   // tab と tab2 両方のactiveを解除
@@ -2044,8 +2181,9 @@ function switchTab(prefix,name,el){
   if(name==='mybook')renderMyBook();
   if(name==='reserve')renderReserve();
   if(name==='notify'){renderTodaySchedule();renderNotifications();}
+  if(name==='message'){renderMessageCenter();}
   if(name==='weektable')renderWeekTable();
-  if(name==='calendar')renderCal();
+  if(name==='expenses')renderExpenses();
   if(name==='schedule')renderSchedule();
   if(name==='patients'){
     renderPatientList();
@@ -2062,63 +2200,68 @@ function switchTab(prefix,name,el){
   if(name==='actuals'){renderActuals();}
 }
 
+function adminTodayRows(){
+  const ds=dateStr(TODAY),rows=[];
+  staffList.forEach(s=>{
+    const statuses=bookingStatuses[ds]?.[s.id]||{};
+    Object.entries(statuses).forEach(([time,status])=>{
+      if(!['reserved','reference','done','noshow'].includes(status))return;
+      const pid=bookings[ds]?.[s.id]?.[time];
+      if(!pid)return;
+      rows.push({ds,time:normalizeTime(time),status,pid,therapist:s.id,unit:bookingUnits[ds]?.[s.id]?.[time]||2});
+    });
+  });
+  return rows.sort((a,b)=>timeMins(a.time)-timeMins(b.time));
+}
+
+function isPatientReservationRequest(n){
+  return isPatientBookingChange(n)&&!isApprovedNotification(n)&&getOriginalNotificationText(n).includes('に予約');
+}
+
+function isUnreadCustomerMessage(n){
+  if(!n||!n.operator||['admin','system'].includes(String(n.operator)))return false;
+  if(hasPatientMessageMark(n.text)||isPatientBookingChange(n))return false;
+  return Object.prototype.hasOwnProperty.call(patients,String(n.operator));
+}
+
+function renderHomeSummaryCounts(){
+  const today=document.getElementById('home-today-count');
+  const requests=document.getElementById('home-request-count');
+  const unread=document.getElementById('home-unread-count');
+  if(today)today.textContent=adminTodayRows().length;
+  if(requests)requests.textContent=notifications.filter(isPatientReservationRequest).length;
+  if(unread)unread.textContent=notifications.filter(isUnreadCustomerMessage).length;
+}
+
+function renderHomeReservationRequests(){
+  const el=document.getElementById('home-reservation-requests');
+  if(!el)return;
+  const list=notifications.filter(isPatientReservationRequest);
+  if(!list.length){
+    el.innerHTML='<div class="admin-home-empty">現在、予約申請はありません。</div>';
+    return;
+  }
+  el.innerHTML=list.slice(0,5).map(n=>`<div class="notif-item" style="padding:10px 0">
+    <div class="notif-dot"></div>
+    <div class="notif-body">${escapeHtml(getOriginalNotificationText(n))}<div class="notif-time">${escapeHtml(n.time||'')}</div></div>
+    <button class="notif-approve" onclick="approvePatientChange(${Number(n.id)})">承認</button>
+  </div>`).join('')+(list.length>5?`<div style="font-size:12px;color:#718078;text-align:center;padding-top:8px">ほか ${list.length-5}件</div>`:'');
+}
+
 function renderTodaySchedule(){
   const el=document.getElementById('today-schedule');
   if(!el)return;
-  const ds=dateStr(TODAY);
-  ensureBookingShape(ds);
-
-  if(!staffList.length){
-    el.innerHTML='<div class="card" style="text-align:center;color:#8E8E93;font-size:13px">担当者が登録されていません</div>';
+  const rows=adminTodayRows();
+  renderHomeSummaryCounts();
+  if(!rows.length){
+    el.innerHTML='<div class="admin-home-empty">本日の予定はありません。</div>';
     return;
   }
-
-  let html='<div style="display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch">';
-  staffList.forEach(s=>{
-    const th=s.id;
-    const times=timesForDate(ds,th).sort((a,b)=>{
-      const [ah,am]=a.split(':').map(Number);
-      const [bh,bm]=b.split(':').map(Number);
-      return (ah*60+am)-(bh*60+bm);
-    });
-
-    html+=`<div class="card" style="flex:1 0 250px;max-width:360px;padding:10px 12px;margin:0">
-      <div style="font-size:14px;font-weight:700;padding:2px 2px 9px;margin-bottom:4px;border-bottom:1px solid #E5E5EA;white-space:nowrap">${s.name}</div>`;
-
-    if(!times.length){
-      html+='<div style="text-align:center;color:#8E8E93;font-size:12px;padding:18px 4px">本日の予約枠はありません</div>';
-    }else{
-      let visibleCount=0;
-      times.forEach(t=>{
-        const pid=bookings[ds]?.[th]?.[t];
-        const status=bookingStatuses[ds]?.[th]?.[t]||'reserved';
-        const empty=!pid;
-        const slotOff=!isSlotAvailable(ds,t,th);
-        if(slotOff){
-          const lv=isLeave(ds,th);
-          const lvFull=lv&&(leaveData.find(l=>l.therapist===th&&l.leave_date===ds)?.half_type||'full')==='full';
-          const reason=lvFull?'休暇':(isDayOff(ds)||isHolidayPeriodOff(ds,t)||isAfternoonOff(ds,t)||isMorningOff(ds,t)?'休診':'休');
-          html+=`<div class="sched-row" style="min-width:0;opacity:.65;cursor:default" title="週間表と同じ休診・休暇設定を反映しています">
-            <span class="sched-time" style="font-weight:600;flex:0 0 42px;font-size:11px">${t}</span>
-            <span class="sched-name" style="color:#9CA3AF;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${reason}</span>
-          </div>`;
-          return;
-        }
-        visibleCount++;
-        html+=`<div class="sched-row" style="min-width:0;cursor:pointer" onclick="${empty?`weekTableBookModal('${ds}','${th}','${t}')`:`weekTableStatusModal('${ds}','${th}','${t}')`}" title="${empty?'クリックして予約登録':'クリックして実施済・キャンセル等を変更'}">
-          <span class="sched-time" style="font-weight:600;flex:0 0 42px;font-size:11px">${t}</span>
-          <span class="sched-name" title="${empty?'空き':(patients[pid]?.name||'不明')}" style="${empty?'color:#C7C7CC':'font-weight:500'};font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0">${empty?'空き':(patients[pid]?.name||'不明')}</span>
-          ${!empty?statusChip(status):'<span class="chip chip-open" style="font-size:10px;flex:0 0 auto">空き</span>'}
-        </div>`;
-      });
-      if(visibleCount===0){
-        html+='<div style="text-align:center;color:#B00020;font-size:12px;padding:8px 4px">🔴 本日は予約可能な時間帯がありません</div>';
-      }
-    }
-    html+='</div>';
-  });
-  html+='</div>';
-  el.innerHTML=html;
+  el.innerHTML=rows.map(r=>`<div class="sched-row" style="cursor:pointer;min-width:0" onclick="weekTableStatusModal('${r.ds}','${r.therapist}','${r.time}')">
+    <span class="sched-time" style="font-weight:700;flex:0 0 48px">${r.time}</span>
+    <span class="sched-name" style="min-width:0"><strong>${escapeHtml(patients[r.pid]?.name||'不明')}</strong><br><span style="font-size:11px;color:#718078">${escapeHtml(getStaffName(r.therapist))}・${escapeHtml(bookingCourseLabel(r.unit))}</span></span>
+    ${statusChip(r.status)}
+  </div>`).join('');
 }
 function openModal(html){document.getElementById('modal-box').innerHTML=html;document.getElementById('modal-overlay').classList.add('open');}
 function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
@@ -2390,6 +2533,190 @@ async function renderWeekTable(){
   if(sumEl)sumEl.innerHTML=isWeekendView?'<div style="font-size:11px;color:#8E8E93;margin-top:4px">※ 土曜日・日曜日に営業がある場合のみ表示しています。</div>':'';
 }
 
+// 月間表：毎月を1〜7日、8〜14日、15〜21日、22〜28日、29日〜月末の5週に分けて表示する。
+async function loadMonthTableBookings(monthStart){
+  const monthEnd=new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0);
+  const from=dateStr(monthStart),to=dateStr(monthEnd);
+  for(let d=new Date(monthStart);d<=monthEnd;d=addDays(d,1)){
+    const ds=dateStr(d);
+    delete bookings[ds];
+    delete bookingStatuses[ds];
+    delete bookingUnits[ds];
+  }
+  try{
+    const {data,error}=await sb.from('rehab_bookings')
+      .select('booking_date,time_slot,therapist,patient_id,status,unit')
+      .gte('booking_date',from).lte('booking_date',to);
+    if(error)throw error;
+    (data||[]).forEach(b=>{
+      if(!bookings[b.booking_date])bookings[b.booking_date]={};
+      if(!bookingStatuses[b.booking_date])bookingStatuses[b.booking_date]={};
+      if(!bookingUnits[b.booking_date])bookingUnits[b.booking_date]={};
+      if(!bookings[b.booking_date][b.therapist])bookings[b.booking_date][b.therapist]={};
+      if(!bookingStatuses[b.booking_date][b.therapist])bookingStatuses[b.booking_date][b.therapist]={};
+      if(!bookingUnits[b.booking_date][b.therapist])bookingUnits[b.booking_date][b.therapist]={};
+      const t=normalizeTime(b.time_slot);
+      bookings[b.booking_date][b.therapist][t]=['reserved','reference','noshow','done'].includes(b.status)?b.patient_id:null;
+      bookingStatuses[b.booking_date][b.therapist][t]=b.status;
+      bookingUnits[b.booking_date][b.therapist][t]=b.unit||2;
+    });
+  }catch(e){
+    console.error('月間表の予約データ取得失敗',e);
+    showToast('月間表の読み込みに失敗しました');
+  }
+}
+
+async function weekTableNav(delta){
+  weekTableOffset+=delta;
+  await renderWeekTable();
+}
+
+function monthTableWeekDays(monthStart,weekIndex){
+  const firstDay=1+weekIndex*7;
+  const lastDay=Math.min(firstDay+6,new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0).getDate());
+  const days=[];
+  for(let day=firstDay;day<=lastDay;day++)days.push(new Date(monthStart.getFullYear(),monthStart.getMonth(),day));
+  return days;
+}
+
+function renderMonthWeekTable(days,weekNumber){
+  const THERAPISTS=staffList.map(s=>s.id);
+  const TH_NAMES=staffList.map(s=>s.name.replace(/^PT ?/,''));
+  const allTimes=new Set();
+  days.forEach(d=>{
+    const ds=dateStr(d);
+    staffList.forEach(s=>timesForDate(ds,s.id).forEach(t=>allTimes.add(normalizeTime(t))));
+  });
+  const sortedTimes=[...allTimes].sort((a,b)=>timeMins(a)-timeMins(b));
+  const lastDate=days[days.length-1];
+  const range=`${days[0].getMonth()+1}/${days[0].getDate()}〜${lastDate.getMonth()+1}/${lastDate.getDate()}`;
+  if(!sortedTimes.length){
+    return `<section class="card" style="margin-bottom:16px"><h3 style="font-size:16px;margin-bottom:8px">第${weekNumber}週 <span style="font-size:12px;color:#718078;font-weight:500">${range}</span></h3><div class="empty" style="padding:20px">予約枠が設定されていません</div></section>`;
+  }
+
+  const CELL_W='64px';
+  let table=`<table style="border-collapse:collapse;font-size:11px;min-width:600px;width:100%"><thead><tr>
+    <th style="border:1px solid #D1D1D6;padding:4px 6px;background:#F9FAFB;min-width:64px;position:sticky;left:0;z-index:2"></th>`;
+  days.forEach(d=>{
+    const ds=dateStr(d),dow=d.getDay();
+    const anySpecial=staffList.some(s=>hasSpecialBusinessDay(ds,s.id));
+    const off=isDayOff(ds)&&!anySpecial;
+    const bg=off?'#F3F4F6':'#EFF6FF';
+    table+=`<th colspan="${THERAPISTS.length}" onclick="weekTableBulkDoneModal('${ds}')" style="border:1px solid #D1D1D6;padding:5px 4px;background:${bg};text-align:center;min-width:${CELL_W};cursor:pointer" title="クリックすると一括実施済・一括キャンセルを選択できます"><div style="font-weight:600">${DAY_NAMES[dow]}</div><div style="font-size:10px;color:#6B7280">${d.getMonth()+1}/${d.getDate()}</div>${off?'<div style="font-size:9px;color:#B00020">休診</div>':anySpecial?'<div style="font-size:9px;color:#8B4500">臨時営業</div>':''}</th>`;
+  });
+  table+=`</tr><tr><th style="border:1px solid #D1D1D6;background:#F9FAFB;position:sticky;left:0;z-index:2"></th>`;
+  days.forEach(d=>{
+    const ds=dateStr(d);
+    THERAPISTS.forEach((th,ti)=>{
+      const off=isDayOff(ds)&&!hasSpecialBusinessDay(ds,th);
+      const lv=isLeave(ds,th);
+      const lvFull=lv&&(leaveData.find(l=>l.therapist===th&&l.leave_date===ds)?.half_type||'full')==='full';
+      const bg=off?'#F3F4F6':lvFull?'#FEF3C7':'#F0F9FF';
+      table+=`<th style="border:1px solid #D1D1D6;padding:3px 2px;background:${bg};text-align:center;font-weight:500;font-size:10px;min-width:${CELL_W}">${TH_NAMES[ti]}${lvFull?'<br><span style="color:#D97706;font-size:9px">休暇</span>':''}</th>`;
+    });
+  });
+  table+=`</tr></thead><tbody>`;
+
+  sortedTimes.forEach(time=>{
+    table+=`<tr><td style="border:1px solid #D1D1D6;padding:5px 6px;background:#F9FAFB;font-weight:600;white-space:nowrap;position:sticky;left:0;z-index:1;font-size:11px">${time}</td>`;
+    days.forEach(d=>{
+      const ds=dateStr(d),dayOff=isDayOff(ds);
+      THERAPISTS.forEach(th=>{
+        const defTimes=timesForDate(ds,th),hasDef=defTimes.includes(time),off=!isSlotAvailable(ds,time,th);
+        if(!hasDef){
+          table+=`<td style="border:1px solid #E5E7EB;background:#FAFAFA;padding:4px;min-width:${CELL_W}"></td>`;
+          return;
+        }
+        if(off){
+          const lvFull=isLeave(ds,th)&&(leaveData.find(l=>l.therapist===th&&l.leave_date===ds)?.half_type||'full')==='full';
+          table+=`<td style="border:1px solid #E5E7EB;background:#F3F4F6;padding:4px;text-align:center;min-width:${CELL_W};font-size:9px;color:#9CA3AF">${lvFull?'休暇':dayOff?'休診':'休'}</td>`;
+          return;
+        }
+        const bottomTime=getSecondUnitTime(time);
+        const coverTop=weekTableBookingAt(ds,th,time),coverBottom=weekTableBookingAt(ds,th,bottomTime);
+        const pid=coverTop?.booking?.patient_id||null,status=coverTop?.booking?.status||'',unit=coverTop?.booking?.unit||2;
+        const bPid=coverBottom?.booking?.patient_id||null,bStatus=coverBottom?.booking?.status||'',bUnit=coverBottom?.booking?.unit||2;
+        const topIsStart=!!(coverTop&&coverTop.start===normalizeTime(time));
+        const bottomIsStart=!!(coverBottom&&coverBottom.start===normalizeTime(bottomTime));
+        const hasTop=pid&&patients[pid],hasBottom=bPid&&patients[bPid];
+        function bookingLine(linePid,lineStatus,lineUnit,clickTime,small){
+          const name=patients[linePid].name,tentative=isTentativePatient(linePid);
+          const bg=lineStatus==='reference'?'#FFF7CC':lineStatus==='done'?'#D1FAE5':lineStatus==='cancelled'?'#FEE2E2':lineStatus==='transfer'?'#FEF3C7':lineStatus==='noshow'?'#FFE0E0':tentative?TENTATIVE_BG:'transparent';
+          const label=lineStatus==='reference'?'参考予約':lineStatus==='done'?`${bookingBillingLabel(ds,th,clickTime,lineUnit)}・${bookingSalesPrice(ds,th,clickTime,lineUnit).toLocaleString()}円`:lineStatus==='cancelled'?'キャンセル':lineStatus==='transfer'?'振替':'';
+          const nameColor=lineStatus==='reference'?'color:#7A5A00;':tentative&&lineStatus==='reserved'?`color:${TENTATIVE_FG};`:'';
+          return `<div onclick="event.stopPropagation();weekTableStatusModal('${ds}','${th}','${clickTime}')" style="cursor:pointer;background:${bg};border-radius:4px;padding:2px;${small?'margin-top:2px;':''}"><div title="${name}" style="font-size:${small?'8px':'10px'};font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;${nameColor}">${name}</div>${label?`<div style="font-size:8px;color:#6B7280">${label}</div>`:''}</div>`;
+        }
+        function addLine(addTime){return `<div onclick="event.stopPropagation();weekTableBookModal('${ds}','${th}','${addTime}')" style="cursor:pointer;margin-top:2px;padding:1px 0;color:#93C5FD;font-size:9px">＋追加</div>`;}
+        if(hasTop||hasBottom){
+          const topCell=hasTop&&topIsStart?bookingLine(pid,status,unit,coverTop.start,false):(hasBottom&&bUnit===1&&bottomIsStart?addLine(time):'');
+          const bottomCell=hasBottom&&bottomIsStart?bookingLine(bPid,bStatus,bUnit,coverBottom.start,true):(hasTop&&topIsStart&&unit===1?addLine(bottomTime):'');
+          table+=`<td style="border:1px solid #D1D1D6;background:#fff;padding:3px;text-align:center;min-width:${CELL_W}">${topCell}${bottomCell}</td>`;
+        }else{
+          const openStart=isOpenStartFromCurrentCache(ds,th,time);
+          table+=openStart?`<td style="border:1px solid #D1D1D6;background:#DBEAFE;padding:3px;text-align:center;min-width:${CELL_W};cursor:pointer" onclick="weekTableBookModal('${ds}','${th}','${time}')"><div style="font-size:10px;color:#1D4ED8">○</div></td>`:`<td style="border:1px solid #D1D1D6;background:#fff;padding:3px;text-align:center;min-width:${CELL_W};color:#9CA3AF"><div style="font-size:9px">—</div></td>`;
+        }
+      });
+    });
+    table+=`</tr>`;
+  });
+
+  table+=`<tr><td style="border:1px solid #D1D1D6;padding:5px 6px;background:#F9FAFB;font-weight:600;white-space:nowrap;position:sticky;left:0;z-index:1;font-size:11px">通常</td>`;
+  days.forEach(d=>{
+    const ds=dateStr(d);
+    THERAPISTS.forEach(th=>{
+      let amount=0;
+      Object.entries(bookingStatuses[ds]?.[th]||{}).forEach(([t,status])=>{if(status==='done'&&!bookingBilling(ds,th,t).referral)amount+=bookingSalesPrice(ds,th,t,bookingUnits[ds]?.[th]?.[t]||3);});
+      table+=`<td style="border:1px solid #D1D1D6;padding:4px;text-align:center;min-width:${CELL_W};font-weight:700;color:#1A7F47;background:#F0FDF4">${amount?`${amount.toLocaleString()}円`:''}</td>`;
+    });
+  });
+  table+=`</tr>`;
+  table+=`<tr><td style="border:1px solid #D1D1D6;padding:5px 6px;background:#F9FAFB;font-weight:600;white-space:nowrap;position:sticky;left:0;z-index:1;font-size:11px">紹介あり</td>`;
+  days.forEach(d=>{
+    const ds=dateStr(d);
+    THERAPISTS.forEach(th=>{
+      let amount=0;
+      Object.entries(bookingStatuses[ds]?.[th]||{}).forEach(([t,status])=>{if(status==='done'&&bookingBilling(ds,th,t).referral)amount+=bookingSalesPrice(ds,th,t,bookingUnits[ds]?.[th]?.[t]||3);});
+      table+=`<td style="border:1px solid #D1D1D6;padding:4px;text-align:center;min-width:${CELL_W};font-weight:700;color:#8a5a00;background:#fffaf0">${amount?`${amount.toLocaleString()}円`:''}</td>`;
+    });
+  });
+  table+=`</tr>`;
+  table+=`<tr><td style="border:1px solid #D1D1D6;padding:5px 6px;background:#F9FAFB;font-weight:600;white-space:nowrap;position:sticky;left:0;z-index:1;font-size:11px">交通費</td>`;
+  days.forEach(d=>{
+    const ds=dateStr(d);
+    THERAPISTS.forEach(th=>{
+      let amount=0;
+      Object.entries(bookingStatuses[ds]?.[th]||{}).forEach(([t,status])=>{if(status==='done')amount+=bookingTravel(ds,th,t);});
+      table+=`<td onclick="openTravelCostModal('${ds}','${th}')" title="クリックして予約ごとの交通費を入力" style="border:1px solid #D1D1D6;padding:4px;text-align:center;min-width:${CELL_W};font-weight:700;color:#1d4ed8;background:#eff6ff;cursor:pointer">${amount?`${amount.toLocaleString()}円`:'入力'}</td>`;
+    });
+  });
+  table+=`</tr></tbody></table>`;
+  return `<section class="card" style="margin-bottom:16px;padding:14px"><h3 style="font-size:16px;margin-bottom:10px">第${weekNumber}週 <span style="font-size:12px;color:#718078;font-weight:500">${range}</span></h3><div style="overflow-x:auto;-webkit-overflow-scrolling:touch">${table}</div></section>`;
+}
+
+async function renderWeekTable(){
+  const monthStart=new Date(TODAY.getFullYear(),TODAY.getMonth()+weekTableOffset,1);
+  await loadMonthTableBookings(monthStart);
+  const el=document.getElementById('weektable-body');
+  if(!el)return;
+  document.getElementById('weektable-label').textContent=`${monthStart.getFullYear()}年${monthStart.getMonth()+1}月`;
+  el.innerHTML=[0,1,2,3,4].map(i=>renderMonthWeekTable(monthTableWeekDays(monthStart,i),i+1)).join('');
+  const sumEl=document.getElementById('weektable-summary');
+  if(sumEl)sumEl.innerHTML='<div style="font-size:11px;color:#718078;margin:6px 4px 12px">※ 実施した予約を「紹介なし／紹介あり」とコース別に集計します。交通費欄をクリックすると、予約ごとの交通費を入力できます。</div>';
+}
+
+function openTravelCostModal(ds,therapist){
+  const rows=Object.entries(bookingStatuses[ds]?.[therapist]||{}).filter(([,status])=>status==='done').sort((a,b)=>timeMins(a[0])-timeMins(b[0]));
+  if(!rows.length){showToast('この日の実施済予約はありません');return;}
+  openModal(`<div class="modal-handle"></div><div class="modal-title">交通費の入力</div><p style="font-size:13px;color:#718078;margin-bottom:12px">${ds} ／ ${getStaffName(therapist)}</p>
+    <div style="display:grid;gap:10px">${rows.map(([time])=>{const pid=bookings[ds]?.[therapist]?.[time];return `<div style="display:grid;grid-template-columns:70px 1fr 120px;gap:8px;align-items:center"><strong>${time}</strong><span>${escapeHtml(patients[pid]?.name||'不明')}</span><input type="number" min="0" step="1" id="travel-${escapeHtml(time).replace(':','-')}" value="${bookingTravel(ds,therapist,time)}" placeholder="0円"></div>`;}).join('')}</div>
+    <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-block" onclick="closeModal()">戻る</button><button class="btn btn-primary btn-block" onclick="saveTravelCosts('${ds}','${therapist}')">保存</button></div>`);
+}
+async function saveTravelCosts(ds,therapist){
+  const rows=Object.entries(bookingStatuses[ds]?.[therapist]||{}).filter(([,status])=>status==='done');
+  rows.forEach(([time])=>{const key=bookingMetaKey(ds,therapist,time),input=document.getElementById(`travel-${normalizeTime(time).replace(':','-')}`);bookingBillingMeta[key]={...(bookingBillingMeta[key]||{}),travel:Math.max(0,Number(input?.value)||0)};});
+  await saveBookingBillingMeta();closeModal();await renderWeekTable();showToast('交通費を保存しました','#34C759');
+}
+
 function weekTableBulkDoneModal(ds){
   const d=parseLocalDate(ds);
   const m=d.getMonth()+1,day=d.getDate(),wd=DAY_NAMES[d.getDay()];
@@ -2628,29 +2955,33 @@ function weekTableStatusModal(ds,therapist,time){
   const d=new Date(ds);
   const m=d.getMonth()+1,day=d.getDate(),wd=DAY_NAMES[d.getDay()];
   const status=bookingStatuses[ds]?.[therapist]?.[time]||'reserved';
-  if(status==='reference'){
-    openModal(`<div class="modal-handle"></div>
-      <div class="modal-title">参考予約</div>
-      <p style="font-size:14px;font-weight:600;margin-bottom:4px">${m}月${day}日（${wd}） ${time}</p>
-      <p style="font-size:13px;color:#8E8E93;margin-bottom:8px">${getStaffName(therapist)} ／ ${p?p.name:'不明'}</p>
-      <div style="background:#FFF7CC;border:1px solid #F0D76A;border-radius:8px;padding:10px 12px;font-size:12px;color:#7A5A00;margin-bottom:14px">この予約は「基本表 → 指定月に一括反映する」で登録された参考予約です。</div>
-      <button class="btn btn-block btn-primary" onclick="wtConfirmReference('${ds}','${therapist}','${time}')">予約確定</button>
-      <button class="btn btn-block" style="margin-top:8px;background:#E8F4FF;color:#004494;border-color:#B3D4FF" onclick="wtConfirmReferenceMonth('${ds}','${pid}')">同月分の参考予約すべてを予約確定させる</button>
-      <button class="btn btn-block" style="margin-top:8px" onclick="closeModal()">閉じる</button>`);
-    return;
-  }
+  const meta=bookingBilling(ds,therapist,time);
   openModal(`<div class="modal-handle"></div>
     <div class="modal-title">予約詳細</div>
     <p style="font-size:14px;font-weight:600;margin-bottom:4px">${m}月${day}日（${wd}） ${time}</p>
-    <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">${getStaffName(therapist)} ／ ${p?p.name:'不明'}</p>
-    <div class="status-btns" style="margin-bottom:14px">
-      <button class="btn btn-sm btn-green" onclick="wtUpdateStatus('${ds}','${therapist}','${time}','done')" ${status==='done'?'disabled':''}>実施済</button>
-      <button class="btn btn-sm btn-orange" onclick="wtUpdateStatus('${ds}','${therapist}','${time}','transfer')" ${status==='transfer'?'disabled':''}>振替</button>
-      <button class="btn btn-sm btn-danger" onclick="wtUpdateStatus('${ds}','${therapist}','${time}','cancelled')" ${status==='cancelled'?'disabled':''}>①キャンセル</button>
-      <button class="btn btn-sm" style="background:#FFE0E0;color:#B00020;border-color:#FFB3B3" onclick="wtUpdateStatus('${ds}','${therapist}','${time}','noshow')" ${status==='noshow'?'disabled':''}>②来なかった</button>
+    <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">${getStaffName(therapist)} ／ ${p?p.name:'不明'}${status==='done'?` ／ 現在：${bookingBillingLabel(ds,therapist,time,bookingUnits[ds]?.[therapist]?.[time]||3)}`:''}</p>
+    <div class="status-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <button class="btn btn-green" onclick="wtSetBillingResult('${ds}','${therapist}','${time}',3,false)">紹介なし60分<br><small>7,000円</small></button>
+      <button class="btn btn-green" onclick="wtSetBillingResult('${ds}','${therapist}','${time}',4,false)">紹介なし90分<br><small>10,000円</small></button>
+      <button class="btn" style="background:#fff7df;color:#8a5a00;border-color:#eed59a" onclick="wtSetBillingResult('${ds}','${therapist}','${time}',3,true)">紹介あり60分<br><small>6,000円</small></button>
+      <button class="btn" style="background:#fff7df;color:#8a5a00;border-color:#eed59a" onclick="wtSetBillingResult('${ds}','${therapist}','${time}',4,true)">紹介あり90分<br><small>9,000円</small></button>
+      <button class="btn btn-danger" style="grid-column:1/-1" onclick="wtUpdateStatus('${ds}','${therapist}','${time}','cancelled')">キャンセル</button>
     </div>
-    <p style="font-size:11px;color:#8E8E93;margin-bottom:12px;line-height:1.6">①キャンセル：枠を空きに戻します　／　②来なかった：予約はあったがお客様が来院しなかった場合。枠は埋まったまま、赤色で表示されます。</p>
     <button class="btn btn-block" onclick="closeModal()">閉じる</button>`);
+}
+async function wtSetBillingResult(ds,therapist,time,unit,referral){
+  const normTime=normalizeTime(time);
+  const {data,error}=await sb.from('rehab_bookings').update({status:'done',unit:Number(unit)})
+    .eq('booking_date',ds).eq('therapist',therapist).eq('time_slot',normTime).select('patient_id');
+  if(error||!data?.length){console.error('料金区分の保存に失敗',error);showToast('保存に失敗しました');return;}
+  const key=bookingMetaKey(ds,therapist,normTime);
+  bookingBillingMeta[key]={...(bookingBillingMeta[key]||{}),referral:!!referral};
+  await saveBookingBillingMeta();
+  if(!bookingStatuses[ds])bookingStatuses[ds]={};if(!bookingStatuses[ds][therapist])bookingStatuses[ds][therapist]={};bookingStatuses[ds][therapist][normTime]='done';
+  if(!bookingUnits[ds])bookingUnits[ds]={};if(!bookingUnits[ds][therapist])bookingUnits[ds][therapist]={};bookingUnits[ds][therapist][normTime]=Number(unit);
+  const label=`${referral?'紹介あり':'紹介なし'}${Number(unit)===4?'90分':'60分'}`;
+  await dbAddNotification(`${await resolvePatientName(data[0].patient_id)} ${ds} ${normTime} を「${label}」で実施済に変更【管理者】`,'admin');
+  closeModal();await renderWeekTable();renderTodaySchedule();renderNotifications();showToast(`${label}で保存しました`,'#34C759');
 }
 async function wtConfirmReference(ds,therapist,time){
   const normTime=normalizeTime(time);
@@ -3682,28 +4013,31 @@ async function doReserve(fullDate,time,dateStr2,dayLabel,therapist,unit){
 
 
 // ---- ADMIN ----
+function openAdminDashboard(logLogin=true){
+  setActor('admin');
+  document.getElementById('admin-err').style.display='none';
+  document.getElementById('admin-pw').value='';
+  const now=getJSTToday();
+  document.getElementById('admin-date-sub').textContent=`${now.getFullYear()}年${now.getMonth()+1}月`;
+  renderNotifications();renderDeadline();renderSettingsDisplay();
+  renderTodaySchedule();
+  weekTableOffset=0;
+  populateClinicSettingsInputs();
+  loadCustomerProfiles().then(()=>renderPatientList());
+  renderPatientMessageSelected();
+  document.getElementById('s-start').value=settings.start;
+  document.getElementById('s-end').value=settings.end;
+  document.getElementById('s-tstart').value=settings.tstart;
+  document.getElementById('s-tend').value=settings.tend;
+  showScreen('s-admin');
+  renderNotifications();
+  if(logLogin)dbLog('admin','login','管理者ログイン');
+}
 function adminLogin(){
   const pw=document.getElementById('admin-pw').value;
   if(pw===ADMIN_PW){
-    setActor('admin');
-    document.getElementById('admin-err').style.display='none';
-    document.getElementById('admin-pw').value='';
-    const now=getJSTToday();
-    document.getElementById('admin-date-sub').textContent=`${now.getFullYear()}年${now.getMonth()+1}月`;
-    renderNotifications();renderDeadline();renderSettingsDisplay();
-    renderTodaySchedule();
-    weekTableOffset=0;
-    weekTableWeekendMode=false;
-    populateClinicSettingsInputs();
-    loadCustomerProfiles().then(()=>renderPatientList());
-    renderPatientMessageSelected();
-    document.getElementById('s-start').value=settings.start;
-    document.getElementById('s-end').value=settings.end;
-    document.getElementById('s-tstart').value=settings.tstart;
-    document.getElementById('s-tend').value=settings.tend;
-    showScreen('s-admin');
-    renderNotifications();
-    dbLog('admin','login','管理者ログイン');
+    try{sessionStorage.setItem('meguru_admin_authenticated','1');}catch(e){}
+    openAdminDashboard(true);
   } else {document.getElementById('admin-err').style.display='block';}
 }
 
@@ -3759,6 +4093,8 @@ function isApprovedNotification(n){
 }
 
 function renderNotifications(){
+  renderHomeSummaryCounts();
+  renderHomeReservationRequests();
   const el=document.getElementById('notif-list');
   const empty=document.getElementById('notif-empty');
   const cnt=document.getElementById('notif-cnt');
@@ -3892,6 +4228,36 @@ function calClick(ds){
 }
 function calNav(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}calSelected=null;document.getElementById('cal-detail').style.display='none';renderCal();}
 
+function currentYearMonth(){return `${TODAY.getFullYear()}-${String(TODAY.getMonth()+1).padStart(2,'0')}`;}
+function renderExpenses(){
+  const monthEl=document.getElementById('expense-month');
+  const listEl=document.getElementById('expense-list');
+  if(!monthEl||!listEl)return;
+  if(!monthEl.value)monthEl.value=currentYearMonth();
+  const dateEl=document.getElementById('expense-date');if(dateEl&&!dateEl.value)dateEl.value=dateStr(TODAY);
+  const ym=monthEl.value;
+  const rows=expenseEntries.filter(e=>String(e.date||'').startsWith(ym)).sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+  const total=rows.reduce((sum,e)=>sum+(Number(e.amount)||0),0);
+  const totalEl=document.getElementById('expense-month-total');if(totalEl)totalEl.textContent=`${total.toLocaleString()}円`;
+  listEl.innerHTML=rows.length?rows.map(e=>{const d=parseLocalDate(e.date);return `<div class="admin-list-card" style="display:flex;gap:12px;align-items:center"><strong style="min-width:115px">${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日</strong><span style="flex:1">${escapeHtml(e.note||'')}</span><strong>${Number(e.amount||0).toLocaleString()}円</strong><button class="btn btn-sm btn-danger" onclick="deleteExpense('${escapeJs(e.id)}')">削除</button></div>`;}).join(''):'<div class="admin-home-empty">この月の経費はまだ登録されていません。</div>';
+}
+async function addExpense(){
+  const date=String(document.getElementById('expense-date')?.value||'');
+  const note=String(document.getElementById('expense-note')?.value||'').trim();
+  const amount=Math.max(0,Number(document.getElementById('expense-amount')?.value)||0);
+  if(!date){showToast('日にちを入力してください');return;}
+  if(!note){showToast('内容を入力してください');return;}
+  if(!amount){showToast('金額を入力してください');return;}
+  expenseEntries.push({id:`exp_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,date,note,amount,createdAt:new Date().toISOString()});
+  await saveExpenseEntries();
+  document.getElementById('expense-note').value='';document.getElementById('expense-amount').value='';document.getElementById('expense-month').value=date.slice(0,7);
+  renderExpenses();showToast('経費を登録しました','#34C759');
+}
+async function deleteExpense(id){
+  if(!confirm('この経費を削除しますか？'))return;
+  expenseEntries=expenseEntries.filter(e=>String(e.id)!==String(id));await saveExpenseEntries();renderExpenses();showToast('経費を削除しました');
+}
+
 function statusChip(s){
   if(s==='done')return '<span class="chip chip-done">実施済</span>';
   if(s==='cancelled')return '<span class="chip chip-cancel">キャンセル</span>';
@@ -3902,79 +4268,22 @@ function statusChip(s){
 
 // ---- SCHEDULE ----
 function schedNav(d){schedOffset+=d;renderSchedule();}
-function renderSchedule(){
+async function renderSchedule(){
   const el=document.getElementById('sched-body');
-  const label=document.getElementById('sched-label');
-  const d=addDays(TODAY,schedOffset);
-  const ds=dateStr(d);
-  const m=d.getMonth()+1,day=d.getDate(),wd=DAY_NAMES[d.getDay()];
-  const anySpecialToday=staffList.some(s=>hasSpecialBusinessDay(ds,s.id));
-  const isOff=isDayOff(ds)&&!anySpecialToday;
-  label.textContent=`${m}月${day}日（${wd}）${isOff?'  🔴休診':''}`;
-
-  if(isOff){
-    el.innerHTML='<div class="card" style="text-align:center;color:#B00020;padding:20px">🔴 休診日です</div>';
-    return;
-  }
-
-  // 全スタッフの時間を統合してソート
-  const allTimes=new Set();
-  staffList.forEach(s=>{
-    timesForDate(ds,s.id).forEach(t=>allTimes.add(t));
-  });
-  const sortedTimes=[...allTimes].sort((a,b)=>{
-    const [ah,am]=a.split(':').map(Number);const [bh,bm]=b.split(':').map(Number);
-    return(ah*60+am)-(bh*60+bm);
-  });
-  ensureBookingShape(ds);
-
-  let html=`<div style="display:grid;grid-template-columns:repeat(${staffList.length||1},1fr);gap:10px">`;
-  staffList.forEach(s=>{
-    const th=s.id;
-    const ptName=s.name;
-    const chipStyle=staffChipStyle(th);
-    const lvFull=isLeave(ds,th)&&(leaveData.find(l=>l.therapist===th&&l.leave_date===ds)?.half_type||'full')==='full';
-    html+=`<div class="card" style="padding:10px 12px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #E5E5EA">
-        <span class="chip" style="${chipStyle}">${ptName}</span>
-        ${lvFull?'<span class="badge badge-warn" style="font-size:10px">休暇</span>':''}
-      </div>`;
-    if(lvFull){
-      html+='<div style="font-size:12px;color:#8E8E93;text-align:center;padding:8px 0">本日休暇</div>';
-    } else {
-      const times=timesForDate(ds,th).sort((a,b)=>{
-        const [ah,am]=a.split(':').map(Number);const [bh,bm]=b.split(':').map(Number);
-        return(ah*60+am)-(bh*60+bm);
-      });
-      if(!times.length){
-        html+='<div style="font-size:12px;color:#C7C7CC">枠なし</div>';
-      } else {
-        times.forEach(t=>{
-          // スロット利用可能チェック（午後休診など）
-          const slotOff=!isSlotAvailable(ds,t,th);
-          const pid=bookings[ds]?.[th]?.[t];
-          const status=bookingStatuses[ds]?.[th]?.[t]||'reserved';
-          if(slotOff){
-            html+=`<div class="sched-row" style="opacity:.4">
-              <span class="sched-time">${t}</span>
-              <span class="sched-name" style="color:#C7C7CC">休診</span>
-            </div>`;
-          } else {
-            const empty=!pid;
-            const name=empty?'空き':(patients[pid]?.name||'不明');
-            html+=`<div class="sched-row">
-              <span class="sched-time">${t}</span>
-              <span class="sched-name" style="${empty?'color:#C7C7CC':'font-weight:500'}">${name}</span>
-              ${empty?'<span class="chip chip-open" style="font-size:10px">空き</span>':statusChip(status)}
-            </div>`;
-          }
-        });
-      }
-    }
-    html+='</div>';
-  });
-  html+='</div>';
-  el.innerHTML=html;
+  if(!el)return;
+  el.innerHTML='<div class="admin-home-empty">予約一覧を読み込んでいます…</div>';
+  const {data,error}=await sb.from('rehab_bookings')
+    .select('booking_date,time_slot,therapist,patient_id,status,unit')
+    .eq('status','reserved').gte('booking_date',dateStr(TODAY))
+    .order('booking_date',{ascending:true}).order('time_slot',{ascending:true});
+  if(error){console.error('予約一覧の取得に失敗',error);el.innerHTML='<div class="admin-home-empty">予約一覧を取得できませんでした。</div>';return;}
+  const rows=data||[];
+  if(!rows.length){el.innerHTML='<div class="admin-home-empty">現在、予約確定したお客様はいません。</div>';return;}
+  el.innerHTML=`<div class="admin-list-card" style="font-size:12px;font-weight:700;color:#718078"><div class="admin-booking-grid"><span>予約日</span><span>時間</span><span>コース</span><span>お客様名</span></div></div>`+rows.map(b=>{
+    const d=parseLocalDate(b.booking_date),wd=DAY_NAMES[d.getDay()];
+    const course=Number(b.unit)===4?'90分':'60分';
+    return `<div class="admin-list-card"><div class="admin-booking-grid"><span style="font-weight:700">${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wd}）</span><span>${escapeHtml(normalizeTime(b.time_slot))}</span><span class="chip" style="background:#edf5f0;color:#315e4f;width:max-content">${course}</span><span style="font-weight:700">${escapeHtml(patients[b.patient_id]?.name||b.patient_id||'不明')}</span></div></div>`;
+  }).join('');
 }
 
 // ---- SLOT DEFS ----
@@ -4464,14 +4773,14 @@ function exportCSV(){
   showToast(`${rows.length}件のCSVを出力しました`,'#34C759');
 }
 
-// ---- 週間表PDF印刷 ----
+// ---- 月間表PDF印刷 ----
 function printWeekTable(){
   const label=document.getElementById('weektable-label').textContent;
   const tableHTML=document.getElementById('weektable-body').innerHTML;
   const printWin=window.open('','_blank','width=900,height=700');
   printWin.document.write(`<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
-<title>週間スケジュール表 ${label}</title>
+<title>月間スケジュール表 ${label}</title>
 <style>
   body{font-family:-apple-system,'Hiragino Sans',sans-serif;font-size:11px;margin:16px}
   h2{font-size:14px;margin-bottom:8px;color:#1C1C1E}
@@ -4487,7 +4796,7 @@ function printWeekTable(){
     body{margin:0}
   }
 </style></head><body>
-<h2>📋 週間スケジュール表　${label}</h2>
+<h2>📋 月間スケジュール表　${label}</h2>
 <p style="font-size:10px;color:#666;margin-bottom:8px">出力日時：${new Date().toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})}</p>
 ${tableHTML}
 <script>window.onload=function(){window.print();}<\/script>
@@ -5426,6 +5735,32 @@ async function renderActuals(){
 
 function printActuals(){const old=document.title;document.title='リハビリ実績表';window.print();setTimeout(()=>document.title=old,500);}
 
+// ---- 収支（旧実績一覧） ----
+function renderActualsFiscalYearSelect(){
+  const el=document.getElementById('actuals-fy');if(!el)return;
+  const current=TODAY.getFullYear();
+  el.innerHTML=Array.from({length:7},(_,i)=>current-3+i).map(y=>`<option value="${y}" ${y===current?'selected':''}>${y}年</option>`).join('');
+}
+async function renderActuals(){
+  const body=document.getElementById('actuals-body');if(!body)return;
+  const sel=document.getElementById('actuals-fy');if(!sel.options.length)renderActualsFiscalYearSelect();
+  const year=Number(sel.value||TODAY.getFullYear());
+  body.innerHTML='<div class="actuals-loading">収支を集計中...</div>';
+  const {data,error}=await sb.from('rehab_bookings').select('booking_date,time_slot,therapist,status,unit')
+    .eq('status','done').gte('booking_date',`${year}-01-01`).lte('booking_date',`${year}-12-31`)
+    .order('booking_date',{ascending:true});
+  if(error){console.error('収支の取得に失敗',error);body.innerHTML='<div class="admin-home-empty" style="margin:16px">収支を取得できませんでした。</div>';return;}
+  const months=Array.from({length:12},(_,i)=>{
+    const month=i+1,ym=`${year}-${String(month).padStart(2,'0')}`;
+    const revenue=(data||[]).filter(b=>String(b.booking_date).startsWith(ym)).reduce((sum,b)=>sum+bookingSalesPrice(b.booking_date,b.therapist,b.time_slot,b.unit)+bookingTravel(b.booking_date,b.therapist,b.time_slot),0);
+    const expense=expenseEntries.filter(e=>String(e.date||'').startsWith(ym)).reduce((sum,e)=>sum+(Number(e.amount)||0),0);
+    return {month,revenue,expense,profit:revenue-expense};
+  });
+  const totals=months.reduce((a,m)=>({revenue:a.revenue+m.revenue,expense:a.expense+m.expense,profit:a.profit+m.profit}),{revenue:0,expense:0,profit:0});
+  document.getElementById('actuals-kpi').innerHTML=`<div class="finance-kpis" style="width:100%"><div class="finance-kpi">年間売上<strong>${totals.revenue.toLocaleString()}円</strong></div><div class="finance-kpi">年間経費<strong style="color:#b45309">${totals.expense.toLocaleString()}円</strong></div><div class="finance-kpi">年間収支<strong style="color:${totals.profit<0?'#b91c1c':'#166534'}">${totals.profit.toLocaleString()}円</strong></div></div>`;
+  body.innerHTML=`<div class="actuals-table-wrap"><table class="actuals-table"><thead><tr><th>月</th><th>月額売上</th><th>経費</th><th>収支（売上－経費）</th></tr></thead><tbody>${months.map(m=>`<tr><td style="font-weight:700">${m.month}月</td><td>${m.revenue.toLocaleString()}円</td><td>${m.expense.toLocaleString()}円</td><td style="font-weight:800;color:${m.profit<0?'#b91c1c':'#166534'}">${m.profit.toLocaleString()}円</td></tr>`).join('')}</tbody><tfoot><tr style="font-weight:800;background:#f1f5f1"><td>年間合計</td><td>${totals.revenue.toLocaleString()}円</td><td>${totals.expense.toLocaleString()}円</td><td>${totals.profit.toLocaleString()}円</td></tr></tfoot></table></div><div style="font-size:12px;color:#718078;padding:12px 16px">※ 月額売上は、月間表で実施済にした料金区分と交通費を合算しています。</div>`;
+}
+
 // ---- INIT ----
 async function init(){
   try{
@@ -5444,6 +5779,9 @@ async function init(){
   }finally{
     document.getElementById('loading-overlay').style.display='none';
     document.getElementById('app').style.display='block';
+    try{
+      if(sessionStorage.getItem('meguru_admin_authenticated')==='1')openAdminDashboard(false);
+    }catch(e){}
   }
 }
 init();

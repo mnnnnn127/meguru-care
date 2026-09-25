@@ -25,6 +25,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Kaku Gothic ProN','H
 .btn-block{width:100%}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .card{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.customer-admin-title{font-size:24px;font-weight:800;margin:0 0 18px;color:#182B31}
+.customer-admin-note{background:#F1F6F4;border-radius:10px;padding:13px 14px;margin-bottom:14px;font-size:13px;color:#5D747B}
+.customer-card-list{display:flex;flex-direction:column;gap:14px}
+.customer-info-card{background:#fff;border:1px solid #D8E0DD;border-radius:14px;padding:16px 18px}
+.customer-info-head{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.customer-info-name{flex:1;font-size:20px;font-weight:800;color:#183038;cursor:pointer}
+.customer-info-actions{display:flex;gap:6px;flex-shrink:0}
+.customer-info-grid{display:grid;grid-template-columns:1.05fr 1fr 1.9fr .62fr;margin-top:4px}
+.customer-info-cell{padding:11px 14px 10px 0;min-width:0;border-bottom:1px solid #E5EBE8}
+.customer-info-cell:not(:nth-child(4n+1)){padding-left:14px;border-left:1px solid #E5EBE8}
+.customer-info-cell:nth-last-child(-n+3){border-bottom:none}
+.customer-info-cell.wide{grid-column:auto}
+.customer-info-label{font-size:12px;color:#718086;margin-bottom:3px}
+.customer-info-value{font-size:15px;font-weight:700;color:#162B32;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:760px){.customer-admin-title{font-size:21px}.customer-info-card{padding:14px}.customer-info-grid{grid-template-columns:1fr 1fr}.customer-info-cell:not(:nth-child(4n+1)){padding-left:0;border-left:none}.customer-info-cell:nth-child(even){padding-left:12px;border-left:1px solid #E5EBE8}.customer-info-cell:nth-last-child(-n+3){border-bottom:1px solid #E5EBE8}.customer-info-cell:nth-last-child(-n+1){border-bottom:none}.customer-info-name{font-size:18px}}
+@media(max-width:460px){.customer-info-grid{grid-template-columns:1fr}.customer-info-cell,.customer-info-cell:nth-child(even){padding:10px 0;border-left:none}.customer-info-cell:last-child{border-bottom:none}.customer-info-head{align-items:flex-start}.customer-info-actions{flex-direction:column}}
 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .metric{background:#fff;border-radius:12px;padding:12px 14px}
 .metric-label{font-size:12px;color:#8E8E93;margin-bottom:2px}
@@ -240,6 +256,7 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
         <div class="th-select-card" data-service-unit="3" onclick="pubSelectService(3)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">60分</div><div style="font-size:14px">7,000円</div></div>
         <div class="th-select-card" data-service-unit="4" onclick="pubSelectService(4)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">90分</div><div style="font-size:14px">10,000円</div></div>
       </div>
+      <p style="font-size:12px;color:#636366;line-height:1.6;margin:-4px 2px 16px">＊紹介割1,000円はお支払い時に確認させていただきます。</p>
     </div>
     <div id="pub-th-select" style="display:none">
       <p style="font-size:15px;font-weight:600;margin-bottom:14px;text-align:center">担当を選んでください</p>
@@ -376,429 +393,6 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
   </div>
 </div>
 
-<!-- ADMIN MAIN -->
-<div id="s-admin" class="screen">
-  <div class="nav">
-    <div><div class="nav-title">管理者ダッシュボード</div><div class="nav-sub" id="admin-date-sub"></div></div>
-    <button class="btn btn-sm" onclick="setActor('system');showScreen('s-top')">戻る</button>
-  </div>
-  <div style="background:#fff;border-bottom:1px solid #E5E5EA">
-    <div class="admin-menu-grid">
-      <div class="tab2 active" onclick="switchTab('a','notify',this)">お知らせ</div>
-      <div class="tab2" onclick="switchTab('a','weektable',this)">週間表</div>
-      <div class="tab2" onclick="switchTab('a','calendar',this)">カレンダー</div>
-      <div class="tab2" onclick="switchTab('a','schedule',this)">スケジュール</div>
-      <div class="tab2" onclick="switchTab('a','patients',this)">お客様管理</div>
-      <div class="tab2" onclick="switchTab('a','booking',this)">代理予約</div>
-      <div class="tab2" onclick="switchTab('a','slots',this)">枠設定</div>
-      <div class="tab2" onclick="switchTab('a','holidays',this)">休診日</div>
-      <div class="tab2" onclick="switchTab('a','leaves',this)">PT休暇</div>
-      <div class="tab2" onclick="switchTab('a','logs',this)">操作ログ</div>
-      <div class="tab2" onclick="switchTab('a','deadline',this)">期限</div>
-      <div class="tab2" onclick="switchTab('a','topedit',this)">トップ画面編集</div>
-      <div class="admin-menu-pair">
-        <div class="tab2" onclick="switchTab('a','settings',this)">設定</div>
-        <div class="tab2" onclick="switchTab('a','actuals',this)">📊 実績表</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- お知らせ -->
-  <div class="pad pt-12" id="atab-notify">
-    <!-- 本日の予定 -->
-    <div style="margin-bottom:16px">
-      <div style="font-size:15px;font-weight:600;margin-bottom:10px">📋 本日の予定</div>
-      <div id="today-schedule"></div>
-    </div>
-    <hr style="border:none;border-top:1px solid #E5E5EA;margin-bottom:16px">
-    <!-- 通知 -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <span style="font-size:15px;font-weight:600">直近の予約変更</span>
-      <span class="badge badge-danger" id="notif-cnt" style="display:none"></span>
-    </div>
-    <div id="notif-list"></div>
-    <div id="notif-empty" class="empty" style="display:none">✅ 未確認のお知らせはありません</div>
-
-    <!-- お客様へメッセージ -->
-    <div style="margin-top:22px;padding-top:16px;border-top:1px solid #E5E5EA">
-      <div style="font-size:15px;font-weight:600;margin-bottom:10px">💬 お客様へメッセージ</div>
-      <div class="card" style="margin:0">
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-          <button class="btn btn-sm" id="patient-message-select-btn" onclick="openPatientMessageModal()">お客様を選択</button>
-          <div id="patient-message-selected" style="font-size:13px;color:#8E8E93;flex:1">お客様が選択されていません</div>
-        </div>
-        <div class="input-group" style="margin-bottom:10px">
-          <label>メッセージ（自由記載）</label>
-          <textarea id="patient-message-text" rows="4" placeholder="お客様へ伝える内容を入力してください" style="width:100%;resize:vertical;box-sizing:border-box"></textarea>
-        </div>
-        <button class="btn btn-primary btn-block" id="patient-message-send-btn" onclick="sendPatientMessage()">送信</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 週間スケジュール表 -->
-  <div id="atab-weektable" style="display:none">
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff;border-bottom:1px solid #E5E5EA">
-      <button class="btn btn-sm" onclick="weekTableNav(-1)">‹ 前週</button>
-      <span id="weektable-label" style="flex:1;text-align:center;font-size:14px;font-weight:600"></span>
-      <button class="btn btn-sm" onclick="weekTableNav(1)">次週 ›</button>
-      <button class="btn btn-sm btn-orange" onclick="printWeekTable()">🖨 PDF</button>
-    </div>
-    <div style="padding:10px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch">
-      <div id="weektable-body"></div>
-      <div id="weektable-summary" style="margin-top:4px"></div>
-    </div>
-    <div style="padding:4px 12px 12px;display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:#8E8E93">
-      <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#DBEAFE;border-radius:2px;display:inline-block"></span>空き枠（クリックで予約）</span>
-      <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#FFE0B3;border-radius:2px;display:inline-block"></span>仮予約1〜5</span>
-      <span style="display:inline-flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#E5E7EB;border-radius:2px;display:inline-block"></span>休診・休暇</span>
-    </div>
-  </div>
-
-  <!-- カレンダー -->
-  <div id="atab-calendar" style="display:none">
-    <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:#fff;border-bottom:1px solid #E5E5EA">
-      <button class="btn btn-sm" onclick="calNav(-1)">‹</button>
-      <span id="cal-label" style="flex:1;text-align:center;font-size:15px;font-weight:600"></span>
-      <button class="btn btn-sm" onclick="calNav(1)">›</button>
-    </div>
-    <div class="pad pt-12">
-      <div class="card" style="padding:12px"><div id="cal-grid"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:#8E8E93">
-          <span>🟢予約あり</span><span style="color:#B00020">🔴休診日</span>
-        </div>
-      </div>
-      <div id="cal-detail" style="display:none"></div>
-    </div>
-  </div>
-
-  <!-- スケジュール -->
-  <div id="atab-schedule" style="display:none">
-    <div class="day-nav">
-      <button class="btn btn-sm" onclick="schedNav(-1)">‹ 前日</button>
-      <span id="sched-label" class="day-nav-label"></span>
-      <button class="btn btn-sm" onclick="schedNav(1)">翌日 ›</button>
-    </div>
-    <div class="pad pt-12" id="sched-body"></div>
-  </div>
-
-  <!-- お客様管理 -->
-  <div class="pad pt-12" id="atab-patients" style="display:none">
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <button class="btn btn-primary btn-sm" onclick="openAddPatient()">＋ 新規登録</button>
-      <button class="btn btn-sm" onclick="openExcelImport()">📋 CSV取込</button>
-      <button class="btn btn-sm btn-green" onclick="exportCSV()">⬇ CSV出力</button>
-    </div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-sm btn-primary" id="cv-table" onclick="setCustomerView('table')">一覧表</button>
-        <button class="btn btn-sm" id="cv-staff" onclick="setCustomerView('staff')">担当別</button>
-      </div>
-      <input type="search" id="cust-search" placeholder="お名前・フリガナ・電話番号・住所で検索" oninput="renderPatientList()" style="flex:1;min-width:200px;min-height:36px;padding:7px 12px;font-size:14px">
-    </div>
-    <div id="cust-warn"></div>
-    <div id="patient-list"></div>
-  </div>
-
-  <!-- 基本表（旧「過去の予約を指定の月に反映」は削除） -->
-  <div class="pad pt-12" id="atab-booking" style="display:none">
-    <div class="card" style="background:#F5F5F7;border-color:#D1D1D6;margin-bottom:12px">
-      <div style="font-size:15px;font-weight:700;margin-bottom:6px">📋 基本表</div>
-      <p style="font-size:12px;color:#636366;line-height:1.6;margin:0">
-        「枠設定」に登録されている担当者・曜日・時間を基本表として、各予約枠にお客様を設定します。
-        「〇月に一括反映する」を押すと、指定月の営業日で空いている同じ曜日・時間の枠へ自動登録します。
-      </p>
-    </div>
-    <div class="card" style="margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-        <div style="font-size:14px;font-weight:700">担当者別・曜日別 基本表</div>
-        <button class="btn btn-sm" onclick="renderBasicBookingTable()">↻ 更新</button>
-      </div>
-      <div class="input-group" style="margin-bottom:12px">
-        <label>担当者</label>
-        <select id="basic-booking-therapist" onchange="renderBasicBookingTable()"></select>
-      </div>
-      <div id="basic-booking-table"></div>
-    </div>
-    <div class="card" style="background:#E8F4FF;border-color:#B3D4FF">
-      <div style="font-size:14px;font-weight:700;color:#004494;margin-bottom:8px">📅 基本表を指定月へ一括反映</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div class="input-group">
-          <label>担当者</label>
-          <select id="basic-booking-reflect-therapist"></select>
-        </div>
-        <div class="input-group">
-          <label>反映する月</label>
-          <input type="month" id="basic-booking-month">
-        </div>
-      </div>
-      <div class="notice" style="margin-bottom:10px;line-height:1.6">
-        選択した<strong>担当者</strong>の基本表を、指定月の営業日に一括反映します。
-        基本表と同じ曜日・時間で、実際に営業していて空いている枠だけに登録します。
-        休診日・担当者の休暇・既に予約が入っている枠はスキップします。
-      </div>
-      <button class="btn btn-primary btn-block" id="basic-booking-reflect-btn" onclick="applyBasicBookingMonth()">📅 指定月に一括反映する</button>
-      <div id="basic-booking-result" style="font-size:12px;color:#636366;margin-top:10px"></div>
-    </div>
-  </div>
-
-  <!-- 枠設定 -->
-  <div class="pad pt-12" id="atab-slots" style="display:none">
-    <div style="font-size:14px;font-weight:600;margin-bottom:12px">予約枠の追加・削除</div>
-    <div class="card">
-      <div style="font-size:13px;font-weight:600;color:#8E8E93;margin-bottom:10px">新しい枠を追加</div>
-      <div class="input-group"><label>曜日</label>
-        <select id="slot-dow">
-          <option value="1">月曜</option><option value="2">火曜</option><option value="3">水曜</option>
-          <option value="4">木曜</option><option value="5">金曜</option><option value="6">土曜</option>
-        </select>
-      </div>
-      <div class="input-group"><label>時間</label><input type="time" id="slot-time" value="09:10"></div>
-      <div class="input-group"><label>担当</label>
-        <select id="slot-th"></select>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="addSlotDef()">追加する</button>
-    </div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px;margin-top:4px">現在の枠一覧</div>
-    <div id="slot-list"></div>
-  </div>
-
-  <!-- 休診日 -->
-  <div class="pad pt-12" id="atab-holidays" style="display:none">
-    <div class="card">
-      <div style="font-size:13px;font-weight:600;color:#8E8E93;margin-bottom:10px">休診日を追加</div>
-      <div class="input-group"><label>日付</label><input type="date" id="hol-date"></div>
-      <div class="input-group"><label>種別</label>
-        <select id="hol-label">
-          <option>祝日</option><option>臨時休診</option><option>院内行事</option><option>その他</option>
-        </select>
-      </div>
-      <div class="input-group"><label>休診時間帯</label>
-        <select id="hol-period">
-          <option value="full">全日休診</option>
-          <option value="am">午前のみ休診（8:30〜11:10）</option>
-          <option value="pm">午後のみ休診（14:00〜）</option>
-        </select>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="addHoliday()">追加する</button>
-    </div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px;margin-top:4px">休診日一覧</div>
-    <div id="holiday-list"></div>
-  </div>
-
-  <!-- PT個別休暇 -->
-  <div class="pad pt-12" id="atab-leaves" style="display:none">
-    <div class="card">
-      <div style="font-size:13px;font-weight:600;color:#8E8E93;margin-bottom:10px">PT休暇を追加</div>
-      <div class="input-group"><label>担当PT</label>
-        <select id="lv-th"></select>
-      </div>
-      <div class="input-group"><label>日付</label><input type="date" id="lv-date"></div>
-      <div class="input-group"><label>種別</label>
-        <select id="lv-label" onchange="toggleLeaveOptions(this.value)">
-          <option value="年休">年休（全休）</option>
-          <option value="半休（午前）">半休（午前）8:30〜11:10不可</option>
-          <option value="半休（午後）">半休（午後）14:00〜不可</option>
-          <option value="時間休">時間休（指定時間のみ不可）</option>
-          <option value="研修">研修（全休）</option>
-          <option value="その他">その他（全休）</option>
-        </select>
-      </div>
-      <div id="lv-hour-wrap" style="display:none" class="input-group">
-        <label>休暇時間を選択</label>
-        <select id="lv-hour-time">
-          <option value="8:30">8:30</option>
-          <option value="9:10">9:10</option>
-          <option value="9:50">9:50</option>
-          <option value="10:30">10:30</option>
-          <option value="11:10">11:10</option>
-          <option value="14:00">14:00</option>
-          <option value="14:50">14:50</option>
-          <option value="15:30">15:30</option>
-          <option value="16:10">16:10</option>
-          <option value="16:50">16:50</option>
-        </select>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="addLeave()">追加する</button>
-    </div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px;margin-top:4px">PT休暇一覧</div>
-    <div id="lv-filter-buttons" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"></div>
-    <div id="leave-list"></div>
-  </div>
-
-  <!-- 操作ログ -->
-  <div class="pad pt-12" id="atab-logs" style="display:none">
-    <div style="font-size:14px;font-weight:600;margin-bottom:12px">操作履歴（直近50件）</div>
-    <div id="log-list"></div>
-  </div>
-
-  <!-- 期限アラート -->
-  <div class="pad pt-12" id="atab-deadline" style="display:none">
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-      <span class="badge badge-warn">残60日以下</span>
-      <span class="badge badge-alert">残30日以下</span>
-      <span class="badge badge-danger">残14日以下</span>
-      <span class="badge badge-expired">期限切れ</span>
-    </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <div class="table-wrap"><table><thead><tr><th>ID</th><th>お客様名</th><th>疾患</th><th>期限</th><th>状態</th></tr></thead><tbody id="dl-tb"></tbody></table></div>
-    </div>
-  </div>
-
-  <!-- トップ画面編集 -->
-  <div class="pad pt-12" id="atab-topedit" style="display:none">
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:14px">クリニック名・システム名</div>
-      <div class="input-group"><label>表示名</label><input type="text" id="cn-name" placeholder="クリニック、施設名、サービス名"></div>
-      <div class="input-group"><label>トップ画面の見出し（自由な文章）</label><input type="text" id="cn-heading" placeholder="例：〇〇訪問リラクゼーション"></div>
-      <div class="input-group"><label>見出しの上のアイコン（絵文字・空欄で非表示）</label><input type="text" id="cn-heading-icon" placeholder="例：🏥"></div>
-      <div class="input-group">
-        <label>見出しの上の画像（ロゴなど・設定するとアイコンより優先）</label>
-        <div id="cn-image-preview" style="text-align:center;font-size:12px;color:#8E8E93;padding:10px;border:1px dashed #D1D1D6;border-radius:10px;margin-bottom:8px"></div>
-        <input type="file" id="cn-heading-image-file" accept="image/*" onchange="onHeadingImagePicked(this)" style="padding:9px">
-        <button class="btn btn-sm btn-danger" id="cn-image-remove" onclick="removeHeadingImage()" style="margin-top:8px;display:none">画像を削除</button>
-        <p id="cn-image-msg" style="font-size:12px;margin-top:6px;display:none"></p>
-        <div class="notice" style="margin-top:8px;font-size:12px">⚠️ 画像データが大きすぎると、機種によっては開きにくくなることがあります。できるだけ小さめの画像をお使いください（選んだ画像は自動で縮小されます）。</div>
-      </div>
-      <div class="input-group"><label>トップ画面 上部の注意文（タイトルの下の一文）</label><input type="text" id="cn-subtitle" placeholder="例：当日キャンセルは電話をお願いします。"></div>
-      <div class="input-group"><label>電話番号</label><input type="tel" id="cn-phone" placeholder="例：000-000-0000" autocomplete="off"></div>
-      <button class="btn btn-primary btn-block" onclick="saveClinicName()">変更する</button>
-      <p id="cn-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 変更しました</p>
-    </div>
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">注意書き</div>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:10px;line-height:1.6">トップ画面の「空き状況カレンダー」の下に表示される黄色い枠の文章です。空欄で保存すると、注意書きは表示されません。</p>
-      <div class="input-group"><textarea id="tn-text" rows="3" maxlength="300" placeholder="例：注意：当日のご予約はお電話でお願いします。"></textarea></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" style="flex:1" onclick="saveTopNotice()">保存する</button>
-        <button class="btn" onclick="resetTopNotice()">初期の文章に戻す</button>
-      </div>
-      <p id="tn-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 保存しました</p>
-    </div>
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">外部リンク設定</div>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:12px;line-height:1.6">
-        トップページ下部に表示するボタンのリンク先を設定します。空欄のままにすると、そのボタンは表示されません。
-      </p>
-      <div class="input-group">
-        <label>🏠 ホームページURL</label>
-        <input type="url" id="ext-homepage-url" placeholder="https://example.com" autocapitalize="none" autocomplete="off">
-      </div>
-      <div class="input-group">
-        <label>📷 InstagramのURL</label>
-        <input type="url" id="ext-instagram-url" placeholder="https://www.instagram.com/xxxxx" autocapitalize="none" autocomplete="off">
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveExternalLinks()">保存する</button>
-      <p id="ext-links-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 保存しました</p>
-    </div>
-  </div>
-
-  <!-- 設定 -->
-  <div class="pad pt-12" id="atab-settings" style="display:none">
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">新規お客様登録の追加項目</div>
-      <p style="font-size:12px;color:#8E8E93;line-height:1.6;margin-bottom:10px">新規お客様登録画面の下部に、自由記載欄を追加できます（最大10個）。項目名を入力して追加してください。</p>
-      <div id="cf-list"></div>
-      <div style="display:flex;gap:8px;align-items:flex-start">
-        <input type="text" id="cf-label" placeholder="例：ご紹介者" maxlength="30" style="flex:1" onkeydown="if(event.key==='Enter')addCustomerExtraField()">
-        <button class="btn btn-primary btn-sm" onclick="addCustomerExtraField()" style="flex-shrink:0">追加</button>
-      </div>
-      <p id="cf-msg" style="font-size:12px;margin-top:6px;display:none"></p>
-    </div>
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:14px">パスワード変更</div>
-      <div class="input-group"><label>現在のパスワード</label><input type="password" id="pw-old" autocomplete="new-password" autocorrect="off" spellcheck="false"></div>
-      <div class="input-group"><label>新しいパスワード</label><input type="password" id="pw-new" autocomplete="new-password" autocorrect="off" spellcheck="false"></div>
-      <div class="input-group"><label>新しいパスワード（確認）</label><input type="password" id="pw-new2" autocomplete="new-password" autocorrect="off" spellcheck="false"></div>
-      <button class="btn btn-primary btn-block" onclick="changePassword()">変更する</button>
-      <p id="pw-msg" style="font-size:13px;margin-top:8px;display:none;text-align:center"></p>
-    </div>
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:14px">予約受付期間</div>
-      <div class="input-group"><label>受付開始日</label><input type="date" id="s-start"></div>
-      <div class="input-group"><label>受付終了日</label><input type="date" id="s-end"></div>
-      <div class="input-group"><label>受付開始時間</label><input type="time" id="s-tstart"></div>
-      <div class="input-group"><label>受付終了時間</label><input type="time" id="s-tend"></div>
-      <button class="btn btn-primary btn-block" onclick="saveSettings()">保存する</button>
-      <p id="s-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 保存しました</p>
-    </div>
-    <div class="card"><p style="font-size:13px;font-weight:600;color:#8E8E93;margin-bottom:6px">現在の設定</p><p id="s-display" style="font-size:14px;line-height:1.8"></p></div>
-
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">スタッフ管理（担当PT）</div>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:12px;line-height:1.6">
-        担当スタッフを追加・削除できます。スタッフIDは半角英数字で、お客様データ・予約枠・休暇などの紐付けに使われるため、追加後の変更はできません。<br>
-        既にそのIDで予約・お客様・枠が登録されているスタッフを削除しても、過去のデータは残りますが担当名が「ID表示」になります。
-      </p>
-      <div id="staff-list-area" style="margin-bottom:14px"></div>
-      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
-        <div class="input-group" style="flex:1;min-width:120px;margin-bottom:0">
-          <label>スタッフID（半角英数字）</label>
-          <input type="text" id="new-staff-id" placeholder="例：sato" autocapitalize="none" autocomplete="off">
-        </div>
-        <div class="input-group" style="flex:1;min-width:140px;margin-bottom:0">
-          <label>表示名</label>
-          <input type="text" id="new-staff-name" placeholder="例：PT 佐藤">
-        </div>
-      </div>
-      <p id="staff-add-err" style="font-size:13px;color:#FF3B30;margin-top:8px;display:none"></p>
-      <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="addStaff()">スタッフを追加する</button>
-    </div>
-
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">臨時営業日</div>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:12px;line-height:1.6">
-        本来休診の日（日曜・第1/3週の木土など）でも、特定の日付・担当・時間だけ臨時で営業させたい場合に登録します。登録した時間は、週間表・お客様予約画面などで通常の枠と同じように予約できるようになります。
-      </p>
-      <div class="input-group"><label>臨時営業日</label><input type="date" id="sp-date"></div>
-      <div class="input-group"><label>担当</label><select id="sp-th"></select></div>
-      <div class="input-group"><label>時間</label><input type="time" id="sp-time" value="9:10"></div>
-      <button class="btn btn-primary btn-block" onclick="addSpecialDay()">追加する</button>
-      <p id="sp-err" style="font-size:13px;color:#FF3B30;margin-top:8px;display:none"></p>
-    </div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:10px">臨時営業日一覧</div>
-    <div id="special-day-list" style="margin-bottom:16px"></div>
-
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">基本営業時間（曜日・週パターン）</div>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:12px;line-height:1.6">
-        曜日ごとに、月の第何週かによって営業状況を設定できます。<br>
-        「終日」＝通常営業（時間は「枠設定」タブで登録した枠に従う）／「午前のみ」＝14:00以降休診／「午後のみ」＝14:00より前休診／「休診」＝終日休診。<br>
-        祝日など特定の日だけを休診にしたい場合は「休診日」タブをご利用ください。
-      </p>
-      <div class="table-wrap">
-        <table id="bh-table" style="min-width:420px"></table>
-      </div>
-      <button class="btn btn-primary btn-block" style="margin-top:14px" onclick="saveBusinessHours()">この内容で保存する</button>
-      <p id="bh-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 保存しました。各画面に反映されます</p>
-    </div>
-  </div>
-
-  <!-- 実績表 -->
-  <div id="atab-actuals" class="actuals-screen" style="display:none">
-    <div class="actuals-toolbar">
-      <button class="btn btn-sm" onclick="switchTab('a','notify',document.querySelector('#s-admin .tab2'))">← 管理画面</button>
-      <div class="actuals-title">📊 リハビリ実績表</div>
-      <div class="actuals-actions">
-        <label style="font-size:12px;color:#8E8E93">年度</label>
-        <select id="actuals-fy" style="width:130px;min-height:36px;padding:7px 30px 7px 10px" onchange="renderActuals()"></select>
-        <button class="btn btn-sm btn-green" onclick="renderActuals()">↻ 再集計</button>
-        <button class="btn btn-sm btn-orange" onclick="printActuals()">🖨 印刷</button>
-      </div>
-    </div>
-    <div class="actuals-kpi" id="actuals-kpi"></div>
-    <div id="actuals-body"><div class="actuals-loading">年度を選択してください</div></div>
-    <div class="actuals-note">
-      ※「実際取得単位数」は予約ステータスが「実施済」の単位数を集計します。<br>
-      ※「キャンセル単位数」は「お知らせ」内の「お客様からの予約変更」に記録されたお客様自身のキャンセルを1件=2単位として集計します。<br>
-      ※「予約空き数」は設定された空き枠を1枠=2単位として集計します。<br>
-      ※「担当者別」は、その月に実施済となったお客様のユニーク人数。「運動器お客様数」は担当者別お客様数の総和です。<br>
-      ※「新規お客様数（開始）」は「お客様管理」の「リハビリ開始日」を月別に集計します。<br>
-      ※現在の予約システムには脳血管リハ・医療のみ・実施計画書・医1/医2の区分データがないため、それらは自動算定せず「—」表示にしています。<br>
-      ※診療報酬の金額は請求データそのものではないため自動推定せず、単価を設定した場合のみ表示します。
-    </div>
-  </div>
-</div><!-- end s-admin -->
 </div><!-- end app -->
 
 <script>
@@ -3261,7 +2855,12 @@ function setCustomerView(v){
 function customerMatchesQuery(id,q){
   if(!q)return true;
   const p=patients[id],pr=customerProfiles[id]||{};
-  return normQuery([p.name,p.kana,pr.phone,pr.address].join(' ')).includes(q);
+  const extraText=Object.values(pr.extra||{}).map(x=>x?.v||'').join(' ');
+  return normQuery([p.name,p.kana,pr.phone,pr.address,p.disease,extraText].join(' ')).includes(q);
+}
+function customerExtraValue(pr,patterns){
+  const item=Object.values(pr.extra||{}).find(x=>x&&patterns.some(re=>re.test(String(x.l||''))));
+  return item?.v||'';
 }
 function renderCustomerTable(){
   const el=document.getElementById('patient-list');
@@ -3270,31 +2869,36 @@ function renderCustomerTable(){
   if(!all.length){el.innerHTML='<div class="empty">お客様が登録されていません</div>';return;}
   const ids=all.filter(id=>customerMatchesQuery(id,q))
     .sort((a,b)=>(patients[a].kana||patients[a].name).localeCompare(patients[b].kana||patients[b].name,'ja'));
-  const th=s=>`<th style="white-space:nowrap">${s}</th>`;
-  const td='style="vertical-align:top;text-align:left"';
-  let html=`<div style="font-size:12px;color:#8E8E93;margin-bottom:6px">${ids.length}名${q?`（全${all.length}名中）`:''}</div>`;
-  html+=`<div class="table-wrap"><table style="min-width:${960+customerExtraFields.length*150}px"><thead><tr>${th('お名前')}${th('フリガナ')}${th('電話番号')}${th('住所')}${th('生年月日')}${th('性別')}${th('ご希望のサービス')}${customerExtraFields.map(f=>th(escapeHtml(f.label))).join('')}${th('担当')}${th('登録')}${th('')}</tr></thead><tbody>`;
-  if(!ids.length)html+=`<tr><td colspan="${9+customerExtraFields.length}" style="text-align:center;color:#8E8E93;padding:20px">該当するお客様はいません</td></tr>`;
+  let html=`<div style="font-size:12px;color:#718086;margin:2px 0 8px">${ids.length}名${q?`（全${all.length}名中）`:''}</div>`;
+  if(!ids.length){el.innerHTML=html+'<div class="empty">該当するお客様はいません</div>';return;}
+  html+='<div class="customer-card-list">';
   ids.forEach(id=>{
     const p=patients[id],pr=customerProfiles[id]||{};
     const age=calcAge(p.dob);
-    const created=pr.createdAt?new Date(pr.createdAt).toLocaleDateString('ja-JP',{timeZone:'Asia/Tokyo'}):'';
-    const staffCell=p.unassigned?'<span style="color:#8E8E93">未設定</span>':`<span class="chip" style="${staffChipStyle(p.therapist)}">${escapeHtml(getStaffName(p.therapist))}</span>`;
-    html+=`<tr>
-      <td ${td}><div style="font-weight:600;cursor:pointer;white-space:nowrap" onclick="openEditPatient('${escapeJs(id)}')">${escapeHtml(p.name)}</div><div style="font-size:10px;color:#8E8E93">${escapeHtml(id)}</div></td>
-      <td ${td}>${escapeHtml(p.kana)}</td>
-      <td ${td}><span style="white-space:nowrap">${escapeHtml(pr.phone||'—')}</span></td>
-      <td ${td}><div style="min-width:160px">${escapeHtml(pr.address||'—')}</div></td>
-      <td ${td}><span style="white-space:nowrap">${escapeHtml(p.dob||'—')}${age!==null?`（${age}歳）`:''}</span></td>
-      <td ${td}>${escapeHtml(p.gender)}</td>
-      <td ${td}><div style="min-width:180px;max-width:280px;white-space:pre-wrap">${escapeHtml(p.disease||'—')}</div></td>
-      ${customerExtraFields.map(f=>`<td ${td}><div style="min-width:120px;white-space:pre-wrap">${escapeHtml(pr.extra?.[f.id]?.v||'—')}</div></td>`).join('')}
-      <td ${td}>${staffCell}</td>
-      <td ${td}><span style="white-space:nowrap">${escapeHtml(created||'—')}</span>${pr.createdVia==='web'?' <span class="badge badge-ok">Web</span>':''}</td>
-      <td ${td}><div style="display:flex;gap:4px"><button class="btn btn-sm" style="font-size:11px;padding:4px 8px;min-height:28px" onclick="openEditPatient('${escapeJs(id)}')">編集</button><button class="btn btn-sm btn-red" style="font-size:11px;padding:4px 8px;min-height:28px" onclick="deletePatient('${escapeJs(id)}')">削除</button></div></td>
-    </tr>`;
+    const referrer=customerExtraValue(pr,[/紹介/]);
+    const freeText=customerExtraValue(pr,[/自由/,/備考/,/その他/]);
+    const value=v=>escapeHtml(v||'未入力');
+    const cell=(label,v)=>`<div class="customer-info-cell"><div class="customer-info-label">${label}</div><div class="customer-info-value">${value(v)}</div></div>`;
+    html+=`<div class="customer-info-card">
+      <div class="customer-info-head">
+        <div class="customer-info-name" onclick="openEditPatient('${escapeJs(id)}')">${escapeHtml(p.name)}</div>
+        <div class="customer-info-actions">
+          <button class="btn btn-sm" onclick="openEditPatient('${escapeJs(id)}')">編集</button>
+          <button class="btn btn-sm btn-danger" onclick="deletePatient('${escapeJs(id)}')">削除</button>
+        </div>
+      </div>
+      <div class="customer-info-grid">
+        ${cell('お名前',p.name)}
+        ${cell('電話番号',pr.phone)}
+        ${cell('住所',pr.address)}
+        ${cell('年齢',age===null?'未入力':String(age))}
+        ${cell('相談内容',p.disease)}
+        ${cell('ご紹介者',referrer)}
+        ${cell('自由記載',freeText)}
+      </div>
+    </div>`;
   });
-  html+='</tbody></table></div>';
+  html+='</div>';
   el.innerHTML=html;
 }
 
@@ -3437,6 +3041,7 @@ function renderReserve(){
       <div class="th-select-card ${resServiceUnit===3?'active':''}" data-service-unit="3" onclick="resSelectService(3)"><div style="font-size:18px;font-weight:700">60分</div><div style="font-size:13px;margin-top:3px">7,000円</div></div>
       <div class="th-select-card ${resServiceUnit===4?'active':''}" data-service-unit="4" onclick="resSelectService(4)"><div style="font-size:18px;font-weight:700">90分</div><div style="font-size:13px;margin-top:3px">10,000円</div></div>
     </div>
+    <p style="font-size:12px;color:#636366;line-height:1.6;margin:-4px 2px 16px">＊紹介割1,000円はお支払い時に確認させていただきます。</p>
     <p style="font-size:14px;font-weight:600;margin-bottom:12px">担当を選んでから空き枠を選択</p>
     <div id="res-th-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">${staffList.map(s=>`
       <div class="th-select-card ${p.therapist===s.id?'active':''}" data-staff-id="${s.id}" onclick="resSelectTherapist('${s.id}')">
@@ -3618,25 +3223,10 @@ async function doReserve(fullDate,time,dateStr2,dayLabel,therapist,unit){
 function adminLogin(){
   const pw=document.getElementById('admin-pw').value;
   if(pw===ADMIN_PW){
-    setActor('admin');
     document.getElementById('admin-err').style.display='none';
     document.getElementById('admin-pw').value='';
-    const now=getJSTToday();
-    document.getElementById('admin-date-sub').textContent=`${now.getFullYear()}年${now.getMonth()+1}月`;
-    renderNotifications();renderDeadline();renderSettingsDisplay();
-    renderTodaySchedule();
-    weekTableOffset=0;
-    weekTableWeekendMode=false;
-    populateClinicSettingsInputs();
-    loadCustomerProfiles().then(()=>renderPatientList());
-    renderPatientMessageSelected();
-    document.getElementById('s-start').value=settings.start;
-    document.getElementById('s-end').value=settings.end;
-    document.getElementById('s-tstart').value=settings.tstart;
-    document.getElementById('s-tend').value=settings.tend;
-    showScreen('s-admin');
-    renderNotifications();
-    dbLog('admin','login','管理者ログイン');
+    try{sessionStorage.setItem('meguru_admin_authenticated','1');}catch(e){}
+    window.location.href='admin.html';
   } else {document.getElementById('admin-err').style.display='block';}
 }
 
@@ -5369,7 +4959,6 @@ async function init(){
     renderTopHeading();
     renderTopNotice();
     renderReminder();
-    renderSettingsDisplay();
     renderTopLinks();
   }catch(e){
     console.error('init error',e);
