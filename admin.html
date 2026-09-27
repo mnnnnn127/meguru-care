@@ -2777,13 +2777,11 @@ function weekTableBookModal(ds,therapist,time){
     <div class="input-group" style="margin-top:4px">
       <label>🔁 登録方法</label>
       <select id="wt-auto">
-        <option value="">今回のみ（${time}に登録）</option>
-        ${isBaseSlot?`<option value="monthly">同月分すべて自動登録（${time}）</option>`:''}
-        ${baseTaken?'':`<option value="half_1">1単位（${baseTime}）</option>`}
-        ${secondTaken?'':`<option value="half_2">1単位（${secondTime}）</option>`}
-        <option value="three_units">3単位（60分）</option>
+        <option value="ref_60">紹介あり60分</option>
+        <option value="ref_90">紹介あり90分</option>
+        <option value="noref_60">紹介なし60分</option>
+        <option value="noref_90">紹介なし90分</option>
       </select>
-      <p style="font-size:11px;color:#8E8E93;margin-top:6px;line-height:1.5">「1単位」は20分、「2単位」は40分、「3単位」は60分です。3単位登録では1件の予約を3単位として登録します。</p>
     </div>
     <p id="wt-err" style="font-size:13px;color:#FF3B30;margin-bottom:8px;display:none"></p>
     <div style="display:flex;gap:8px">
@@ -2857,15 +2855,10 @@ function wtSelectPatient(pid){
 async function weekTableDoBook(ds,therapist,time){
   const err=document.getElementById('wt-err');
   const btn=document.getElementById('wt-submit');
-  const auto=document.getElementById('wt-auto').value;
-  // 「1単位」を選んだ場合は、実際に登録する時間を選択に応じて前半／後半に切り替える
-  const baseTime=getBaseSlotTime(ds,therapist,time);
-  const secondTime=getSecondUnitTime(baseTime);
-  const isHalf=auto==='half_1'||auto==='half_2';
-  const isThreeUnits=auto==='three_units';
-  const actualTime=auto==='half_1'?baseTime:auto==='half_2'?secondTime:(isThreeUnits?baseTime:time);
-  const unit=isHalf?1:(isThreeUnits?3:2);
-  const normTime=normalizeTime(actualTime);
+  const course=document.getElementById('wt-auto').value;
+  const referral=course.startsWith('ref_');
+  const unit=course.endsWith('_90')?4:3;
+  const normTime=normalizeTime(getBaseSlotTime(ds,therapist,time));
 
   if(!wtSelectedPid){err.textContent='お客様を検索して選択してください';err.style.display='block';return;}
   const pid=wtSelectedPid;
@@ -2875,8 +2868,7 @@ async function weekTableDoBook(ds,therapist,time){
     const ym=ds.substring(0,7);
     const usedUnits=await countMonthlyBookingUnits(pid,ym);
     if(usedUnits+unit>13){
-      const m=parseInt(ym.split('-')[1]);
-      err.textContent=`リハビリ算定期限を超えているため追加予約できません。詳しくは電話または担当者に確認して下さい。`;
+      err.textContent='リハビリ算定期限を超えているため追加予約できません。詳しくは電話または担当者に確認して下さい。';
       err.style.display='block';return;
     }
   }
@@ -2885,44 +2877,24 @@ async function weekTableDoBook(ds,therapist,time){
   const r=await dbBookSlot(ds,therapist,normTime,pid,unit);
   btn.disabled=false;btn.textContent='予約する';
   if(!r.ok){err.textContent=r.reason;err.style.display='block';return;}
+
+  bookingBillingMeta[bookingMetaKey(ds,therapist,normTime)]={
+    ...(bookingBillingMeta[bookingMetaKey(ds,therapist,normTime)]||{}),
+    referral
+  };
+  await saveBookingBillingMeta();
+
   const p=patients[pid];
   const d=parseLocalDate(ds);
-  const unitNote=isHalf?'【1単位】':(isThreeUnits?'【3単位・60分】':'');
-  await dbAddNotification(`${p.name}（${pid}）${d.getMonth()+1}/${d.getDate()} ${normTime}${unitNote}（${getStaffName(therapist)}）に予約【管理者】`,'admin');
-
-  // 同月自動登録（1単位登録の場合は今回のみとし、自動登録の対象外とする）
-  let autoCount=0;
-  if(auto==='monthly'){
-    const baseDate=parseLocalDate(ds);
-    const baseMonth=baseDate.getMonth();
-    const baseYear=baseDate.getFullYear();
-    for(let w=1;w<=5;w++){
-      const nd=addDays(baseDate,w*7);
-      if(nd.getMonth()!==baseMonth||nd.getFullYear()!==baseYear)break;
-      const nds=dateStr(nd);
-      if(isTherapistOff(nds,therapist)||nd.getDay()===0)continue;
-      if(isOverDeadline(pid)){
-        const usedUnits=await countMonthlyBookingUnits(pid,nds.substring(0,7));
-        if(usedUnits+2>13)break;
-      }
-      // DBから最新状態を確認して重複チェック
-      if(!bookings[nds]?.[therapist]?.[normTime]){
-        const nr=await dbBookSlot(nds,therapist,normTime,pid);
-        if(nr.ok)autoCount++;
-      }
-    }
-  }
+  const courseLabel=`${referral?'紹介あり':'紹介なし'}${unit===4?'90分':'60分'}`;
+  await dbAddNotification(`${p.name}（${pid}）${d.getMonth()+1}/${d.getDate()} ${normTime}【${courseLabel}】（${getStaffName(therapist)}）に予約【管理者】`,'admin');
 
   wtSelectedPid=null;
   await reloadBookings();
-  closeModal();renderWeekTable();
-  if(autoCount>0){
-    showToast(`${p.name} さんの予約を登録。同月分 ${autoCount}回分も自動登録しました`,'#34C759');
-  } else {
-    showToast(`${p.name} さんの予約を登録しました`,'#34C759');
-  }
+  closeModal();
+  await renderWeekTable();
+  showToast(`${p.name} さんを「${courseLabel}」で予約登録しました`,'#34C759');
 }
-
 function weekTableStatusModal(ds,therapist,time){
   const pid=bookings[ds]?.[therapist]?.[time];
   if(!pid)return;
