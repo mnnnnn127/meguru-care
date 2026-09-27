@@ -3467,7 +3467,10 @@ function renderReserve(){
     return;
   }
   el.innerHTML=`<div class="pad pt-12">
-    <div class="notice-blue" style="margin-bottom:14px">受付期間：${settings.start||'指定なし'}〜${settings.end||'指定なし'}${(settings.tstart&&settings.tend)?`（${settings.tstart}〜${settings.tend}）`:''}</div>
+    <div class="notice-blue" style="margin-bottom:10px">受付期間：${settings.start||'指定なし'}〜${settings.end||'指定なし'}${(settings.tstart&&settings.tend)?`（${settings.tstart}〜${settings.tend}）`:''}</div>
+    <p style="font-size:12px;color:#8E8E93;line-height:1.7;margin:0 2px 16px">
+      ＊カレンダーより空き状況を確認したい方は、「戻る」ボタンを押してからホーム画面の”予約をする”を押してください。
+    </p>
     <p style="font-size:14px;font-weight:600;margin-bottom:10px">コースを選択</p>
     <div id="res-service-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
       <div class="th-select-card ${resServiceUnit===3?'active':''}" data-service-unit="3" onclick="resSelectService(3)"><div style="font-size:18px;font-weight:700">60分</div><div style="font-size:13px;margin-top:3px">7,000円</div></div>
@@ -3540,9 +3543,6 @@ async function renderResSlots(){
   if(!anyOpen)html=weekEndBeyondReception
     ?`<div class="empty">この週以降は予約受付期間外です<br><span style="font-size:12px">受付終了日：${settings.end}</span></div>`
     :'<div class="empty">この週の空き枠はありません<br><span style="font-size:12px">「次週」ボタンで先の週を確認できます</span></div>';
-  html += `<div style="margin:28px 4px 8px;font-size:12px;color:#8E8E93;line-height:1.7">
-    ＊カレンダーより空き状況を確認したい方は、「戻る」ボタンを押してからホーム画面の”予約をする”を押してください。
-  </div>`;
   wrap.innerHTML=html;wrap.style.display='block';
 }
 
