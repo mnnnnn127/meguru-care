@@ -4554,12 +4554,12 @@ function openAddPatient(){
     <div class="input-group"><label>性別</label><select id="np-gender"><option>男</option><option>女</option><option>その他</option></select></div>
     <div class="input-group"><label>電話番号</label><input type="tel" id="np-phone" placeholder="パスワード再設定の本人確認に使います"></div>
     <div class="input-group"><label>住所</label><input type="text" id="np-address"></div>
-    <div class="input-group"><label>疾患名／ご希望のサービス</label><input type="text" id="np-disease" placeholder="変形性膝関節症"></div>
+    <div class="input-group"><label>ご希望のサービス、要望</label><input type="text" id="np-disease" placeholder="変形性膝関節症"></div>
     <div class="input-group"><label>担当セラピスト</label><select id="np-th">${staffList.map(s=>`<option value="${s.id}">${s.name}</option>`).join('')}</select></div>
-    <div class="input-group"><label>リハビリ開始日</label><input type="date" id="np-rehab-start"></div>
-    <div class="input-group"><label>リハビリ算定開始日</label><input type="date" id="np-rehab-billing-start" onchange="autoCalcNewPatientDeadline()"></div>
-    <div class="input-group"><label>介護保険</label><select id="np-care-insurance"><option value="無" selected>無</option><option value="有">有</option></select></div>
-    <div class="input-group"><label>リハ期限（自動）</label><input type="date" id="np-dl" readonly></div>
+    <div class="input-group"><label>初回日にち</label><input type="date" id="np-rehab-start"></div>
+    <input type="hidden" id="np-rehab-billing-start" value="">
+    <input type="hidden" id="np-care-insurance" value="無">
+    <input type="hidden" id="np-dl" value="">
     <div class="input-group"><label>備考</label><input type="text" id="np-note" placeholder="任意"></div>
     ${extraFieldsInputsHTML('np',{})}
     <p id="np-err" style="font-size:13px;color:#FF3B30;margin-bottom:8px;display:none"></p>
@@ -4631,12 +4631,12 @@ function openEditPatient(id){
     <div class="input-group"><label>性別</label><select id="ep-gender"><option ${p.gender==='男'?'selected':''}>男</option><option ${p.gender==='女'?'selected':''}>女</option><option ${p.gender==='その他'?'selected':''}>その他</option></select></div>
     <div class="input-group"><label>電話番号</label><input type="tel" id="ep-phone" value="${escapeHtml(pr.phone||'')}"></div>
     <div class="input-group"><label>住所</label><input type="text" id="ep-address" value="${escapeHtml(pr.address||'')}"></div>
-    <div class="input-group"><label>疾患名／ご希望のサービス</label><input type="text" id="ep-disease" value="${p.disease}"></div>
+    <div class="input-group"><label>ご希望のサービス、要望</label><input type="text" id="ep-disease" value="${p.disease}"></div>
     <div class="input-group"><label>担当</label><select id="ep-th"><option value="" ${p.unassigned?'selected':''}>（未設定）</option>${staffList.map(s=>`<option value="${s.id}" ${(!p.unassigned&&p.therapist===s.id)?'selected':''}>${s.name}</option>`).join('')}</select></div>
-    <div class="input-group"><label>リハビリ開始日</label><input type="date" id="ep-rehab-start" value="${p.rehabStartDate||''}"></div>
-    <div class="input-group"><label>リハビリ算定開始日</label><input type="date" id="ep-rehab-billing-start" value="${p.rehabBillingStartDate||''}" onchange="autoCalcEditPatientDeadline()"></div>
-    <div class="input-group"><label>介護保険</label><select id="ep-care-insurance"><option value="無" ${p.careInsurance?'':'selected'}>無</option><option value="有" ${p.careInsurance?'selected':''}>有</option></select></div>
-    <div class="input-group"><label>リハ期限（自動）</label><input type="date" id="ep-dl" value="${dl}" readonly></div>
+    <div class="input-group"><label>初回日にち</label><input type="date" id="ep-rehab-start" value="${p.rehabStartDate||''}"></div>
+    <input type="hidden" id="ep-rehab-billing-start" value="${p.rehabBillingStartDate||''}">
+    <input type="hidden" id="ep-care-insurance" value="${p.careInsurance?'有':'無'}">
+    <input type="hidden" id="ep-dl" value="${dl}">
     <div class="input-group"><label>備考</label><input type="text" id="ep-note" value="${p.note||''}"></div>
     ${extraFieldsInputsHTML('ep',pr.extra)}
     <div style="display:flex;gap:8px">
