@@ -742,53 +742,33 @@ body.admin-page .customer-admin-title{color:var(--admin-text)}
 
   <!-- トップ画面編集 -->
   <div class="pad pt-12" id="atab-topedit" style="display:none">
+    <div class="customer-admin-title">トップ画面</div>
+    <div class="customer-admin-note">予約ページのトップ画像と、その下に表示されるカレンダー部分の表示内容を設定します。</div>
+
     <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:14px">クリニック名・システム名</div>
-      <div class="input-group"><label>表示名</label><input type="text" id="cn-name" placeholder="クリニック、施設名、サービス名"></div>
-      <div class="input-group"><label>トップ画面の見出し（自由な文章）</label><input type="text" id="cn-heading" placeholder="例：〇〇訪問リラクゼーション"></div>
-      <div class="input-group"><label>見出しの上のアイコン（絵文字・空欄で非表示）</label><input type="text" id="cn-heading-icon" placeholder="例：🏥"></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:14px">トップ画面の見出し</div>
       <div class="input-group">
-        <label>見出しの上の画像（ロゴなど・設定するとアイコンより優先）</label>
-        <div id="cn-image-preview" style="text-align:center;font-size:12px;color:#8E8E93;padding:10px;border:1px dashed #D1D1D6;border-radius:10px;margin-bottom:8px"></div>
-        <input type="file" id="cn-heading-image-file" accept="image/*" onchange="onHeadingImagePicked(this)" style="padding:9px">
-        <button class="btn btn-sm btn-danger" id="cn-image-remove" onclick="removeHeadingImage()" style="margin-top:8px;display:none">画像を削除</button>
-        <p id="cn-image-msg" style="font-size:12px;margin-top:6px;display:none"></p>
-        <div class="notice" style="margin-top:8px;font-size:12px">⚠️ 画像データが大きすぎると、機種によっては開きにくくなることがあります。できるだけ小さめの画像をお使いください（選んだ画像は自動で縮小されます）。</div>
+        <label>トップ画像の見出し</label>
+        <input type="text" id="cn-heading" placeholder="例：めぐる訪問ケア">
       </div>
-      <div class="input-group"><label>トップ画面 上部の注意文（タイトルの下の一文）</label><input type="text" id="cn-subtitle" placeholder="例：当日キャンセルは電話をお願いします。"></div>
-      <div class="input-group"><label>電話番号</label><input type="tel" id="cn-phone" placeholder="例：000-000-0000" autocomplete="off"></div>
-      <button class="btn btn-primary btn-block" onclick="saveClinicName()">変更する</button>
-      <p id="cn-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 変更しました</p>
+      <button class="btn btn-primary btn-block" onclick="saveTopHeadingOnly()">保存する</button>
+      <p id="cn-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 保存しました</p>
     </div>
+
     <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">注意書き</div>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:10px;line-height:1.6">トップ画面の「空き状況カレンダー」の下に表示される黄色い枠の文章です。空欄で保存すると、注意書きは表示されません。</p>
-      <div class="input-group"><textarea id="tn-text" rows="3" maxlength="300" placeholder="例：注意：当日のご予約はお電話でお願いします。"></textarea></div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px">カレンダー下の注意書き</div>
+      <p style="font-size:12px;color:#8E8E93;margin-bottom:10px;line-height:1.6">トップ画像の下に表示されるカレンダーの、その下に表示する注意書きです。空欄で保存すると表示されません。</p>
+      <div class="input-group">
+        <textarea id="tn-text" rows="3" maxlength="300" placeholder="注意書きを入力してください"></textarea>
+      </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary" style="flex:1" onclick="saveTopNotice()">保存する</button>
         <button class="btn" onclick="resetTopNotice()">初期の文章に戻す</button>
       </div>
       <p id="tn-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 保存しました</p>
     </div>
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px">外部リンク設定</div>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:12px;line-height:1.6">
-        トップページ下部に表示するボタンのリンク先を設定します。空欄のままにすると、そのボタンは表示されません。
-      </p>
-      <div class="input-group">
-        <label>🏠 ホームページURL</label>
-        <input type="url" id="ext-homepage-url" placeholder="https://example.com" autocapitalize="none" autocomplete="off">
-      </div>
-      <div class="input-group">
-        <label>📷 InstagramのURL</label>
-        <input type="url" id="ext-instagram-url" placeholder="https://www.instagram.com/xxxxx" autocapitalize="none" autocomplete="off">
-      </div>
-      <button class="btn btn-primary btn-block" onclick="saveExternalLinks()">保存する</button>
-      <p id="ext-links-saved" style="font-size:13px;color:#34C759;margin-top:8px;display:none;text-align:center">✓ 保存しました</p>
-    </div>
   </div>
 
-  <!-- 設定 -->
   <div class="pad pt-12" id="atab-settings" style="display:none">
     <div class="card">
       <div style="font-size:14px;font-weight:600;margin-bottom:6px">新規お客様登録の追加項目</div>
@@ -5030,6 +5010,18 @@ async function applyBasicBookingMonth(){
 }
 
 
+async function saveTopHeadingOnly(){
+  const el=document.getElementById('cn-heading');
+  if(!el)return;
+  topHeadingText=el.value.trim()||'めぐる訪問ケア';
+  await dbSaveSetting('top_heading_text',topHeadingText);
+  renderTopHeading();
+  const msg=document.getElementById('cn-saved');
+  if(msg){msg.style.display='block';setTimeout(()=>msg.style.display='none',2000);}
+  updateLastUpdated();
+  showToast('トップ画面の見出しを保存しました','#34C759');
+}
+
 // ---- SETTINGS ----
 async function saveClinicName(){
   clinicName=document.getElementById('cn-name').value.trim()||clinicName;
@@ -5188,20 +5180,10 @@ function renderTopSubtitle(){
   el.innerHTML=`⚠️ ${topSubtitleText||'当日キャンセルは電話をお願いします。'}${clinicPhone?`<br><a href="tel:${telHref}" style="color:#007AFF;text-decoration:none;font-weight:600">TEL.${clinicPhone}</a>`:''}`;
 }
 function populateClinicSettingsInputs(){
-  const nameEl=document.getElementById('cn-name');
-  const subEl=document.getElementById('cn-subtitle');
-  const phoneEl=document.getElementById('cn-phone');
   const headEl=document.getElementById('cn-heading');
-  const headIcEl=document.getElementById('cn-heading-icon');
-  if(headEl)headEl.value=topHeadingText;
-  if(headIcEl)headIcEl.value=topHeadingIcon;
-  renderCustomerExtraFieldsSettings();
-  pendingHeadingImage=undefined;
-  const imgFile=document.getElementById('cn-heading-image-file');if(imgFile)imgFile.value='';
-  renderHeadingImagePreview();
-  if(nameEl)nameEl.value=clinicName;
-  if(subEl)subEl.value=topSubtitleText;
-  if(phoneEl)phoneEl.value=clinicPhone;
+  const noticeEl=document.getElementById('tn-text');
+  if(headEl)headEl.value=topHeadingText||'めぐる訪問ケア';
+  if(noticeEl)noticeEl.value=topNoticeText||'';
 }
 async function changePassword(){
   const old=document.getElementById('pw-old').value;
