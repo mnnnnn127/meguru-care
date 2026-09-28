@@ -1841,6 +1841,37 @@ function getPatientConversation(pid){
  return (notifications||[]).filter(n=>String(n.operator)===id&&(hasPatientMessageMark(n.text)||isPatientToStaffMessage(n)))
  .map(n=>({id:String(n.id),from:isPatientToStaffMessage(n)?'patient':'staff',text:isPatientToStaffMessage(n)?getPatientToStaffMessageText(n):getPatientMessageText(n),time:n.time||''})).filter(x=>x.text).reverse();
 }
+async function refreshPatientMessages(){
+  const btn=document.getElementById('patient-chat-refresh');
+  const status=document.getElementById('patient-chat-refresh-status');
+  if(btn){ btn.disabled=true; btn.textContent='更新中…'; }
+  if(status) status.textContent='最新のメッセージを確認しています';
+  try{
+    if(!currentPid) throw new Error('お客様情報が確認できません');
+    const {data,error}=await sb
+      .from('rehab_notifications')
+      .select('*')
+      .eq('operator',String(currentPid))
+      .order('created_at',{ascending:true});
+    if(error) throw error;
+
+    // 他のお客様の通知を混ぜず、現在のお客様の最新通知だけを差し替える。
+    const other=(notifications||[]).filter(n=>String(n.operator)!==String(currentPid));
+    notifications=other.concat(data||[]);
+    renderPatientChatHistory();
+
+    if(status){
+      const d=new Date();
+      status.textContent='更新しました '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    }
+  }catch(e){
+    console.error(e);
+    if(status) status.textContent='更新できませんでした。もう一度お試しください。';
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='↻ 更新'; }
+  }
+}
+
 function renderPatientChatHistory(){
  const el=document.getElementById('patient-chat-history'); if(!el||!currentPid)return;
  const items=getPatientConversation(currentPid);
@@ -1855,7 +1886,8 @@ async function sendMessageFromPatient(){
  const {data,error}=await sb.from('rehab_notifications').insert({message:`${PATIENT_TO_STAFF_MESSAGE_MARK}\n${msg}`,operator:String(currentPid)}).select().single();
  if(error){if(btn)btn.disabled=false;showToast('メッセージを送信できませんでした');return;}
  notifications.unshift({id:data.id,text:data.message,time:'たった今',operator:data.operator}); if(ta)ta.value='';
- await dbLog(String(currentPid),'patient_message_to_staff',msg); renderPatientChatHistory(); renderNotifications(); if(btn)btn.disabled=false; showToast('担当者へメッセージを送信しました','#34C759');
+ await dbLog(String(currentPid),'patient_message_to_staff',msg); renderPatientChatHistory();
+    await refreshPatientMessages(); renderNotifications(); if(btn)btn.disabled=false; showToast('担当者へメッセージを送信しました','#34C759');
 }
 async function deletePatientChatMessage(id){
  if(!currentPid)return;
@@ -3484,7 +3516,11 @@ function renderPatientMessageTab(){
   const el=document.getElementById('ptab-message');
   if(!el)return;
   el.innerHTML=`<div class="card" style="margin-bottom:14px;border:1px solid #DCE8F7">
-    <div style="font-size:18px;font-weight:700;margin-bottom:4px">💬 メッセージ</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px">
+      <div style="font-size:18px;font-weight:700">💬 メッセージ</div>
+      <button type="button" id="patient-chat-refresh" onclick="refreshPatientMessages()" style="border:1px solid #D7E3F3;background:#fff;border-radius:10px;padding:7px 12px;font-size:13px;font-weight:700;cursor:pointer">↻ 更新</button>
+    </div>
+    <div id="patient-chat-refresh-status" style="font-size:11px;color:#8E8E93;text-align:right;min-height:16px;margin-bottom:2px"></div>
     <div style="font-size:12px;color:#8E8E93;line-height:1.6;margin-bottom:12px">担当者とメッセージのやり取りができます。ご自身が送信したメッセージは削除できます。</div>
     <div id="patient-chat-history" style="max-height:420px;overflow-y:auto;margin-bottom:12px"></div>
     <div class="input-group" style="margin-bottom:8px"><textarea id="patient-chat-text" rows="3" maxlength="1000" placeholder="担当者へのメッセージを入力してください"></textarea></div>
