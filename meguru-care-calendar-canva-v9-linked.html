@@ -479,7 +479,11 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
         </div>
         <button class="btn btn-primary btn-block" id="patient-message-send-btn" onclick="sendPatientMessage()">送信</button>
         <div style="margin-top:16px;padding-top:14px;border-top:1px solid #E5E5EA">
-          <div style="font-size:13px;font-weight:600;margin-bottom:8px">送信済みメッセージ</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
+            <div style="font-size:13px;font-weight:600">メッセージ履歴</div>
+            <button type="button" class="btn btn-sm" id="admin-message-refresh-btn" onclick="refreshAdminPatientMessages()">↻ 更新</button>
+          </div>
+          <div id="admin-message-refresh-status" style="font-size:11px;color:#8E8E93;margin-bottom:6px"></div>
           <div id="admin-patient-message-history"></div>
         </div>
       </div>
@@ -1776,6 +1780,7 @@ function renderPatientMessageSelected(){
   const p=selectedPatientMessageId?patients[selectedPatientMessageId]:null;
   if(el)el.textContent=p?`${selectedPatientMessageId}：${p.name}`:'お客様が選択されていません';
   if(btn)btn.textContent=p?'お客様を変更':'お客様を選択';
+  renderAdminPatientMessageHistory();
 }
 
 function openPatientMessageModal(){
@@ -1823,45 +1828,79 @@ function selectPatientForMessage(id){
 function renderAdminPatientMessageHistory(){
   const el=document.getElementById('admin-patient-message-history');
   if(!el)return;
+  if(!selectedPatientMessageId){
+    el.innerHTML='<div style="font-size:12px;color:#8E8E93;padding:8px 0">お客様を選択すると、そのお客様とのメッセージ履歴が表示されます</div>';
+    return;
+  }
+  const pid=String(selectedPatientMessageId);
   const items=(notifications||[])
-    .filter(n=>hasPatientMessageMark(n.text))
+    .filter(n=>String(n.operator)===pid && (hasPatientMessageMark(n.text)||isPatientToStaffMessage(n)))
     .map(n=>({
       id:String(n.id),
-      pid:String(n.operator||''),
-      name:patients[String(n.operator||'')]?.name||String(n.operator||''),
-      text:getPatientMessageText(n),
+      from:isPatientToStaffMessage(n)?'patient':'staff',
+      text:isPatientToStaffMessage(n)?getPatientToStaffMessageText(n):getPatientMessageText(n),
       time:n.time||''
     }))
     .filter(x=>x.text)
     .reverse();
   if(!items.length){
-    el.innerHTML='<div style="font-size:12px;color:#8E8E93;padding:8px 0">送信済みメッセージはありません</div>';
+    el.innerHTML='<div style="font-size:12px;color:#8E8E93;padding:8px 0">このお客様とのメッセージ履歴はありません</div>';
     return;
   }
-  el.innerHTML=items.map(x=>`<div style="padding:10px 0;border-bottom:1px solid #F2F2F7">
-    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
-      <div style="min-width:0;flex:1">
-        <div style="font-size:11px;color:#8E8E93;margin-bottom:3px">${escChatText(x.name||x.pid)} ${x.time?`・${escChatText(x.time)}`:''}</div>
-        <div style="font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word">${escChatText(x.text)}</div>
+  el.innerHTML=items.map(x=>{
+    const fromPatient=x.from==='patient';
+    return `<div style="padding:10px 0;border-bottom:1px solid #F2F2F7">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+        <div style="min-width:0;flex:1">
+          <div style="font-size:11px;color:#8E8E93;margin-bottom:3px">${fromPatient?'お客様':'担当者'}${x.time?` ・ ${escChatText(x.time)}`:''}</div>
+          <div style="font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word">${escChatText(x.text)}</div>
+        </div>
+        <button type="button" onclick="deleteAdminConversationMessage('${x.id}')" style="border:0;background:transparent;color:#FF3B30;font-size:12px;padding:4px 2px;white-space:nowrap">削除</button>
       </div>
-      <button type="button" onclick="deleteAdminPatientMessage('${x.id}')" style="border:0;background:transparent;color:#FF3B30;font-size:12px;padding:4px 2px;white-space:nowrap">削除</button>
-    </div>
-  </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
-async function deleteAdminPatientMessage(id){
+async function refreshAdminPatientMessages(){
+  if(getCurrentActor()!=='admin'){showToast('管理者ログイン中のみ更新できます');return;}
+  const btn=document.getElementById('admin-message-refresh-btn');
+  const status=document.getElementById('admin-message-refresh-status');
+  if(btn){btn.disabled=true;btn.textContent='更新中…';}
+  if(status)status.textContent='最新のメッセージを確認しています';
+  try{
+    const {data,error}=await sb.from('rehab_notifications').select('*').order('created_at',{ascending:false});
+    if(error)throw error;
+    const latest=(data||[]).map(n=>({id:n.id,text:n.message,time:fmtTime(n.created_at),operator:n.operator||''}));
+    const nonDb=(notifications||[]).filter(n=>!latest.some(x=>String(x.id)===String(n.id)));
+    notifications=latest.concat(nonDb.filter(n=>!hasPatientMessageMark(n.text)&&!isPatientToStaffMessage(n)));
+    renderAdminPatientMessageHistory();
+    renderNotifications();
+    if(status){
+      const d=new Date();
+      status.textContent='更新しました '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    }
+  }catch(e){
+    console.error('管理画面メッセージ更新失敗:',e);
+    if(status)status.textContent='更新できませんでした。もう一度お試しください。';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='↻ 更新';}
+  }
+}
+
+async function deleteAdminConversationMessage(id){
   if(getCurrentActor()!=='admin'){showToast('管理者ログイン中のみ削除できます');return;}
   const target=(notifications||[]).find(n=>String(n.id)===String(id));
-  if(!target||!hasPatientMessageMark(target.text)){showToast('削除対象のメッセージを確認できません');return;}
+  if(!target || !(hasPatientMessageMark(target.text)||isPatientToStaffMessage(target))){
+    showToast('削除対象のメッセージを確認できません');return;
+  }
   if(!confirm('このメッセージを削除しますか？'))return;
   const {error}=await sb.from('rehab_notifications').delete().eq('id',id);
   if(error){
-    console.error('管理者メッセージ削除失敗:',error);
-    showToast('メッセージを削除できませんでした');
-    return;
+    console.error('管理画面メッセージ削除失敗:',error);
+    showToast('メッセージを削除できませんでした');return;
   }
   notifications=(notifications||[]).filter(n=>String(n.id)!==String(id));
-  await dbLog('admin','patient_message_delete',`${target.operator||''}：${getPatientMessageText(target)}`);
+  await dbLog('admin','conversation_message_delete',`${target.operator||''}：${String(target.text||'').slice(0,120)}`);
   renderAdminPatientMessageHistory();
   renderNotifications();
   showToast('メッセージを削除しました','#34C759');
@@ -1875,7 +1914,6 @@ async function sendPatientMessage(){
   if(!r.ok){showToast(r.reason||'送信に失敗しました');return;}
   if(btn)btn.disabled=true;
   if(document.getElementById('patient-message-text'))document.getElementById('patient-message-text').value='';
-  selectedPatientMessageId='';
   renderPatientMessageSelected();
   if(btn)btn.disabled=false;
   renderNotifications();
@@ -3498,18 +3536,29 @@ function getDismissedStaffReplyIds(pid){
   try{return new Set(JSON.parse(localStorage.getItem('staffReplyDismissed_'+String(pid))||'[]').map(String));}
   catch(e){return new Set();}
 }
-async function dismissStaffReply(id){
+async function dismissStaffReply(id,kind='reply'){
   if(!currentPid)return;
-  // お客様側の「×」はDBでも非表示にする。別端末・再ログイン後にも削除状態を維持する。
-  const {error}=await sb.from('rehab_notifications').update({dismissed:true}).eq('id',id).eq('operator',String(currentPid));
-  if(error){
-    console.error('担当者通知の削除失敗:',error);
-    showToast('通知の削除に失敗しました');
-    return;
-  }
   const ids=getDismissedStaffReplyIds(currentPid);
   ids.add(String(id));
   try{localStorage.setItem('staffReplyDismissed_'+String(currentPid),JSON.stringify(Array.from(ids)));}catch(e){console.warn('担当者通知の削除状態を保存できません',e);}
+
+  // 「現在の予約確認」に出るメッセージ通知は表示だけを消す。
+  // メッセージ本体は削除しないため、「メッセージ」タブの会話履歴は残る。
+  if(kind==='message'){
+    renderMyBook();
+    showToast('通知を削除しました','#34C759');
+    return;
+  }
+
+  // 予約変更に対する担当者通知は従来どおりDB側でもdismissedにする。
+  const {error}=await sb.from('rehab_notifications').update({dismissed:true}).eq('id',id).eq('operator',String(currentPid));
+  if(error){
+    console.error('担当者通知の削除失敗:',error);
+    ids.delete(String(id));
+    try{localStorage.setItem('staffReplyDismissed_'+String(currentPid),JSON.stringify(Array.from(ids)));}catch(e){}
+    showToast('通知の削除に失敗しました');
+    return;
+  }
   notifications=notifications.filter(n=>String(n.id)!==String(id));
   renderMyBook();
 }
@@ -3539,7 +3588,7 @@ function renderMyBook(){
       ${staffItems.map(r=>`<div class="card" style="border-left:4px solid #007AFF;background:#F7FBFF;margin-bottom:8px;display:flex;align-items:center;gap:10px">
         <div style="flex:1;min-width:0"><div style="font-size:14px;line-height:1.6;white-space:pre-wrap">${r.text}</div>
         <div style="font-size:11px;color:#8E8E93;margin-top:4px">${r.time}</div></div>
-        <button class="notif-delete" title="通知を削除" onclick="dismissStaffReply('${r.id}')">×</button>
+        <button class="notif-delete" title="通知を削除" onclick="dismissStaffReply('${r.id}','${r.kind}')">×</button>
       </div>`).join('')}
     </div>`;
   }
