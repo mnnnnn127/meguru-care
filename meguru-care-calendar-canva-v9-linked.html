@@ -478,6 +478,10 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
           <textarea id="patient-message-text" rows="4" placeholder="お客様へ伝える内容を入力してください" style="width:100%;resize:vertical;box-sizing:border-box"></textarea>
         </div>
         <button class="btn btn-primary btn-block" id="patient-message-send-btn" onclick="sendPatientMessage()">送信</button>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #E5E5EA">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px">送信済みメッセージ</div>
+          <div id="admin-patient-message-history"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1816,6 +1820,53 @@ function selectPatientForMessage(id){
   closeModal();
 }
 
+function renderAdminPatientMessageHistory(){
+  const el=document.getElementById('admin-patient-message-history');
+  if(!el)return;
+  const items=(notifications||[])
+    .filter(n=>hasPatientMessageMark(n.text))
+    .map(n=>({
+      id:String(n.id),
+      pid:String(n.operator||''),
+      name:patients[String(n.operator||'')]?.name||String(n.operator||''),
+      text:getPatientMessageText(n),
+      time:n.time||''
+    }))
+    .filter(x=>x.text)
+    .reverse();
+  if(!items.length){
+    el.innerHTML='<div style="font-size:12px;color:#8E8E93;padding:8px 0">送信済みメッセージはありません</div>';
+    return;
+  }
+  el.innerHTML=items.map(x=>`<div style="padding:10px 0;border-bottom:1px solid #F2F2F7">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+      <div style="min-width:0;flex:1">
+        <div style="font-size:11px;color:#8E8E93;margin-bottom:3px">${escChatText(x.name||x.pid)} ${x.time?`・${escChatText(x.time)}`:''}</div>
+        <div style="font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word">${escChatText(x.text)}</div>
+      </div>
+      <button type="button" onclick="deleteAdminPatientMessage('${x.id}')" style="border:0;background:transparent;color:#FF3B30;font-size:12px;padding:4px 2px;white-space:nowrap">削除</button>
+    </div>
+  </div>`).join('');
+}
+
+async function deleteAdminPatientMessage(id){
+  if(getCurrentActor()!=='admin'){showToast('管理者ログイン中のみ削除できます');return;}
+  const target=(notifications||[]).find(n=>String(n.id)===String(id));
+  if(!target||!hasPatientMessageMark(target.text)){showToast('削除対象のメッセージを確認できません');return;}
+  if(!confirm('このメッセージを削除しますか？'))return;
+  const {error}=await sb.from('rehab_notifications').delete().eq('id',id);
+  if(error){
+    console.error('管理者メッセージ削除失敗:',error);
+    showToast('メッセージを削除できませんでした');
+    return;
+  }
+  notifications=(notifications||[]).filter(n=>String(n.id)!==String(id));
+  await dbLog('admin','patient_message_delete',`${target.operator||''}：${getPatientMessageText(target)}`);
+  renderAdminPatientMessageHistory();
+  renderNotifications();
+  showToast('メッセージを削除しました','#34C759');
+}
+
 async function sendPatientMessage(){
   if(getCurrentActor()!=='admin'){showToast('管理者ログイン中のみ送信できます');return;}
   const text=document.getElementById('patient-message-text')?.value||'';
@@ -1828,6 +1879,7 @@ async function sendPatientMessage(){
   renderPatientMessageSelected();
   if(btn)btn.disabled=false;
   renderNotifications();
+  renderAdminPatientMessageHistory();
   showToast('お客様へメッセージを送信しました','#34C759');
 }
 
