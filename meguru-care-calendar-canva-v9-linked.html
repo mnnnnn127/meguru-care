@@ -1857,7 +1857,13 @@ async function refreshPatientMessages(){
 
     // 他のお客様の通知を混ぜず、現在のお客様の最新通知だけを差し替える。
     const other=(notifications||[]).filter(n=>String(n.operator)!==String(currentPid));
-    notifications=other.concat(data||[]);
+    const latest=(data||[]).map(n=>({
+      id:n.id,
+      text:n.message,
+      time:fmtTime(n.created_at),
+      operator:n.operator||'patient'
+    }));
+    notifications=other.concat(latest);
     renderPatientChatHistory();
 
     if(status){
