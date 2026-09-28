@@ -1855,15 +1855,17 @@ async function refreshPatientMessages(){
       .order('created_at',{ascending:true});
     if(error) throw error;
 
-    // 他のお客様の通知を混ぜず、現在のお客様の最新通知だけを差し替える。
-    const other=(notifications||[]).filter(n=>String(n.operator)!==String(currentPid));
+    // 既存履歴を消さず、DBから取得できた最新メッセージをID単位で追加・更新する。
+    // DB取得結果が空でも、画面上の既存履歴は保持する。
     const latest=(data||[]).map(n=>({
       id:n.id,
       text:n.message,
       time:fmtTime(n.created_at),
       operator:n.operator||'patient'
     }));
-    notifications=other.concat(latest);
+    const merged=new Map((notifications||[]).map(n=>[String(n.id),n]));
+    latest.forEach(n=>merged.set(String(n.id),n));
+    notifications=Array.from(merged.values());
     renderPatientChatHistory();
 
     if(status){
@@ -1892,8 +1894,11 @@ async function sendMessageFromPatient(){
  const {data,error}=await sb.from('rehab_notifications').insert({message:`${PATIENT_TO_STAFF_MESSAGE_MARK}\n${msg}`,operator:String(currentPid)}).select().single();
  if(error){if(btn)btn.disabled=false;showToast('メッセージを送信できませんでした');return;}
  notifications.unshift({id:data.id,text:data.message,time:'たった今',operator:data.operator}); if(ta)ta.value='';
- await dbLog(String(currentPid),'patient_message_to_staff',msg); renderPatientChatHistory();
-    await refreshPatientMessages(); renderNotifications(); if(btn)btn.disabled=false; showToast('担当者へメッセージを送信しました','#34C759');
+ await dbLog(String(currentPid),'patient_message_to_staff',msg);
+ renderPatientChatHistory();
+ renderNotifications();
+ if(btn)btn.disabled=false;
+ showToast('担当者へメッセージを送信しました','#34C759');
 }
 async function deletePatientChatMessage(id){
  if(!currentPid)return;
