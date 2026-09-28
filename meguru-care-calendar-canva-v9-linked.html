@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>リハビリ予約システム</title>
+<title>めぐる訪問ケア予約ページ</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -394,10 +394,12 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
     <div class="tab active" onclick="switchTab('p','mybook',this)">現在の予約確認</div>
     <div class="tab" onclick="switchTab('p','reserve',this)">追加したい場合はこちら</div>
     <div class="tab" onclick="switchTab('p','history',this)">受診履歴</div>
+    <div class="tab" onclick="switchTab('p','message',this)">メッセージ</div>
   </div>
   <div class="pad pt-12" id="ptab-mybook"></div>
   <div id="ptab-reserve" style="display:none"></div>
   <div class="pad pt-12" id="ptab-history" style="display:none"></div>
+  <div class="pad pt-12" id="ptab-message" style="display:none"></div>
 
 </div>
 
@@ -1829,6 +1831,42 @@ async function sendPatientMessage(){
   showToast('お客様へメッセージを送信しました','#34C759');
 }
 
+
+const PATIENT_TO_STAFF_MESSAGE_MARK='【お客様からメッセージ】';
+function isPatientToStaffMessage(n){return String(n?.text||'').includes(PATIENT_TO_STAFF_MESSAGE_MARK);}
+function getPatientToStaffMessageText(n){return String(n?.text||'').replace(PATIENT_TO_STAFF_MESSAGE_MARK,'').trim();}
+function escChatText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function getPatientConversation(pid){
+ const id=String(pid||'');
+ return (notifications||[]).filter(n=>String(n.operator)===id&&(hasPatientMessageMark(n.text)||isPatientToStaffMessage(n)))
+ .map(n=>({id:String(n.id),from:isPatientToStaffMessage(n)?'patient':'staff',text:isPatientToStaffMessage(n)?getPatientToStaffMessageText(n):getPatientMessageText(n),time:n.time||''})).filter(x=>x.text).reverse();
+}
+function renderPatientChatHistory(){
+ const el=document.getElementById('patient-chat-history'); if(!el||!currentPid)return;
+ const items=getPatientConversation(currentPid);
+ if(!items.length){el.innerHTML='<div style="font-size:13px;color:#8E8E93;text-align:center;padding:16px">まだメッセージはありません</div>';return;}
+ el.innerHTML=items.map(x=>{const mine=x.from==='patient';return `<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'};margin:8px 0"><div style="max-width:86%;background:${mine?'#E8F4FF':'#F2F2F7'};border-radius:14px;padding:10px 12px"><div style="font-size:11px;font-weight:600;color:#8E8E93">${mine?'あなた':'担当者'}</div><div style="font-size:14px;line-height:1.55;white-space:pre-wrap;word-break:break-word">${escChatText(x.text)}</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:5px"><span style="font-size:10px;color:#8E8E93">${escChatText(x.time)}</span>${mine?`<button onclick="deletePatientChatMessage('${x.id}')" style="border:0;background:transparent;color:#FF3B30;font-size:11px">削除</button>`:''}</div></div></div>`}).join('');
+ el.scrollTop=el.scrollHeight;
+}
+async function sendMessageFromPatient(){
+ if(!currentPid){showToast('お客様情報を確認できません');return;}
+ const ta=document.getElementById('patient-chat-text'),btn=document.getElementById('patient-chat-send'),msg=String(ta?.value||'').trim();
+ if(!msg){showToast('メッセージを入力してください');return;} if(btn)btn.disabled=true;
+ const {data,error}=await sb.from('rehab_notifications').insert({message:`${PATIENT_TO_STAFF_MESSAGE_MARK}\n${msg}`,operator:String(currentPid)}).select().single();
+ if(error){if(btn)btn.disabled=false;showToast('メッセージを送信できませんでした');return;}
+ notifications.unshift({id:data.id,text:data.message,time:'たった今',operator:data.operator}); if(ta)ta.value='';
+ await dbLog(String(currentPid),'patient_message_to_staff',msg); renderPatientChatHistory(); renderNotifications(); if(btn)btn.disabled=false; showToast('担当者へメッセージを送信しました','#34C759');
+}
+async function deletePatientChatMessage(id){
+ if(!currentPid)return;
+ const target=(notifications||[]).find(n=>String(n.id)===String(id));
+ if(!target||String(target.operator)!==String(currentPid)||!isPatientToStaffMessage(target))return;
+ if(!confirm('このメッセージを削除しますか？'))return;
+ const {error}=await sb.from('rehab_notifications').delete().eq('id',id).eq('operator',String(currentPid));
+ if(error){showToast('メッセージを削除できませんでした');return;}
+ notifications=notifications.filter(n=>String(n.id)!==String(id)); await dbLog(String(currentPid),'delete_patient_message',String(id)); renderPatientChatHistory(); renderNotifications(); showToast('メッセージを削除しました','#34C759');
+}
+
 async function dbLog(operator,action,detail){
   await sb.from('rehab_operation_logs').insert({operator,action,detail});
 }
@@ -2018,7 +2056,7 @@ function showScreen(id){
   if(id==='s-top')topCalResetDisplay();
 }
 function switchTab(prefix,name,el){
-  const all=prefix==='p'?['mybook','reserve','history']:
+  const all=prefix==='p'?['mybook','reserve','history','message']:
     ['notify','weektable','calendar','schedule','patients','booking','slots','holidays','leaves','logs','deadline','topedit','settings','actuals'];
   all.forEach(t=>{const e=document.getElementById(prefix+'tab-'+t);if(e)e.style.display='none';});
   const t=document.getElementById(prefix+'tab-'+name);if(t)t.style.display='block';
@@ -2031,6 +2069,7 @@ function switchTab(prefix,name,el){
   el.classList.add('active');
   if(name==='mybook')renderMyBook();
   if(name==='reserve')renderReserve();
+  if(name==='message')renderPatientMessageTab();
   if(name==='notify'){renderTodaySchedule();renderNotifications();}
   if(name==='weektable')renderWeekTable();
   if(name==='calendar')renderCal();
@@ -3398,6 +3437,7 @@ function renderMyBook(){
   const staffItems=[...staffReplies,...directMessages].slice(0,20);
 
   let html='';
+
   if(staffItems.length){
     html+=`<div style="margin-bottom:14px">
       <div style="font-size:15px;font-weight:700;margin-bottom:8px">担当者より</div>
@@ -3440,10 +3480,23 @@ function renderMyBook(){
   el.innerHTML=html;
 }
 
+function renderPatientMessageTab(){
+  const el=document.getElementById('ptab-message');
+  if(!el)return;
+  el.innerHTML=`<div class="card" style="margin-bottom:14px;border:1px solid #DCE8F7">
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px">💬 メッセージ</div>
+    <div style="font-size:12px;color:#8E8E93;line-height:1.6;margin-bottom:12px">担当者とメッセージのやり取りができます。ご自身が送信したメッセージは削除できます。</div>
+    <div id="patient-chat-history" style="max-height:420px;overflow-y:auto;margin-bottom:12px"></div>
+    <div class="input-group" style="margin-bottom:8px"><textarea id="patient-chat-text" rows="3" maxlength="1000" placeholder="担当者へのメッセージを入力してください"></textarea></div>
+    <button class="btn btn-primary btn-block" id="patient-chat-send" onclick="sendMessageFromPatient()">担当者へ送信</button>
+  </div>`;
+  renderPatientChatHistory();
+}
+
 function switchTabByName(name){
   const tabBar=document.getElementById('p-tabs');
   const tabs=tabBar.querySelectorAll('.tab');
-  const nameMap={'mybook':0,'reserve':1,'history':2};
+  const nameMap={'mybook':0,'reserve':1,'history':2,'message':3};
   const idx=nameMap[name];
   if(idx!==undefined) tabs[idx].click();
 }
@@ -3591,7 +3644,7 @@ function showCancelModal(date,time,therapist){
       <select id="cr" onchange="document.getElementById('cr-other').style.display=this.value==='その他'?'block':'none';document.getElementById('cr-err').style.display='none'">
         <option value="">選択してください</option>
         <option>体調不良</option><option>仕事のため</option><option>家庭の事情</option>
-        <option>その他</option>
+        <option>交通機関の遅延</option><option>その他</option>
       </select>
     </div>
     <div id="cr-other" style="display:none" class="input-group"><label>詳細</label><input type="text" id="cr-other-text" placeholder="理由を入力"></div>
