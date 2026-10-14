@@ -165,6 +165,7 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
   .actuals-table{font-size:9px!important}.actuals-table th,.actuals-table td{padding:3px 4px!important}
   .actuals-table .actuals-label{position:static!important}.card{box-shadow:none!important}
 }
+.booking-intro{font-size:14px;line-height:1.8;color:#52665f;margin:6px 0 22px}.booking-section{background:#fff;border:1px solid #e1ebe5;border-radius:20px;padding:20px;margin:18px 0;box-shadow:0 6px 24px #24473508}.booking-section-title{font-size:16px;color:#29483b;margin:0 0 14px}.booking-courses{display:grid;grid-template-columns:1fr 1fr;gap:12px}.booking-course{font-family:inherit;background:#fafcfb;border:1.5px solid #dfe9e3;border-radius:16px;padding:20px 8px;cursor:pointer;color:#29483b}.booking-course strong{display:block;font-size:30px;line-height:1.2}.booking-course strong span{font-size:15px;margin-left:4px}.booking-price{display:block;font-size:15px;margin-top:10px}.booking-course.active{background:#eaf5ed;border-color:#39875e;box-shadow:0 0 0 2px #39875e18}.booking-date-card{background:#fff;border:1px solid #e1ebe5;border-radius:20px;padding:20px;margin-bottom:12px;box-shadow:0 6px 24px #24473508}.booking-date-title{font-size:21px;font-weight:700;color:#29483b;margin-bottom:16px}.booking-date-title span{font-size:14px;font-weight:500;margin-left:12px;color:#718178}.booking-time{width:100%;font-family:inherit;display:flex;align-items:center;justify-content:space-between;background:#fafcfb;border:1.5px solid #e0eae3;border-radius:13px;padding:15px 18px;cursor:pointer;color:#29483b}.booking-time.active{background:#eaf5ed;border-color:#39875e}.booking-time strong{font-size:21px;font-weight:600}.booking-time span{font-size:13px;color:#39875e;background:#edf5ef;border-radius:30px;padding:4px 12px}.booking-hint{font-size:12px;color:#718178;text-align:center;line-height:1.7;margin:16px 0 12px}.booking-next{background:#347957;border-color:#347957;border-radius:13px;min-height:50px}.booking-next:disabled{opacity:.4;cursor:default}.booking-summary{background:#f0f6f2;border:1px solid #dfeae2;border-radius:18px;padding:20px;margin:18px 0 24px}.booking-summary label{display:block;font-size:12px;color:#718178;margin-bottom:6px}.booking-summary strong{display:block;font-size:23px;color:#29483b}.booking-summary .summary-course{border-top:1px solid #dbe6de;padding-top:16px;margin-top:16px}
 </style>
 
 <style id="canva-calendar-v6-style">
@@ -278,30 +279,23 @@ td{padding:9px 10px;border-bottom:1px solid #F2F2F7;color:#1C1C1E;vertical-align
   </div>
   <div class="pad pt-12">
     <div id="pub-closed-notice" style="display:none"></div>
-    <div id="pub-course-select">
-      <p style="font-size:15px;font-weight:600;margin-bottom:14px;text-align:center">コースを選んでください</p>
-      <div id="pub-course-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-        <div class="th-select-card" data-service-unit="3" onclick="pubSelectService(3)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">60分</div><div style="font-size:14px">7,000円</div></div>
-        <div class="th-select-card" data-service-unit="4" onclick="pubSelectService(4)"><div style="font-size:20px;font-weight:700;margin-bottom:4px">90分</div><div style="font-size:14px">10,000円</div></div>
-      </div>
-    </div>
-    <div id="pub-th-select" style="display:none">
-      <p style="font-size:15px;font-weight:600;margin-bottom:14px;text-align:center">担当を選んでください</p>
-      <div id="pub-th-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px"></div>
-    </div>
+    <p class="booking-intro">予約をしたい日時と施術時間を選択してください。</p>
     <div id="pub-slots-wrap" style="display:none">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <button class="btn btn-sm" onclick="pubResetTherapist()">← 担当変更</button>
-        <span id="pub-th-label" style="font-size:14px;font-weight:600"></span>
-      </div>
-      <button class="btn btn-sm" onclick="pubResetService()" style="margin-bottom:10px">コース変更</button>
-      <p style="font-size:12px;color:#8E8E93;margin-bottom:10px">空いている時間のみ表示（タップで予約）</p>
       <div id="pub-week-nav" style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
         <button class="btn btn-sm" onclick="pubWeekNav(-1)">‹ 前週</button>
         <span id="pub-week-label" style="flex:1;text-align:center;font-size:13px;font-weight:600"></span>
         <button class="btn btn-sm" onclick="pubWeekNav(1)">次週 ›</button>
       </div>
       <div id="public-slots"></div>
+    </div>
+    <div id="pub-course-select" class="booking-section">
+      <h3 class="booking-section-title">施術時間</h3>
+      <div id="pub-course-cards" class="booking-courses">
+        <button type="button" class="th-select-card booking-course" data-service-unit="3" onclick="pubSelectService(3)"><strong>60<span>分</span></strong><span class="booking-price">7,000円</span></button>
+        <button type="button" class="th-select-card booking-course" data-service-unit="4" onclick="pubSelectService(4)"><strong>90<span>分</span></strong><span class="booking-price">10,000円</span></button>
+      </div>
+      <p id="pub-selection-hint" class="booking-hint">日時と施術時間を選択してください</p>
+      <button type="button" id="pub-confirm-choice" class="btn btn-primary btn-block booking-next" disabled onclick="pubConfirmChoice()">予約内容を確認する</button>
     </div>
   </div>
 </div>
@@ -880,7 +874,7 @@ const TOMORROW=new Date(TODAY); TOMORROW.setDate(TOMORROW.getDate()+1);
 let ADMIN_PW="changeme"; // 初期パスワード（初回ログイン後に設定タブで変更）
 let clinicName="（医院名）リハビリ予約";
 let topSubtitleText="当日キャンセルは電話をお願いします。";
-const TOP_NOTICE_DEFAULT="注意：診察日と同日にリハビリの予約を行うことはできません。";
+const TOP_NOTICE_DEFAULT="";
 let topNoticeText=TOP_NOTICE_DEFAULT; // トップ画面の注意書き（空なら非表示）
 let topHeadingText="リハビリ予約"; // トップ画面の見出し
 let topHeadingIcon="🏥";           // 見出しの上のアイコン（空なら非表示）
@@ -909,6 +903,8 @@ let adminBookSelected=null,bkWeekOffset=0,pubWeekOffset=0;
 let pubTherapist=null;
 let pubServiceUnit=0;
 let pubTargetDate=null;
+let pubSelectedSlot=null;
+let pubRenderVersion=0;
 let topCalYear=TODAY.getFullYear(),topCalMonth=TODAY.getMonth();
 let topCalBookings={};
 let businessHoursMatrix=defaultBusinessHoursMatrix(); // DB読み込み前はデフォルト値を使用
@@ -2159,6 +2155,7 @@ async function renderTopAvailabilityCalendar(){
   grid.innerHTML=html;
 }
 function openPublicDate(ds){
+  pubSelectedSlot=null;
   pubTargetDate=ds;
   pubTherapist=null;
   pubServiceUnit=0;
@@ -2960,68 +2957,36 @@ function closeCanvaAvailabilityCalendar(){
 
 // ---- PUBLIC SLOTS ----
 function openPublicSlots(){
+  pubSelectedSlot=null;
   pubServiceUnit=0;
   pubTherapist=null;
   pubTargetDate=null;
   showScreen('s-public');
   renderPublicScreenState();
 }
-function renderPubTherapistCards(){
-  const el=document.getElementById('pub-th-cards');
-  if(!el)return;
-  el.innerHTML=staffList.map(s=>`
-    <div class="th-select-card" data-staff-id="${s.id}" onclick="pubSelectTherapist('${s.id}')">
-      <div style="font-size:28px;margin-bottom:6px">🩺</div>
-      <div style="font-weight:600">${s.name}</div>
-    </div>`).join('');
-}
 function renderPublicScreenState(){
-  renderPubTherapistCards();
   const closed=!isReceptionOpen();
   const noticeEl=document.getElementById('pub-closed-notice');
   noticeEl.style.display=closed?'block':'none';
   noticeEl.innerHTML=closed?receptionClosedNoticeHTML():'';
-  document.getElementById('pub-course-select').style.display=closed?'none':(pubServiceUnit?'none':'block');
-  document.getElementById('pub-th-select').style.display=closed||!pubServiceUnit||pubTherapist?'none':'block';
-  document.getElementById('pub-slots-wrap').style.display=closed?'none':(pubServiceUnit&&pubTherapist?'block':'none');
+  pubTherapist=staffList[0]?.id||null;
+  document.getElementById('pub-course-select').style.display=closed?'none':'block';
+  document.getElementById('pub-slots-wrap').style.display=closed?'none':'block';
+  document.getElementById('pub-week-nav').style.display=pubTargetDate?'none':'flex';
+  document.querySelectorAll('#pub-course-cards .th-select-card').forEach(card=>card.classList.toggle('active',Number(card.dataset.serviceUnit)===pubServiceUnit));
+  if(!closed){
+    document.getElementById('public-slots').innerHTML='<div class="empty">受付可能な時間を確認中...</div>';
+    if(pubTherapist)renderPublicSlots();
+    else document.getElementById('public-slots').innerHTML='<div class="empty">現在予約を受け付けていません</div>';
+  }
 }
 function pubSelectService(unit){
   pubServiceUnit=Number(unit);
-  pubTherapist=null;
-  document.querySelectorAll('#pub-course-cards .th-select-card').forEach(card=>card.classList.toggle('active',Number(card.dataset.serviceUnit)===pubServiceUnit));
   renderPublicScreenState();
 }
-function pubResetService(){
-  pubServiceUnit=0;
-  pubTherapist=null;
-  renderPublicScreenState();
-}
-function pubSelectTherapist(t){
-  if(!isReceptionOpen())return;
-  pubTherapist=t;
-  // トップカレンダーから日付指定で来た場合は、その日を含む週を表示する。
-  // 通常の「空き状況の確認」から担当者を選んだ場合だけ今週から開始する。
-  if(pubTargetDate){
-    const target=parseLocalDate(pubTargetDate);
-    const diffDays=Math.round((monday(target)-monday(TODAY))/(24*60*60*1000));
-    pubWeekOffset=Math.floor(diffDays/7);
-  }else{
-    pubWeekOffset=0;
-  }
-  document.querySelectorAll('#pub-th-cards .th-select-card').forEach(card=>{
-    card.classList.toggle('active',card.dataset.staffId===t);
-  });
-  document.getElementById('pub-th-label').textContent=getStaffName(t);
-  document.getElementById('pub-th-select').style.display='none';
-  document.getElementById('pub-slots-wrap').style.display='block';
-  renderPublicSlots();
-}
-function pubResetTherapist(){
-  pubTherapist=null;
-  pubTargetDate=null;
-  renderPublicScreenState();
-}
+function pubResetService(){pubServiceUnit=0;renderPublicScreenState();}
 function pubWeekNav(d){
+  pubSelectedSlot=null;
   // 週移動したら、カレンダーから選択した特定日へのフォーカスを解除する。
   // これにより「土曜を選択→次週」などでも表示が特定日に固定されない。
   pubTargetDate=null;
@@ -3067,6 +3032,9 @@ function isOpenStartFromCurrentCache(ds,therapist,time,unit=2){
 }
 
 async function renderPublicSlots(){
+  const renderVersion=++pubRenderVersion;
+  updatePubSelection();
+  const confirmBtn=document.getElementById('pub-confirm-choice');if(confirmBtn)confirmBtn.disabled=true;
   const el=document.getElementById('public-slots');
   if(!el||!pubTherapist)return;
   const ws=monday(addDays(TODAY,pubWeekOffset*7));
@@ -3076,13 +3044,14 @@ async function renderPublicSlots(){
   // 通常は月〜金。トップの空き状況カレンダーから土日を直接選択した場合は、
   // その選択日だけを表示する（「空きあり」なのに予約画面で空きが消える不整合を防ぐ）。
   const selectedWeekend=selectedDate && (selectedDow===0||selectedDow===6);
-  const displayDates=selectedWeekend?[selectedDate]:[0,1,2,3,4].map(i=>addDays(ws,i));
+  const displayDates=selectedDate?[selectedDate]:[0,1,2,3,4].map(i=>addDays(ws,i));
   const labelStart=selectedWeekend?selectedDate:ws;
   const labelEnd=selectedWeekend?selectedDate:addDays(ws,4);
   // 管理者週間表と同じDB最新値を取得してから空き状況を描画する。
-  const loadFrom=dateStr(selectedWeekend?selectedDate:ws);
-  const loadTo=dateStr(selectedWeekend?selectedDate:addDays(ws,4));
+  const loadFrom=dateStr(selectedDate||ws);
+  const loadTo=dateStr(selectedDate||addDays(ws,4));
   await refreshBookingsForDateRange(loadFrom,loadTo);
+  if(renderVersion!==pubRenderVersion)return;
   document.getElementById('pub-week-label').textContent=
     `${labelStart.getMonth()+1}/${labelStart.getDate()} 〜 ${labelEnd.getMonth()+1}/${labelEnd.getDate()}`;
   let html='';let anyOpen=false;
@@ -3102,28 +3071,45 @@ async function renderPublicSlots(){
     }
     ensureBookingShape(ds);
     const openTimes=times
-      .filter(t=>isOpenStartFromCurrentCache(ds,pubTherapist,t,pubServiceUnit))
+      .filter(t=>pubServiceUnit?isOpenStartFromCurrentCache(ds,pubTherapist,t,pubServiceUnit):[3,4].some(unit=>isOpenStartFromCurrentCache(ds,pubTherapist,t,unit)))
       .sort((a,b)=>{const [ah,am]=a.split(':').map(Number);const [bh,bm]=b.split(':').map(Number);return(ah*60+am)-(bh*60+bm);});
     if(!openTimes.length)continue;
     anyOpen=true;
-    html+=`<div class="card" style="padding:12px;margin-bottom:8px">
-      <div style="font-size:17px;font-weight:700;margin-bottom:10px">${DAY_NAMES[dow]}曜日&nbsp; <span style="font-size:17px;color:#000;font-weight:700">${d.getMonth()+1}/${d.getDate()}</span></div>
+    html+=`<div class="booking-date-card">
+      <div class="booking-date-title">${d.getMonth()+1}月${d.getDate()}日<span>${DAY_NAMES[dow]}曜日</span></div>
       <div style="display:flex;flex-direction:column;gap:6px">`;
     openTimes.forEach(t=>{
-      html+=`<div class="slot open" style="justify-content:flex-start;gap:10px;padding:12px 16px" onclick="pubBookModal('${DAY_NAMES[dow]}曜','${d.getMonth()+1}/${d.getDate()}','${t}','${ds}')"><span style="font-size:17px;font-weight:400">${t}</span><span style="font-size:12px;color:#1A7F47">空き ○ タップで予約</span></div>`;
+      html+=`<button type="button" class="booking-time ${pubSelectedSlot?.fullDate===ds&&pubSelectedSlot?.time===t?'active':''}" onclick="pubChooseTime('${DAY_NAMES[dow]}曜','${d.getMonth()+1}/${d.getDate()}','${t}','${ds}')"><strong>${t}～</strong><span>空き</span></button>`;
     });
     html+='</div></div>';
   }
+  if(pubSelectedSlot&&pubServiceUnit&&!isOpenStartFromCurrentCache(pubSelectedSlot.fullDate,pubTherapist,pubSelectedSlot.time,pubServiceUnit))pubSelectedSlot=null;
+  updatePubSelection();
   const weekEndBeyondReception=settings.end&&dateStr(we)>settings.end;
-  el.innerHTML=anyOpen?html:(weekEndBeyondReception?`<div class="empty">この週以降は予約受付期間外です<br><span style="font-size:12px">受付終了日：${settings.end}</span></div>`:'<div class="empty">この週の空き枠はありません</div>');
+  el.innerHTML=anyOpen?html:(weekEndBeyondReception?`<div class="empty">この週以降は予約受付期間外です<br><span style="font-size:12px">受付終了日：${settings.end}</span></div>`:'<div class="empty">選択した日・コースの空き枠はありません</div>');
 }
 
+function updatePubSelection(){
+  const btn=document.getElementById('pub-confirm-choice');
+  if(btn)btn.disabled=!(pubSelectedSlot&&pubServiceUnit);
+  const hint=document.getElementById('pub-selection-hint');
+  if(hint)hint.textContent=pubSelectedSlot?(pubServiceUnit?pubSelectedSlot.dateStr2+' '+pubSelectedSlot.time+'～ ／ '+bookingCourseLabel(pubServiceUnit):'施術時間を選択してください'):'日時を選択してください';
+}
+function pubChooseTime(dayLabel,dateStr2,time,fullDate){
+  pubSelectedSlot={dayLabel,dateStr2,time,fullDate};
+  renderPublicSlots();
+}
+function pubConfirmChoice(){
+  if(!pubSelectedSlot||!pubServiceUnit)return;
+  const {dayLabel,dateStr2,time,fullDate}=pubSelectedSlot;
+  pubBookModal(dayLabel,dateStr2,time,fullDate);
+}
 function pubBookModal(dayLabel,dateStr2,time,fullDate){
+  if(!pubServiceUnit){showToast('コースを選んでください','#FF9500');document.getElementById('pub-course-select').scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(!isOpenStartFromCurrentCache(fullDate,pubTherapist,time,pubServiceUnit)){showToast('この時間は選択したコースで予約できません','#FF9500');renderPublicSlots();return;}
   openModal(`<div class="modal-handle"></div>
-    <div class="modal-title">📅 予約する</div>
-    <p style="font-size:15px;font-weight:500;margin-bottom:4px">${dateStr2} ${dayLabel} ${time}</p>
-    <p style="font-size:13px;color:#8E8E93;margin-bottom:14px">担当：${getStaffName(pubTherapist)} ／ ${bookingCourseLabel(pubServiceUnit)}</p>
-    <div class="notice" style="margin-bottom:14px">⚠️ 診察日と同日の予約はできません</div>
+    <div class="modal-title">📅 予約内容の確認</div>
+    <div class="booking-summary"><label>ご予約日時</label><strong>${parseLocalDate(fullDate).getMonth()+1}月${parseLocalDate(fullDate).getDate()}日（${dayLabel}）</strong><strong style="margin-top:8px">${time}～</strong><div class="summary-course"><label>施術時間・料金</label><strong>${pubServiceUnit===3?'60分　7,000円':'90分　10,000円'}</strong></div></div>
     <div class="input-group"><label>お名前</label>
       <input type="text" id="pub-name" placeholder="ご登録のお名前" autocomplete="username">
     </div>
@@ -3134,7 +3120,7 @@ function pubBookModal(dayLabel,dateStr2,time,fullDate){
     <p id="pub-book-err" style="font-size:13px;color:#FF3B30;margin-bottom:10px;display:none"></p>
     <div style="display:flex;gap:8px">
       <button class="btn btn-block" onclick="closeModal()">戻る</button>
-      <button class="btn btn-primary btn-block" id="pub-submit" onclick="pubDoBook('${fullDate}','${time}','${dateStr2}','${dayLabel}',${pubServiceUnit})">予約する</button>
+      <button class="btn btn-primary btn-block" id="pub-submit" onclick="pubDoBook('${fullDate}','${time}','${dateStr2}','${dayLabel}',${pubServiceUnit})">予約を確定する</button>
     </div>`);
 }
 async function pubDoBook(fullDate,time,dateStr2,dayLabel,unit){
@@ -3808,7 +3794,6 @@ function showReserveModal(dayLabel,dateStr2,time,fullDate,therapist){
     <p style="font-size:16px;font-weight:600;margin-bottom:4px">${dateStr2} ${dayLabel}</p>
     <p style="font-size:20px;font-weight:700;color:#007AFF;margin-bottom:4px">${time}</p>
     <p style="font-size:13px;color:#8E8E93;margin-bottom:12px">${getStaffName(therapist)} ／ ${bookingCourseLabel(resServiceUnit)}</p>
-    <div class="notice" style="margin-bottom:14px">⚠️ 診察日と同日の予約はできません</div>
     <p id="res-err" style="font-size:13px;color:#FF3B30;margin-bottom:10px;display:none"></p>
     <div style="display:flex;gap:8px">
       <button class="btn btn-block" onclick="closeModal()">戻る</button>
@@ -5028,13 +5013,13 @@ function renderHeadingImagePreview(){
 // トップ画面の注意書きを描画する（空欄なら枠ごと非表示）
 function renderTopNotice(){
   const el=document.getElementById('top-notice');if(!el)return;
-  const txt=String(topNoticeText||'').trim();
+  const txt=String(topNoticeText||'').split(/\n/).filter(line=>!(/診察日/.test(line)&&/同日/.test(line))).join('\n').trim();
   if(!txt){el.style.display='none';el.innerHTML='';return;}
   el.style.display='';
   el.innerHTML='⚠️ '+escapeHtml(txt).replace(/^(注意[：:])/,'<strong>$1</strong>');
 }
 function populateTopNoticeInput(){
-  const el=document.getElementById('tn-text');if(el)el.value=topNoticeText;
+  const el=document.getElementById('tn-text');if(el)el.value=String(topNoticeText||'').split(/\n/).filter(line=>!(/診察日/.test(line)&&/同日/.test(line))).join('\n');
   const s=document.getElementById('tn-saved');if(s)s.style.display='none';
 }
 function showTopNoticeSaved(){
